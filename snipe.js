@@ -47,19 +47,21 @@ class AstroportSniper {
     }
 
     async sendMessageToDiscord(message) {
-        if (this.discordClient && this.discordChannelId) {
-            const channel = this.discordClient.channels.cache.get(this.discordChannelId);
-            if (channel) {
-                try {
-                    await channel.send(message);
-                } catch (error) {
-                    console.error('Error sending message to Discord channel:', error);
-                }
-            } else {
-                console.error('Discord channel not found.');
-            }
-        } else {
+        if (!this.discordClient || !this.discordChannelId) {
             console.error('Discord client or channel information not available.');
+            return;
+        }
+
+        const channel = this.discordClient.channels.cache.get(this.discordChannelId);
+        if (!channel) {
+            console.error('Discord channel not found.');
+            return;
+        }
+
+        try {
+            await channel.send(message);
+        } catch (error) {
+            console.error('Error sending message to Discord channel:', error);
         }
     }
 
@@ -81,7 +83,7 @@ class AstroportSniper {
         console.log('Base Asset monitoring started.');
         this.monitoringBasePairIntervalId = setInterval(() => {
             this.updateBaseAssetPrice();
-        }, intervalInSeconds * 1000); // Convert seconds to milliseconds
+        }, intervalInSeconds * 1000);
     }
 
     stopMonitoringBasePair() {
@@ -218,8 +220,8 @@ class AstroportSniper {
         }
     }
 
-
     async getQuote(pair) {
+        if (!pair) return
         const pairName = `${pair.token0Meta.symbol}, ${pair.token1Meta.symbol}`;
         const simulationQuery = {
             simulation: {
@@ -316,7 +318,7 @@ class AstroportSniper {
                 this.sendMessageToDiscord(message);
                 this.calculateLiquidity(pair)
                 if (pair.liquidity > this.liquidityThreshold) {
-                    await this.monitorPairForPriceChange(pair, 2, 5, 5)
+                    await this.monitorPairForPriceChange(pair, 5, 5, 5)
                 }
                 else {
                     this.monitorLowLiquidityPair(pair, 10, 200)
@@ -371,6 +373,7 @@ class AstroportSniper {
                     this.lastPrices.delete(pair.contract_addr);
                     lastPrices = [];
                 }
+                console.log(`${pairName} price ${parseFloat(currentPrice).toFixed(10)}`)
             }, intervalInSeconds * 1000);
 
             this.pairPriceMonitoringIntervals.set(pair.contract_addr, monitoringIntervalId);
@@ -405,9 +408,9 @@ class AstroportSniper {
                 const currentLiquidity = await this.calculateLiquidity(updatedPair);
                 if (currentLiquidity && currentLiquidity > liquidityThreshold) {
                     console.log(`Monitoring ${pairName} - Liquidity Added: $${currentLiquidity}`);
-                    this.sendMessageToDiscord(`:heavy_plus_sign: Monitoring ${pairName} - Liquidity Added: $${currentLiquidity} <@352761566401265664>\n${pair.astroportLink}`)
+                    this.sendMessageToDiscord(`:eyes: Monitoring ${pairName} - Liquidity Added: $${currentLiquidity} <@352761566401265664>\n${pair.astroportLink}`)
                     this.stopMonitoringLowLiquidityPair(pair)
-                    this.monitorPairForPriceChange(pair)
+                    this.monitorPairForPriceChange(pair, 5, 5, 5)
                 }
             }, intervalInSeconds * 1000);
             this.lowLiquidityPairMonitoringIntervals.set(pair.contract_addr, monitoringIntervalId);
@@ -435,10 +438,6 @@ class AstroportSniper {
         try {
             this.allPairs = await this.getPairs(pairType, tokenTypes);
 
-            // to test getting new pairs, pretend we have not seen the latest one
-            // this.allPairs.pop()
-            // this.allPairsQuery.pairs.start_after = this.allPairs[this.allPairs.length - 1].asset_infos;
-
             this.allPairs = this.allPairs.sort((a, b) => {
                 if (a.liquidity !== null && b.liquidity !== null) {
                     return b.liquidity - a.liquidity;
@@ -454,7 +453,7 @@ class AstroportSniper {
 
             this.allPairs.forEach((pair) => {
                 const pairName = `${pair.token0Meta.symbol}, ${pair.token1Meta.symbol}`;
-                console.log(`${pairName}: ${pair.coinhallLink}, Liquidity: $${Math.round(pair.liquidity)}`);
+                console.log(`${pairName}: ${pair.coinhallLink} ${pair.astroportLink}, Liquidity: $${Math.round(pair.liquidity)}`);
             });
         } catch (error) {
             console.error('Error during initialization:', error);
@@ -473,7 +472,7 @@ const main = async () => {
 
     astroportSniper.startMonitoringNewPairs(10); // monitor for new tokens
 
-    const lowLiquidityThreshold = 200; // USD
+    const lowLiquidityThreshold = 1000; // USD
     const lowLiquidityPairs = astroportSniper.allPairs.filter(pair => {
         return pair.liquidity < lowLiquidityThreshold;
     });
@@ -488,11 +487,14 @@ const main = async () => {
         );
     }
 
-    const pairsToMonitor = astroportSniper.allPairs.slice(0, 5);
+    const pairs = ['THUG', 'GRINJ', 'YUKI'];
+    const pairsToMonitor = astroportSniper.allPairs.filter(pair => {
+        return (pairs.includes(pair.token0Meta.symbol) || pairs.includes(pair.token1Meta.symbol)) && pair.liquidity > lowLiquidityThreshold;
+    });
 
     const trackingPollInterval = 5; // seconds
-    const trackingPriceDuration = 10; // minutes
-    const priceChangePercentNotificationThreshold = 10; // percent
+    const trackingPriceDuration = 5; // minutes
+    const priceChangePercentNotificationThreshold = 5; // percent
 
     for (const pair of pairsToMonitor) {
         await astroportSniper.monitorPairForPriceChange(
