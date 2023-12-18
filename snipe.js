@@ -1,9 +1,10 @@
-const { ChainGrpcWasmApi } = require('@injectivelabs/sdk-ts');
+const { ChainGrpcWasmApi, IndexerGrpcAccountPortfolioApi } = require('@injectivelabs/sdk-ts');
 const { getNetworkEndpoints, Network } = require('@injectivelabs/networks');
 const { DenomClientAsync } = require('@injectivelabs/sdk-ui-ts');
 const { Client, GatewayIntentBits, ActivityType } = require('discord.js');
 const moment = require('moment');
 require('dotenv').config();
+const fs = require('fs/promises');
 
 
 class AstroportSniper {
@@ -19,7 +20,11 @@ class AstroportSniper {
         this.stableAsset = null
         this.baseAssetPrice = 0;
 
+        this.tokenTypes = ['native', 'tokenFactory'];
+        this.pairType = '{"xyk":{}}';
+
         this.allPairs = [];
+        this.ignoredPairs = [];
         this.pairPriceMonitoringIntervals = new Map();
         this.lowLiquidityPairMonitoringIntervals = new Map();
 
@@ -44,6 +49,38 @@ class AstroportSniper {
                 limit: 10,
             },
         };
+    }
+
+    async loadFromFile(filename) {
+        try {
+            const data = await fs.readFile(filename, 'utf-8');
+            const jsonData = JSON.parse(data);
+
+            if (jsonData.allPairs) {
+                this.allPairs = jsonData.allPairs;
+                console.log('Loaded allPairs from file');
+            }
+
+            if (jsonData.ignoredPairs) {
+                this.ignoredPairs = jsonData.ignoredPairs;
+                console.log('Loaded ignoredPairs from file');
+            }
+        } catch (error) {
+            console.error('Error loading data from file:', error);
+        }
+    }
+
+    async saveToFile(filename) {
+        try {
+            const dataToSave = {
+                allPairs: this.allPairs,
+                ignoredPairs: this.ignoredPairs,
+            };
+
+            await fs.writeFile(filename, JSON.stringify(dataToSave, null, 2), 'utf-8');
+        } catch (error) {
+            console.error('Error saving data to file:', error);
+        }
     }
 
     async sendMessageToDiscord(message) {
@@ -93,6 +130,7 @@ class AstroportSniper {
 
     async getPairs(pairType, tokenTypes) {
         try {
+            const startTime = new Date().getTime(); // Record the start time
             let uniquePairs = new Set();
             let previousPairs = null;
 
@@ -116,17 +154,36 @@ class AstroportSniper {
 
                 await Promise.all(decodedJson.pairs.map(async (pair) => {
                     const pairKey = JSON.stringify(pair);
-                    if (!uniquePairs.has(pairKey)) {
-                        let pairInfo = await this.getPairInfo(pair.contract_addr);
+                    if (!uniquePairs.has(pairKey) && !this.ignoredPairs.some(ignoredPair => ignoredPair.contract_addr === pair.contract_addr)) {
+                        if (!this.allPairs.some(existingPair => existingPair.contract_addr === pair.contract_addr)) {
+                            console.log("get pair info for", pair.contract_addr)
+                            let pairInfo = await this.getPairInfo(pair.contract_addr);
 
-                        if (pairInfo && pairInfo.token0Meta && pairInfo.token1Meta) {
                             if (
+                                pairInfo &&
+                                pairInfo.token0Meta &&
+                                pairInfo.token1Meta &&
                                 tokenTypes.includes(pairInfo.token0Meta.tokenType) &&
                                 tokenTypes.includes(pairInfo.token1Meta.tokenType) &&
                                 pairType === JSON.stringify(pairInfo.pair_type) &&
                                 (pairInfo.token0Meta.denom === this.baseDenom || pairInfo.token1Meta.denom === this.baseDenom)
                             ) {
                                 uniquePairs.add(JSON.stringify({ ...pair, ...pairInfo }));
+
+                                const message = `:new: New pair found: ${pairInfo.token0Meta.symbol}, ${pairInfo.token1Meta.symbol}: ${pairInfo.astroportLink} <@352761566401265664>`;
+                                console.log(message)
+                                this.sendMessageToDiscord(message);
+                                await this.calculateLiquidity({ ...pair, ...pairInfo })
+
+                                if (pair.liquidity > this.liquidityThreshold) {
+                                    await this.monitorPairForPriceChange({ ...pair, ...pairInfo }, 5, 5, 5)
+                                }
+                                else {
+                                    this.monitorLowLiquidityPair({ ...pair, ...pairInfo }, 10, 200)
+                                }
+                            }
+                            else {
+                                this.ignoredPairs.push(pair);
                             }
                         }
                     }
@@ -138,7 +195,15 @@ class AstroportSniper {
                 previousPairs = decodedJson.pairs;
             }
 
-            return Array.from(uniquePairs).map(pair => JSON.parse(pair));
+            this.allPairs = this.allPairs.concat(Array.from(uniquePairs).map(pair => JSON.parse(pair)));
+
+            const endTime = new Date().getTime(); // Record the end time
+            const executionTime = endTime - startTime;
+            console.log(`Finished check for new pairs in ${executionTime} milliseconds`);
+
+            await this.saveToFile('data.json');
+
+            return this.allPairs;
         } catch (error) {
             console.error('Error fetching all astro port pairs:', error);
         }
@@ -171,7 +236,6 @@ class AstroportSniper {
                 JSON.parse(new TextDecoder().decode(poolInfo.data)),
                 JSON.parse(new TextDecoder().decode(pairConfig.data)),
             ]);
-
 
             const [token0Contract, token1Contract] = infoDecoded['asset_infos'].map((assetInfo) => {
                 const contract = assetInfo['native_token'] ? assetInfo['native_token']['denom'] : assetInfo['token']['contract_addr'];
@@ -246,6 +310,10 @@ class AstroportSniper {
         }
     }
 
+    async getQuoteFromRouter() {
+
+    }
+
     async getQuotes(pairs) {
         pairs.forEach(async (pair) => {
             let pairName = `${pair.token0Meta.symbol}, ${pair.token1Meta.symbol}`
@@ -261,7 +329,8 @@ class AstroportSniper {
             this.sendMessageToDiscord(`Monitoring for new pairs started. Checking every ${intervalInSeconds} seconds.`);
 
             this.monitoringNewPairIntervalId = setInterval(async () => {
-                await this.checkForNewPairs();
+                this.allPairsQuery.pairs.start_after = []
+                await this.getPairs(this.pairType, this.tokenTypes);
             }, intervalInSeconds * 1000);
         } else {
             console.log('Monitoring is already in progress.');
@@ -303,28 +372,6 @@ class AstroportSniper {
         } catch (error) {
             console.error('Error calculating market cap:', error);
             return null;
-        }
-    }
-
-    async checkForNewPairs() {
-        this.allPairsQuery.pairs.start_after = this.allPairs[this.allPairs.length - 1].asset_infos;
-        const newPairs = await this.getPairs('{"xyk":{}}', ['native', 'tokenFactory']);
-        const addedPairs = newPairs.filter((newPair) => !this.allPairs.some((existingPair) => existingPair.contract_addr === newPair.contract_addr));
-
-        if (addedPairs.length > 0) {
-            console.log(`Found ${addedPairs.length} new pair(s):`);
-            addedPairs.forEach(async (pair) => {
-                const message = `:new: New pair found: ${pair.token0Meta.symbol}, ${pair.token1Meta.symbol}: ${pair.astroportLink} <@352761566401265664>`;
-                this.sendMessageToDiscord(message);
-                this.calculateLiquidity(pair)
-                if (pair.liquidity > this.liquidityThreshold) {
-                    await this.monitorPairForPriceChange(pair, 5, 5, 5)
-                }
-                else {
-                    this.monitorLowLiquidityPair(pair, 10, 200)
-                }
-            });
-            this.allPairs = [...this.allPairs, ...addedPairs];
         }
     }
 
@@ -374,6 +421,9 @@ class AstroportSniper {
                     lastPrices = [];
                 }
                 console.log(`${pairName} price ${parseFloat(currentPrice).toFixed(10)}`)
+                if (currentPrice == Infinity) {
+                    this.stopMonitoringPairForPriceChange(pair)
+                }
             }, intervalInSeconds * 1000);
 
             this.pairPriceMonitoringIntervals.set(pair.contract_addr, monitoringIntervalId);
@@ -410,7 +460,7 @@ class AstroportSniper {
                     console.log(`Monitoring ${pairName} - Liquidity Added: $${currentLiquidity}`);
                     this.sendMessageToDiscord(`:eyes: Monitoring ${pairName} - Liquidity Added: $${currentLiquidity} <@352761566401265664>\n${pair.astroportLink}`)
                     this.stopMonitoringLowLiquidityPair(pair)
-                    this.monitorPairForPriceChange(pair, 5, 5, 5)
+                    // this.monitorPairForPriceChange(pair, 5, 5, 5)
                 }
             }, intervalInSeconds * 1000);
             this.lowLiquidityPairMonitoringIntervals.set(pair.contract_addr, monitoringIntervalId);
@@ -433,10 +483,57 @@ class AstroportSniper {
         }
     }
 
-    async initialize(pairType, tokenTypes) {
-        await this.updateBaseAssetPrice()
+    async getPortfolio(address) {
         try {
-            this.allPairs = await this.getPairs(pairType, tokenTypes);
+            const endpoints = getNetworkEndpoints(Network.Mainnet);
+            const indexerGrpcAccountPortfolioApi = new IndexerGrpcAccountPortfolioApi(
+                endpoints.indexer,
+            );
+
+            const portfolio = await indexerGrpcAccountPortfolioApi.fetchAccountPortfolio(
+                address,
+            );
+
+            for (const balance of portfolio.bankBalancesList) {
+                try {
+                    let pair = this.allPairs.find(x => x.asset_infos[0].native_token.denom == balance.denom || x.asset_infos[1].native_token.denom == balance.denom);
+
+                    if (!pair || balance.amount == 0) continue;
+
+                    const pairInfo = await this.getPairInfo(pair.contract_addr);
+
+                    if (pairInfo) {
+                        const pairName = `${pair.token0Meta.symbol}, ${pair.token1Meta.symbol}`;
+                        console.log("Found balance", pairName, balance.amount);
+                    }
+                } catch (error) {
+                    console.error(`Error processing balance for ${balance.denom}:`, error);
+                }
+            }
+        } catch (error) {
+            console.error('Error fetching account portfolio:', error);
+        }
+    }
+
+
+    async updateLiquidityAllPairs() {
+        for (const pair of this.allPairs) {
+            await this.calculateLiquidity(pair);
+        }
+        await this.saveToFile('data.json')
+    }
+
+    async initialize(pairType, tokenTypes) {
+        this.pairType = pairType
+        this.tokenTypes = tokenTypes
+
+        await this.updateBaseAssetPrice()
+
+        try {
+            await this.loadFromFile('data.json');
+            await this.getPairs(pairType, tokenTypes);
+
+            await this.updateLiquidityAllPairs()
 
             this.allPairs = this.allPairs.sort((a, b) => {
                 if (a.liquidity !== null && b.liquidity !== null) {
@@ -453,7 +550,7 @@ class AstroportSniper {
 
             this.allPairs.forEach((pair) => {
                 const pairName = `${pair.token0Meta.symbol}, ${pair.token1Meta.symbol}`;
-                console.log(`${pairName}: ${pair.coinhallLink} ${pair.astroportLink}, Liquidity: $${Math.round(pair.liquidity)}`);
+                if (Math.round(pair.liquidity) > 0) console.log(`${pairName}: ${pair.astroportLink}, Liquidity: $${Math.round(pair.liquidity)}`);
             });
         } catch (error) {
             console.error('Error during initialization:', error);
@@ -470,29 +567,34 @@ const main = async () => {
     const pairType = '{"xyk":{}}';
     await astroportSniper.initialize(pairType, tokenTypes); // get token list
 
-    astroportSniper.startMonitoringNewPairs(10); // monitor for new tokens
+    astroportSniper.startMonitoringNewPairs(15); // monitor for new tokens
+
+    await astroportSniper.getPortfolio("inj1lq9wn94d49tt7gc834cxkm0j5kwlwu4gm65lhe")
 
     const lowLiquidityThreshold = 1000; // USD
-    const lowLiquidityPairs = astroportSniper.allPairs.filter(pair => {
-        return pair.liquidity < lowLiquidityThreshold;
-    });
 
-    const lowLiquidityPollInterval = 10; // seconds
+    // const lowLiquidityPairs = astroportSniper.allPairs.filter(pair => {
+    //     return pair.liquidity < lowLiquidityThreshold;
+    // });
 
-    for (const pair of lowLiquidityPairs) {
-        await astroportSniper.monitorLowLiquidityPair(
-            pair,
-            lowLiquidityPollInterval,
-            lowLiquidityThreshold
-        );
-    }
+    // const lowLiquidityPollInterval = 10; // seconds
+    // for (const pair of lowLiquidityPairs) {
+    //     await astroportSniper.monitorLowLiquidityPair(
+    //         pair,
+    //         lowLiquidityPollInterval,
+    //         lowLiquidityThreshold
+    //     );
+    // }
 
-    const pairs = ['THUG', 'GRINJ', 'YUKI'];
+    // let ginger = await astroportSniper.getTokenInfo("inj1atyz3wxcaxdmhudpmpwgruqrp2yll83k47h4lz")
+    // console.log(ginger)
+
+    const pairs = ['GINGER'];
     const pairsToMonitor = astroportSniper.allPairs.filter(pair => {
         return (pairs.includes(pair.token0Meta.symbol) || pairs.includes(pair.token1Meta.symbol)) && pair.liquidity > lowLiquidityThreshold;
     });
 
-    const trackingPollInterval = 5; // seconds
+    const trackingPollInterval = 10; // seconds
     const trackingPriceDuration = 5; // minutes
     const priceChangePercentNotificationThreshold = 5; // percent
 
