@@ -13,12 +13,9 @@ const main = async () => {
     const pairType = '{"xyk":{}}';
     await astroportSniper.initialize(pairType, tokenTypes); // get token list
 
-    astroportSniper.startMonitoringNewPairs(15); // monitor for new tokens
+    astroportSniper.startMonitoringNewPairs(30); // monitor for new tokens
 
     await astroportSniper.getPortfolio(wallet)
-
-    // await astroportSniper.monitorPairs(['BABY GINGER'])
-
 
     // let pairToBuy = await astroportSniper.getPairInfo("inj1atyz3wxcaxdmhudpmpwgruqrp2yll83k47h4lz")
     // astroportSniper.executePurchase(pairToBuy, 0.01, 0.1, 0.1)

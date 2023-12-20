@@ -76,15 +76,15 @@ class AstroportSniper {
 
             this.setupDiscordCommands()
 
-            // await this.updateLiquidityAllPairs()
+            await this.updateLiquidityAllPairs()
 
             this.allPairs = this.allPairs.sort((a, b) => (b.liquidity ?? 0) - (a.liquidity ?? 0));
             console.log(`Number of pairs: ${this.allPairs.length}`);
 
-            // this.allPairs.forEach((pair) => {
-            //     const pairName = `${pair.token0Meta.symbol}, ${pair.token1Meta.symbol}`;
-            //     if (Math.round(pair.liquidity) > 0) console.log(`${pairName}: ${pair.astroportLink}, Liquidity: $${Math.round(pair.liquidity)}`);
-            // });
+            this.allPairs.forEach((pair) => {
+                const pairName = `${pair.token0Meta.symbol}, ${pair.token1Meta.symbol}`;
+                if (Math.round(pair.liquidity) > 0) console.log(`${pairName}: ${pair.astroportLink}, Liquidity: $${Math.round(pair.liquidity)}`);
+            });
         } catch (error) {
             console.error('Error during initialization:', error);
         }
@@ -653,7 +653,7 @@ class AstroportSniper {
 
                             console.log(`found balance for ${pairName}: ${(balance.amount / Math.pow(10, tokenDenom.decimals)).toFixed(2)} ${tokenDenom.symbol} (${amountBack} ${this.baseAssetName} $${usdValue.toFixed(2)})`)
                             if (usdValue > 1) {
-                                this.monitorPairToSell(pairInfo, balance, 5)
+                                this.monitorPairToSell(pairInfo, balance, 10)
                             }
                         }
                     }
