@@ -27,6 +27,8 @@ class AstroportSniper {
         this.tokenTypes = ['native', 'tokenFactory'];
         this.pairType = '{"xyk":{}}';
 
+        this.liquidityThreshold = 10000
+
         this.allPairs = [];
         this.ignoredPairs = [];
 
@@ -74,15 +76,15 @@ class AstroportSniper {
 
             this.setupDiscordCommands()
 
-            await this.updateLiquidityAllPairs()
+            // await this.updateLiquidityAllPairs()
 
             this.allPairs = this.allPairs.sort((a, b) => (b.liquidity ?? 0) - (a.liquidity ?? 0));
             console.log(`Number of pairs: ${this.allPairs.length}`);
 
-            this.allPairs.forEach((pair) => {
-                const pairName = `${pair.token0Meta.symbol}, ${pair.token1Meta.symbol}`;
-                if (Math.round(pair.liquidity) > 0) console.log(`${pairName}: ${pair.astroportLink}, Liquidity: $${Math.round(pair.liquidity)}`);
-            });
+            // this.allPairs.forEach((pair) => {
+            //     const pairName = `${pair.token0Meta.symbol}, ${pair.token1Meta.symbol}`;
+            //     if (Math.round(pair.liquidity) > 0) console.log(`${pairName}: ${pair.astroportLink}, Liquidity: $${Math.round(pair.liquidity)}`);
+            // });
         } catch (error) {
             console.error('Error during initialization:', error);
         }
@@ -207,7 +209,6 @@ class AstroportSniper {
                                 (pairInfo.token0Meta.denom === this.baseDenom || pairInfo.token1Meta.denom === this.baseDenom)
                             ) {
                                 uniquePairs.add(JSON.stringify({ ...pair, ...pairInfo }));
-
                                 const message = `:new: New pair found: ${pairInfo.token0Meta.symbol}, ${pairInfo.token1Meta.symbol}: \n${pairInfo.astroportLink}\n${pairInfo.coinhallLink}\n <@352761566401265664>`;
                                 console.log(message)
                                 this.sendMessageToDiscord(message);
@@ -217,7 +218,7 @@ class AstroportSniper {
                                     await this.monitorPairForPriceChange({ ...pair, ...pairInfo }, 5, 5, 5)
                                 }
                                 else {
-                                    this.monitorLowLiquidityPair({ ...pair, ...pairInfo }, 10, 200)
+                                    await this.monitorLowLiquidityPair({ ...pair, ...pairInfo }, 10, 200)
                                 }
                             }
                             else {
@@ -874,9 +875,9 @@ class AstroportSniper {
         }
     }
 
-    async monitorPairs(pairsToMonitorPrice, lowLiquidityThreshold) {
+    async monitorPairs(pairsToMonitorPrice) {
         const pairsToMonitor = this.allPairs.filter(pair => {
-            return (pairsToMonitorPrice.includes(pair.token0Meta.symbol) || pairsToMonitorPrice.includes(pair.token1Meta.symbol)) && pair.liquidity > lowLiquidityThreshold;
+            return (pairsToMonitorPrice.includes(pair.token0Meta.symbol) || pairsToMonitorPrice.includes(pair.token1Meta.symbol)) && pair.liquidity > this.liquidityThreshold;
         });
 
         const trackingPollInterval = 10; // seconds

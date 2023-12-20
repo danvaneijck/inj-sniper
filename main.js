@@ -1,7 +1,6 @@
 const AstroportSniper = require("./snipe")
 
 const main = async () => {
-    // const RPC = getNetworkEndpoints(Network.Mainnet).grpc
     const RPC = "https://sentry.chain.grpc-web.injective.network"
 
     const wallet = "inj1lq9wn94d49tt7gc834cxkm0j5kwlwu4gm65lhe"
@@ -18,7 +17,7 @@ const main = async () => {
 
     await astroportSniper.getPortfolio(wallet)
 
-    const lowLiquidityThreshold = 10000; // USD
+    // await astroportSniper.monitorPairs(['BABY GINGER'])
 
 
     // let pairToBuy = await astroportSniper.getPairInfo("inj1atyz3wxcaxdmhudpmpwgruqrp2yll83k47h4lz")
