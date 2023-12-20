@@ -1,54 +1,62 @@
-import {
-    getNetworkInfo,
-    Network,
+const {
     TxClient,
-    PrivateKey,
     TxGrpcClient,
     ChainRestAuthApi,
     createTransaction,
     MsgSend,
-    DEFAULT_STD_FEE,
-    BigNumberInBase,
-} from '@injectivelabs/sdk-ts';
+    BaseAccount,
+    ChainRestTendermintApi
+} = require('@injectivelabs/sdk-ts');
+const { BigNumberInBase, DEFAULT_STD_FEE, DEFAULT_BLOCK_TIMEOUT_HEIGHT } = require('@injectivelabs/utils')
 
 class TransactionManager {
-    constructor(network) {
-        this.network = network;
+
+    constructor(privateKey) {
+        this.privateKey = privateKey
     }
 
-    async signAndBroadcastTransaction(privateKeyHash, msgJson, memo = '') {
+    async signAndBroadcastTransaction(msg, memo = '') {
         try {
-            const privateKey = PrivateKey.fromHex(privateKeyHash);
-            const injectiveAddress = privateKey.toBech32();
-            const publicKey = privateKey.toPublicKey().toBase64();
+            const restEndpoint = "https://sentry.lcd.injective.network"
+            const gRPC = "https://sentry.chain.grpc-web.injective.network"
+            const chainId = "injective-1"
 
-            const accountDetails = await new ChainRestAuthApi(
-                this.network.rest,
-            ).fetchAccount(injectiveAddress);
+            const walletAddress = this.privateKey.toAddress().toBech32()
+            const publicKey = this.privateKey.toPublicKey().toBase64();
 
-            const msg = MsgSend.fromJSON(msgJson);
+            const chainRestAuthApi = new ChainRestAuthApi(restEndpoint)
+            const accountDetailsResponse = await chainRestAuthApi.fetchAccount(
+                walletAddress,
+            )
+            const baseAccount = BaseAccount.fromRestApi(accountDetailsResponse)
+
+            const chainRestTendermintApi = new ChainRestTendermintApi(restEndpoint)
+            const latestBlock = await chainRestTendermintApi.fetchLatestBlock()
+            const latestHeight = latestBlock.header.height
+            const timeoutHeight = new BigNumberInBase(latestHeight).plus(
+                DEFAULT_BLOCK_TIMEOUT_HEIGHT,
+            )
 
             const { signBytes, txRaw } = createTransaction({
                 message: msg,
                 memo: memo,
                 fee: DEFAULT_STD_FEE,
                 pubKey: publicKey,
-                sequence: parseInt(accountDetails.account.base_account.sequence, 10),
-                accountNumber: parseInt(
-                    accountDetails.account.base_account.account_number,
-                    10,
-                ),
-                chainId: this.network.chainId,
+                sequence: baseAccount.sequence,
+                timeoutHeight: timeoutHeight.toNumber(),
+                accountNumber: baseAccount.accountNumber,
+                chainId: chainId,
             });
 
-            const signature = await privateKey.sign(Buffer.from(signBytes));
+            const signature = await this.privateKey.sign(Buffer.from(signBytes));
             txRaw.signatures = [signature];
 
             console.log(`Transaction Hash: ${TxClient.hash(txRaw)}`);
 
-            const txService = new TxGrpcClient(this.network.grpc);
+            const txService = new TxGrpcClient(gRPC);
 
             const simulationResponse = await txService.simulate(txRaw);
+
             console.log(
                 `Transaction simulation response: ${JSON.stringify(
                     simulationResponse.gasInfo,
@@ -59,10 +67,12 @@ class TransactionManager {
 
             if (txResponse.code !== 0) {
                 console.log(`Transaction failed: ${txResponse.rawLog}`);
+                return null
             } else {
                 console.log(
                     `Broadcasted transaction hash: ${JSON.stringify(txResponse.txHash)}`,
                 );
+                return txResponse
             }
         } catch (error) {
             console.error(`Error in signAndBroadcastTransaction: ${error}`);
@@ -70,4 +80,4 @@ class TransactionManager {
     }
 }
 
-export default TransactionManager
+module.exports = TransactionManager

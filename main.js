@@ -1,24 +1,33 @@
 const AstroportSniper = require("./snipe")
 
 const main = async () => {
+    const config = {
+        live: true,
+        maxSpread: 0.49,
+        snipeAmount: 0.01
+    }
+
     const RPC = "https://sentry.chain.grpc-web.injective.network"
 
-    const wallet = "inj1lq9wn94d49tt7gc834cxkm0j5kwlwu4gm65lhe"
+    const astroportSniper = new AstroportSniper(RPC, config);
 
-    const astroportSniper = new AstroportSniper(RPC, wallet);
-
-    astroportSniper.startMonitoringBasePair(5); // track INJ price
+    astroportSniper.startMonitoringBasePair(30); // track INJ price
 
     const tokenTypes = ['native', 'tokenFactory'];
     const pairType = '{"xyk":{}}';
     await astroportSniper.initialize(pairType, tokenTypes); // get token list
 
-    astroportSniper.startMonitoringNewPairs(30); // monitor for new tokens
+    astroportSniper.startMonitoringNewPairs(10); // monitor for new tokens
 
-    await astroportSniper.getPortfolio(wallet)
+    await astroportSniper.getPortfolio()
 
-    // let pairToBuy = await astroportSniper.getPairInfo("inj1atyz3wxcaxdmhudpmpwgruqrp2yll83k47h4lz")
-    // astroportSniper.executePurchase(pairToBuy, 0.01, 0.1, 0.1)
+    console.log(astroportSniper.positions)
+
+    let pairToSell = await astroportSniper.getPairInfo("inj1lzgs9sx54g7p6xu28nkycj42kt2emexpay32lt")
+    await astroportSniper.sellMemeToken(pairToSell, null, config.maxSpread)
+
+    // pairToSell = await astroportSniper.getPairInfo("inj1lmr5qlz3przfvccrsrff2ufvv33wujkgj8alhf")
+    // await astroportSniper.sellMemeToken(pairToSell, null, config.maxSpread)
 };
 
 main();

@@ -1,22 +1,33 @@
-const { ChainGrpcWasmApi, IndexerGrpcAccountPortfolioApi } = require('@injectivelabs/sdk-ts');
+const { ChainGrpcWasmApi, IndexerGrpcAccountPortfolioApi, PrivateKey, PublicKey, MsgExecuteContractCompat } = require('@injectivelabs/sdk-ts');
 const { getNetworkEndpoints, Network } = require('@injectivelabs/networks');
 const { DenomClientAsync } = require('@injectivelabs/sdk-ui-ts');
+const { BigNumberInBase } = require('@injectivelabs/utils')
 const { Client, GatewayIntentBits, ActivityType } = require('discord.js');
 const { SlashCommandBuilder } = require('@discordjs/builders');
 const moment = require('moment');
 const fs = require('fs/promises');
+const TransactionManager = require("./transactions")
 require('dotenv').config();
 
 class AstroportSniper {
-    constructor(rpc, wallet) {
-        console.log("init with ", rpc)
+    constructor(rpc, config) {
+        console.log("Init on ", rpc)
+
+        this.RPC = rpc
+        this.live = config.live
 
         this.chainGrpcWasmApi = new ChainGrpcWasmApi(rpc);
         this.astroFactory = process.env.FACTORY_CONTRACT;
         this.astroRouter = process.env.ROUTER_CONTRACT;
         this.pricePair = process.env.PRICE_PAIR_CONTRACT; // INJ / USDT
 
-        this.walletAddress = wallet
+        this.privateKey = PrivateKey.fromMnemonic(process.env.MNEMONIC)
+        this.publicKey = this.privateKey.toAddress()
+
+        this.walletAddress = this.privateKey.toAddress().toBech32()
+        console.log(`Loaded wallet from private key ${this.walletAddress}`)
+
+        this.txManager = new TransactionManager(this.privateKey)
 
         this.baseAssetName = "INJ"
         this.baseDenom = "inj"
@@ -27,7 +38,13 @@ class AstroportSniper {
         this.tokenTypes = ['native', 'tokenFactory'];
         this.pairType = '{"xyk":{}}';
 
-        this.liquidityThreshold = 10000
+        // snipe coins 10k to 100k liquidity
+        this.lowLiquidityThreshold = 10000
+        this.highLiquidityThreshold = 100000
+
+        this.snipeAmount = config.snipeAmount
+        this.maxSpread = config.maxSpread
+        this.positions = new Map()
 
         this.allPairs = [];
         this.ignoredPairs = [];
@@ -76,15 +93,15 @@ class AstroportSniper {
 
             this.setupDiscordCommands()
 
-            await this.updateLiquidityAllPairs()
+            // await this.updateLiquidityAllPairs()
 
             this.allPairs = this.allPairs.sort((a, b) => (b.liquidity ?? 0) - (a.liquidity ?? 0));
             console.log(`Number of pairs: ${this.allPairs.length}`);
 
-            this.allPairs.forEach((pair) => {
-                const pairName = `${pair.token0Meta.symbol}, ${pair.token1Meta.symbol}`;
-                if (Math.round(pair.liquidity) > 0) console.log(`${pairName}: ${pair.astroportLink}, Liquidity: $${Math.round(pair.liquidity)}`);
-            });
+            // this.allPairs.forEach((pair) => {
+            //     const pairName = `${pair.token0Meta.symbol}, ${pair.token1Meta.symbol}`;
+            //     if (Math.round(pair.liquidity) > 0) console.log(`${pairName}: ${pair.astroportLink}, Liquidity: $${Math.round(pair.liquidity)}`);
+            // });
         } catch (error) {
             console.error('Error during initialization:', error);
         }
@@ -143,7 +160,7 @@ class AstroportSniper {
 
     async updateBaseAssetPrice() {
         let baseAssetPair = await this.getPairInfo(this.pricePair)
-        let quote = await this.getQuote(baseAssetPair)
+        let quote = await this.getQuote(baseAssetPair, 1)
         if (!quote) return
         this.baseAssetPrice = quote['return_amount']
         this.stableAsset = baseAssetPair.token0Meta
@@ -209,19 +226,24 @@ class AstroportSniper {
                                 (pairInfo.token0Meta.denom === this.baseDenom || pairInfo.token1Meta.denom === this.baseDenom)
                             ) {
                                 uniquePairs.add(JSON.stringify({ ...pair, ...pairInfo }));
-                                const message = `:new: New pair found: ${pairInfo.token0Meta.symbol}, ${pairInfo.token1Meta.symbol}: \n${pairInfo.astroportLink}\n${pairInfo.coinhallLink}\n <@352761566401265664>`;
+                                const message = `:new: New pair found: ${pairInfo.token0Meta.symbol}, ${pairInfo.token1Meta.symbol}: \n${pairInfo.astroportLink}\n${pairInfo.dexscreenerLink}\n <@352761566401265664>`;
                                 console.log(message)
+
+                                // comment out this stuff when backfilling new pairs from fresh
                                 this.sendMessageToDiscord(message);
                                 await this.calculateLiquidity({ ...pair, ...pairInfo })
 
-                                if (pair.liquidity > this.liquidityThreshold) {
-                                    await this.monitorPairForPriceChange({ ...pair, ...pairInfo }, 5, 5, 5)
+                                if (pair.liquidity > this.lowLiquidityThreshold && pair.liquidity < this.highLiquidityThreshold) {
+                                    await this.buyMemeToken(pair, this.snipeAmount, this.maxSpread)
+                                    // await this.monitorPairForPriceChange({ ...pair, ...pairInfo }, 5, 5, 5)
                                 }
                                 else {
-                                    await this.monitorLowLiquidityPair({ ...pair, ...pairInfo }, 10, 200)
+                                    await this.monitorLowLiquidityPair({ ...pair, ...pairInfo }, 10, this.lowLiquidityThreshold)
                                 }
                             }
                             else {
+                                console.log(`Ignored pair ${pair.contract_addr}`)
+                                this.sendMessageToDiscord(`Ignored new pair ${pair.contract_addr}`);
                                 this.ignoredPairs.push(pair);
                             }
                         }
@@ -250,7 +272,9 @@ class AstroportSniper {
 
     async getTokenInfo(denom) {
         try {
-            const denomClient = new DenomClientAsync(Network.Mainnet, {})
+            const denomClient = new DenomClientAsync(Network.Mainnet, {
+                endpoints: { grpc: this.RPC }
+            })
             const token = await denomClient.getDenomToken(denom)
             return token;
         } catch (error) {
@@ -259,73 +283,96 @@ class AstroportSniper {
     }
 
     async getPairInfo(pairContract) {
-        try {
-            const pairQuery = Buffer.from(JSON.stringify({ pair: {} })).toString('base64');
-            const poolQuery = Buffer.from(JSON.stringify({ pool: {} })).toString('base64');
-            const configQuery = Buffer.from(JSON.stringify({ config: {} })).toString('base64');
+        let retryCount = 0;
 
-            const [pairInfo, poolInfo, pairConfig] = await Promise.all([
-                this.chainGrpcWasmApi.fetchSmartContractState(pairContract, pairQuery),
-                this.chainGrpcWasmApi.fetchSmartContractState(pairContract, poolQuery),
-                this.chainGrpcWasmApi.fetchSmartContractState(pairContract, configQuery),
-            ]);
+        while (retryCount < 3) {
+            try {
+                const pairQuery = Buffer.from(JSON.stringify({ pair: {} })).toString('base64');
+                const poolQuery = Buffer.from(JSON.stringify({ pool: {} })).toString('base64');
+                const configQuery = Buffer.from(JSON.stringify({ config: {} })).toString('base64');
 
-            const [infoDecoded, poolDecoded, decodedJson] = await Promise.all([
-                JSON.parse(new TextDecoder().decode(pairInfo.data)),
-                JSON.parse(new TextDecoder().decode(poolInfo.data)),
-                JSON.parse(new TextDecoder().decode(pairConfig.data)),
-            ]);
+                const pairInfo = await this.chainGrpcWasmApi.fetchSmartContractState(pairContract, pairQuery);
+                const infoDecoded = JSON.parse(new TextDecoder().decode(pairInfo.data));
 
-            const [token0Contract, token1Contract] = infoDecoded['asset_infos'].map((assetInfo) => {
-                const contract = assetInfo['native_token'] ? assetInfo['native_token']['denom'] : assetInfo['token']['contract_addr'];
-                return this.getTokenInfo(contract);
-            });
+                const poolInfo = await this.chainGrpcWasmApi.fetchSmartContractState(pairContract, poolQuery);
+                const poolDecoded = JSON.parse(new TextDecoder().decode(poolInfo.data));
 
-            const [token0Info, token1Info] = await Promise.all([token0Contract, token1Contract]);
-            if (!token0Info || !token1Info) return null
+                const pairConfig = await this.chainGrpcWasmApi.fetchSmartContractState(pairContract, configQuery);
+                const decodedJson = JSON.parse(new TextDecoder().decode(pairConfig.data));
 
-            const paramsDecoded = JSON.parse(atob(decodedJson.params));
+                const assetInfos = infoDecoded['asset_infos'];
+                const tokenInfos = [];
 
-            let liquidity = null
-            if (this.baseAsset && this.stableAsset) {
+                for (const assetInfo of assetInfos) {
+                    const contract = assetInfo['native_token']
+                        ? assetInfo['native_token']['denom']
+                        : assetInfo['token']['contract_addr'];
 
-                const baseAssetAmount = poolDecoded.assets.find(asset => {
-                    if (asset.info.native_token) {
-                        return asset.info.native_token.denom === this.baseAsset.denom;
-                    } else if (asset.info.token) {
-                        return asset.info.token.contract_addr === this.baseAsset.denom;
-                    }
-                    return false;
-                })?.amount || 0;
-                const baseAssetDecimals = this.baseAsset.decimals || 0;
-                const baseAssetPrice = this.baseAssetPrice || 0;
+                    const tokenInfo = await this.getTokenInfo(contract);
+                    tokenInfos.push(tokenInfo);
+                }
 
-                const numericBaseAssetAmount = Number(baseAssetAmount) / 10 ** baseAssetDecimals;
-                liquidity = numericBaseAssetAmount * baseAssetPrice;
-                liquidity = (liquidity * 2) / Math.pow(10, this.stableAsset.decimals)
+                const [token0Info, token1Info] = tokenInfos;
+                if (!token0Info || !token1Info) {
+                    console.error(`Failed getting token info ${JSON.stringify(token0Info)} ${JSON.stringify(token1Info)}`)
+                    retryCount += 1
+                    continue
+                }
+
+                const paramsDecoded = JSON.parse(atob(decodedJson.params));
+
+                let liquidity = null
+                if (this.baseAsset && this.stableAsset) {
+
+                    const baseAssetAmount = poolDecoded.assets.find(asset => {
+                        if (asset.info.native_token) {
+                            return asset.info.native_token.denom === this.baseAsset.denom;
+                        } else if (asset.info.token) {
+                            return asset.info.token.contract_addr === this.baseAsset.denom;
+                        }
+                        return false;
+                    })?.amount || 0;
+                    const baseAssetDecimals = this.baseAsset.decimals || 0;
+                    const baseAssetPrice = this.baseAssetPrice || 0;
+
+                    const numericBaseAssetAmount = Number(baseAssetAmount) / 10 ** baseAssetDecimals;
+                    liquidity = numericBaseAssetAmount * baseAssetPrice;
+                    liquidity = (liquidity * 2) / Math.pow(10, this.stableAsset.decimals)
+                }
+
+                return {
+                    ...decodedJson,
+                    token0Meta: token0Info,
+                    token1Meta: token1Info,
+                    astroportLink: `https://app.astroport.fi/swap?from=${token0Info.denom}&to=${token1Info.denom}`,
+                    coinhallLink: `https://coinhall.org/injective/${pairContract}`,
+                    dexscreenerLink: `https://dexscreener.com/injective/${pairContract}?maker=${this.walletAddress}`,
+                    contract_addr: pairContract,
+                    pair_type: infoDecoded.pair_type,
+                    asset_infos: infoDecoded.asset_infos,
+                    pool: poolDecoded.assets,
+                    params: paramsDecoded,
+                    liquidity: liquidity,
+                    liquidityUpdated: moment()
+                };
+
+            } catch (error) {
+                if (error.name == "GrpcUnaryRequestException") {
+                    console.error(`Error fetching pair ${pairContract} info. Retrying... (Retry count: ${retryCount + 1})`);
+                    retryCount++;
+                } else {
+                    console.error(`Error fetching pair ${pairContract} info:`, error);
+                    break;
+                }
             }
-
-            return {
-                ...decodedJson,
-                token0Meta: token0Info,
-                token1Meta: token1Info,
-                astroportLink: `https://app.astroport.fi/swap?from=${token0Info.denom}&to=${token1Info.denom}`,
-                coinhallLink: `https://coinhall.org/injective/${pairContract}`,
-                contract_addr: pairContract,
-                pair_type: infoDecoded.pair_type,
-                asset_infos: infoDecoded.asset_infos,
-                pool: poolDecoded.assets,
-                params: paramsDecoded,
-                liquidity: liquidity,
-                liquidityUpdated: moment()
-            };
-        } catch (error) {
-            console.error(`Error fetching pair ${pairContract} info:`, error);
         }
+        console.error(`Max retry count reached. Unable to fetch pair ${pairContract} info.`);
+        return null;
     }
 
-    async getQuote(pair) {
+    async getQuote(pair, amount) {
         if (!pair) return
+        const offerAmount = amount * Math.pow(10, this.baseAsset ? this.baseAsset.decimals : 18);
         const pairName = `${pair.token0Meta.symbol}, ${pair.token1Meta.symbol}`;
         const simulationQuery = {
             simulation: {
@@ -335,7 +382,7 @@ class AstroportSniper {
                             denom: 'inj'
                         }
                     },
-                    amount: '1000000000000000000'
+                    amount: offerAmount.toString()
                 }
             }
         };
@@ -446,7 +493,7 @@ class AstroportSniper {
     async getQuotes(pairs) {
         pairs.forEach(async (pair) => {
             let pairName = `${pair.token0Meta.symbol}, ${pair.token1Meta.symbol}`
-            let decodedData = await this.getQuote(pair)
+            let decodedData = await this.getQuote(pair, 1)
             if (decodedData) {
                 console.log(`quote for ${pairName}: ${this.baseAssetPrice / decodedData['return_amount']}`)
             }
@@ -593,9 +640,10 @@ class AstroportSniper {
                 const currentLiquidity = await this.calculateLiquidity(updatedPair);
                 if (currentLiquidity && currentLiquidity > liquidityThreshold) {
                     console.log(`Monitoring ${pairName} - Liquidity Added: $${currentLiquidity}`);
-                    this.sendMessageToDiscord(`:eyes: ${pairName} - Liquidity Added: $${currentLiquidity}\n${pair.astroportLink}\n${pair.coinhallLink}\n<@352761566401265664>`)
+                    this.sendMessageToDiscord(`:eyes: ${pairName} - Liquidity Added: $${currentLiquidity}\n${pair.astroportLink}\n${pair.dexscreenerLink}\n<@352761566401265664>`)
                     this.stopMonitoringLowLiquidityPair(pair)
-                    this.monitorPairForPriceChange(pair, 5, 5, 5)
+                    // this.monitorPairForPriceChange(pair, 5, 5, 5)
+                    await this.buyMemeToken(pair, this.snipeAmount, this.maxSpread)
                 }
             }, intervalInSeconds * 1000);
             this.lowLiquidityPairMonitoringIntervals.set(pair.contract_addr, monitoringIntervalId);
@@ -618,7 +666,7 @@ class AstroportSniper {
         }
     }
 
-    async getPortfolio(address) {
+    async getPortfolio() {
         try {
             const endpoints = getNetworkEndpoints(Network.Mainnet);
             const indexerGrpcAccountPortfolioApi = new IndexerGrpcAccountPortfolioApi(
@@ -626,7 +674,7 @@ class AstroportSniper {
             );
 
             const portfolio = await indexerGrpcAccountPortfolioApi.fetchAccountPortfolio(
-                address,
+                this.walletAddress,
             );
 
             for (const balance of portfolio.bankBalancesList) {
@@ -651,10 +699,9 @@ class AstroportSniper {
                             const baseAssetPriceConverted = this.baseAssetPrice / Math.pow(10, this.stableAsset.decimals)
                             const usdValue = (convertedQuote * baseAssetPriceConverted)
 
+                            this.positions.set(tokenDenom.denom, balance.amount / Math.pow(10, tokenDenom.decimals));
+
                             console.log(`found balance for ${pairName}: ${(balance.amount / Math.pow(10, tokenDenom.decimals)).toFixed(2)} ${tokenDenom.symbol} (${amountBack} ${this.baseAssetName} $${usdValue.toFixed(2)})`)
-                            if (usdValue > 1) {
-                                this.monitorPairToSell(pairInfo, balance, 10)
-                            }
                         }
                     }
                 } catch (error) {
@@ -674,10 +721,14 @@ class AstroportSniper {
         await this.saveToFile('data.json')
     }
 
-    async executePurchase(pair, amount, slippage, maxSpread) {
-        console.log(JSON.stringify(pair, null, 2))
+    async buyMemeToken(pair, amount, maxSpread) {
         if (!pair) {
             console.error("Invalid pair for executePurchase");
+            return;
+        }
+
+        if (!this.live) {
+            console.error("Live trading not enabled");
             return;
         }
 
@@ -687,60 +738,112 @@ class AstroportSniper {
             ? pair.asset_infos[0].native_token.denom
             : pair.asset_infos[1].native_token.denom;
 
-        const askDenom = pair.asset_infos[1].native_token.denom !== baseDenom
-            ? pair.asset_infos[1].native_token.denom
-            : pair.asset_infos[0].native_token.denom;
-
-
-        const quote = await this.getQuoteFromRouter(pair, amount);
+        const quote = await this.getQuote(pair, amount);
 
         if (!quote) {
             console.error("Failed to get quote for executePurchase");
             return;
         }
 
-        const quotedAmount = quote['amount']
-        const slippageFactor = 1 - slippage;
-        const minimumReceive = (parseFloat(quotedAmount) * slippageFactor).toString();
-
-        console.log(`quotedAmount :${quotedAmount}`)
-        console.log(`minimumReceive :${minimumReceive}`)
+        const adjustedAmount = amount * Math.pow(10, this.baseAsset ? this.baseAsset.decimals : 18);
 
         const swapOperations = {
-            execute_swap_operations: {
-                operations: [
-                    {
-                        native_swap: {
-                            offer_denom: offerDenom,
-                            ask_denom: askDenom
+            swap: {
+                offer_asset: {
+                    info: {
+                        native_token: {
+                            denom: offerDenom
                         }
                     },
-                    {
-                        astro_swap: {
-                            offer_asset_info: {
-                                native_token: {
-                                    denom: offerDenom
-                                }
-                            },
-                            ask_asset_info: {
-                                token: {
-                                    contract_addr: askDenom
-                                }
-                            }
-                        }
-                    }
-                ],
-                minimum_receive: minimumReceive,
-                to: this.walletAddress,
-                max_spread: maxSpread
-            }
+                    amount: adjustedAmount.toString()
+                },
+                max_spread: maxSpread.toString(),
+            },
         };
-        return
+
+        const msg = MsgExecuteContractCompat.fromJSON({
+            contractAddress: pair.contract_addr,
+            sender: this.walletAddress,
+            msg: swapOperations,
+            funds: {
+                denom: this.baseDenom,
+                amount: adjustedAmount
+            }
+        })
 
         try {
-            const query = Buffer.from(JSON.stringify(swapOperations)).toString('base64');
-            const result = await this.chainGrpcWasmApi.executeSmartContract(this.astroRouter, query);
-            console.log("Swap executed successfully:", result);
+            let result = await this.txManager.signAndBroadcastTransaction(msg)
+            if (!result) {
+                console.log("buy failed")
+            }
+            else {
+                console.log("Swap executed successfully:", result);
+                this.sendMessageToDiscord(`:gun: Sniped a meme coin! <@352761566401265664>\n${pair.dexscreenerLink}`)
+                this.monitorPairForPriceChange(pair, 5, 5, 5)
+            }
+
+            return result;
+        } catch (error) {
+            console.error("Error executing swap:", error);
+        }
+    }
+
+    async sellMemeToken(pair, amount = null, maxSpread) {
+        if (!pair) {
+            console.error("Invalid pair for sellMemeToken");
+            return;
+        }
+
+        if (!this.live) {
+            console.error("Live trading not enabled");
+            return;
+        }
+
+        const baseDenom = this.baseDenom;
+        const memeTokenMeta = pair.token0Meta.denom === baseDenom
+            ? pair.token1Meta
+            : pair.token0Meta;
+
+        if (!amount) {
+            // if no amount given, set to whole balance
+            amount = this.positions.get(memeTokenMeta.denom)
+        }
+        const adjustedAmount = Math.round(amount * Math.pow(10, memeTokenMeta.decimals))
+
+        const swapOperations = {
+            swap: {
+                offer_asset: {
+                    info: {
+                        native_token: {
+                            denom: memeTokenMeta.denom
+                        }
+                    },
+                    amount: adjustedAmount.toString()
+                },
+                max_spread: maxSpread.toString(),
+            },
+        };
+
+        const msg = MsgExecuteContractCompat.fromJSON({
+            contractAddress: pair.contract_addr,
+            sender: this.walletAddress,
+            msg: swapOperations,
+            funds: {
+                denom: memeTokenMeta.denom,
+                amount: adjustedAmount.toString()
+            }
+        })
+
+        try {
+            let result = await this.txManager.signAndBroadcastTransaction(msg);
+
+            if (!result) {
+                console.log("Sell failed");
+            } else {
+                console.log("Swap executed successfully:", result);
+                this.sendMessageToDiscord(`:checkered_flag: Sold token ${memeTokenMeta.symbol} <@352761566401265664>\n${pair.dexscreenerLink}`);
+            }
+
             return result;
         } catch (error) {
             console.error("Error executing swap:", error);
@@ -867,7 +970,7 @@ class AstroportSniper {
 
         const lowLiquidityPollInterval = 10; // seconds
         for (const pair of lowLiquidityPairs) {
-            await his.monitorLowLiquidityPair(
+            await this.monitorLowLiquidityPair(
                 pair,
                 lowLiquidityPollInterval,
                 lowLiquidityThreshold
@@ -877,7 +980,7 @@ class AstroportSniper {
 
     async monitorPairs(pairsToMonitorPrice) {
         const pairsToMonitor = this.allPairs.filter(pair => {
-            return (pairsToMonitorPrice.includes(pair.token0Meta.symbol) || pairsToMonitorPrice.includes(pair.token1Meta.symbol)) && pair.liquidity > this.liquidityThreshold;
+            return (pairsToMonitorPrice.includes(pair.token0Meta.symbol) || pairsToMonitorPrice.includes(pair.token1Meta.symbol)) && pair.liquidity > this.lowLiquidityThreshold;
         });
 
         const trackingPollInterval = 10; // seconds
