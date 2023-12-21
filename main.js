@@ -1,46 +1,44 @@
 const AstroportSniper = require("./snipe")
 
+const CONFIG = {
+    live: true,
+    gRpc: "https://sentry.chain.grpc-web.injective.network",
+    tokenTypes: ['native', 'tokenFactory'],
+    pairType: '{"xyk":{}}',
+    maxSpread: 0.2, // 20%
+    snipeAmount: 0.1, // INJ
+    profitGoalPercent: 5, // %
+    tradeTimeLimit: 5, // mins
+    lowLiquidityThreshold: 1000, // USD
+    highLiquidityThreshold: 100000 // USD
+}
+
+const BACKFILL_PAIRS = false
+
+
 const main = async () => {
 
-    const config = {
-        live: true,
-        maxSpread: 0.49,
-        snipeAmount: 0.1,
-        profitGoalPercent: 10,
-        lowLiquidityThreshold: 1000,
-        highLiquidityThreshold: 100000
-    }
-
-    const RPC = "https://sentry.chain.grpc-web.injective.network"
-
-    const astroportSniper = new AstroportSniper(RPC, config);
+    const astroportSniper = new AstroportSniper(CONFIG);
 
     astroportSniper.startMonitoringBasePair(15); // track INJ price
 
-    const tokenTypes = ['native', 'tokenFactory'];
-    const pairType = '{"xyk":{}}';
-
-    await astroportSniper.initialize(pairType, tokenTypes); // get token list
+    await astroportSniper.initialize(
+        CONFIG.pairType,
+        CONFIG.tokenTypes,
+        BACKFILL_PAIRS
+    );
 
     // await astroportSniper.updateLiquidityAllPairs()
+    console.log(`Number of pairs: ${astroportSniper.allPairs.size}`);
 
-    astroportSniper.startMonitoringNewPairs(15); // monitor for new tokens
+    astroportSniper.startMonitoringNewPairs(20); // monitor for new tokens
 
     await astroportSniper.getPortfolio()
 
-    // const pairToBuy = await astroportSniper.getPairInfo("inj12w09rlksf9wyae3h3yc4pxxrdhfcgd8tm96tpa")
-    // await astroportSniper.sellMemeToken(pairToBuy)
-
-    // const sortedPairsArray = Array.from(astroportSniper.allPairs.entries()).sort(
-    //     ([, pairA], [, pairB]) => (pairB.liquidity ?? 0) - (pairA.liquidity ?? 0)
-    // );
-    // astroportSniper.allPairs = new Map(sortedPairsArray);
-    // console.log(`Number of pairs: ${astroportSniper.allPairs.size}`);
-
-    // astroportSniper.allPairs.forEach((pair) => {
-    //     const pairName = `${pair.token0Meta.symbol}, ${pair.token1Meta.symbol}`;
-    //     if (Math.round(pair.liquidity) > 0) console.log(`${pairName}: ${pair.astroportLink}, Liquidity: $${Math.round(pair.liquidity)}`);
-    // });
+    // const pair = await astroportSniper.getPairInfo("inj18lyzlqaee2fv4xm78jchdmp3hthz9w7x0jfm9d")
+    // await astroportSniper.buyMemeToken(pair, CONFIG.snipeAmount)
+    // await astroportSniper.monitorPairToSell(pair, 5)
+    // await astroportSniper.sellMemeToken(pair)
 
 };
 
