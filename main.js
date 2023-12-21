@@ -3,9 +3,10 @@ const AstroportSniper = require("./snipe")
 const main = async () => {
 
     const config = {
-        live: false,
+        live: true,
         maxSpread: 0.49,
-        snipeAmount: 0.01,
+        snipeAmount: 0.1,
+        profitGoalPercent: 20,
         lowLiquidityThreshold: 1000,
         highLiquidityThreshold: 100000
     }
@@ -14,29 +15,33 @@ const main = async () => {
 
     const astroportSniper = new AstroportSniper(RPC, config);
 
-    astroportSniper.startMonitoringBasePair(30); // track INJ price
+    astroportSniper.startMonitoringBasePair(15); // track INJ price
 
     const tokenTypes = ['native', 'tokenFactory'];
     const pairType = '{"xyk":{}}';
 
     await astroportSniper.initialize(pairType, tokenTypes); // get token list
 
-    await astroportSniper.updateLiquidityAllPairs()
+    // await astroportSniper.updateLiquidityAllPairs()
 
     astroportSniper.startMonitoringNewPairs(15); // monitor for new tokens
 
     await astroportSniper.getPortfolio()
 
-    // await astroportSniper.startMonitoringLowLiquidityPairs()
+    const pairToBuy = await astroportSniper.getPairInfo("inj1lxwe2enwcaffnpzu950rvg59sz6h0pzxk36gcc")
+    await astroportSniper.buyMemeToken(pairToBuy, config.snipeAmount)
 
-    // let pairToSell = await astroportSniper.getPairInfo("inj1lzgs9sx54g7p6xu28nkycj42kt2emexpay32lt")
-    // await astroportSniper.sellMemeToken(pairToSell, null, config.maxSpread)
+    // const sortedPairsArray = Array.from(astroportSniper.allPairs.entries()).sort(
+    //     ([, pairA], [, pairB]) => (pairB.liquidity ?? 0) - (pairA.liquidity ?? 0)
+    // );
+    // astroportSniper.allPairs = new Map(sortedPairsArray);
+    // console.log(`Number of pairs: ${astroportSniper.allPairs.size}`);
 
-    // pairToSell = await astroportSniper.getPairInfo("inj1lmr5qlz3przfvccrsrff2ufvv33wujkgj8alhf")
-    // await astroportSniper.sellMemeToken(pairToSell, null, config.maxSpread)
+    // astroportSniper.allPairs.forEach((pair) => {
+    //     const pairName = `${pair.token0Meta.symbol}, ${pair.token1Meta.symbol}`;
+    //     if (Math.round(pair.liquidity) > 0) console.log(`${pairName}: ${pair.astroportLink}, Liquidity: $${Math.round(pair.liquidity)}`);
+    // });
 
-    // let decode = astroportSniper.decodeReceipt('12360A342F696E6A6563746976652E7761736D782E76312E4D736745786563757465436F6E7472616374436F6D706174526573706F6E7365')
-    // console.log(decode)
 };
 
 main();
