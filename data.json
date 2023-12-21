@@ -11394,6 +11394,55 @@
       "astroportLink": "https://app.astroport.fi/swap?from=factory/inj1vrktrmvtxkzd52kk45ptc5m53zncm56d278qza/COOKIG&to=inj",
       "coinhallLink": "https://coinhall.org/injective/inj15gjpe6wxtvne4dujl2zryjpyxcg9wc6lxjytuw",
       "dexscreenerLink": "https://dexscreener.com/injective/inj15gjpe6wxtvne4dujl2zryjpyxcg9wc6lxjytuw?maker=inj1sy2aad37tku3dz0353epczxd95hvuhzl0lhfqh"
+    },
+    {
+      "asset_infos": [
+        {
+          "native_token": {
+            "denom": "factory/inj1ztugej2ytfwj9kxa8m5md85e5z3v8jvaxapz6n/skibidi"
+          }
+        },
+        {
+          "native_token": {
+            "denom": "inj"
+          }
+        }
+      ],
+      "contract_addr": "inj12w09rlksf9wyae3h3yc4pxxrdhfcgd8tm96tpa",
+      "liquidity_token": "inj1yd08dvyefxyju9f4nyxh25dgnryc3zp4n3fjcn",
+      "pair_type": {
+        "xyk": {}
+      },
+      "token0Meta": {
+        "denom": "factory/inj1ztugej2ytfwj9kxa8m5md85e5z3v8jvaxapz6n/skibidi",
+        "name": "skibidi toilet",
+        "display": "skibidi",
+        "description": "flush skibidi toilet",
+        "symbol": "SKIBIDI",
+        "decimals": 6,
+        "logo": "https://m.media-amazon.com/images/M/MV5BNGFjNjBjNjYtOGUwZi00Y2VmLWI4NmUtNmZkZmRlNTU0NjgyXkEyXkFqcGdeQXVyMTY1OTQyNjI4._V1_FMjpg_UX1000_.jpg",
+        "coinGeckoId": "",
+        "tokenType": "tokenFactory",
+        "tokenVerification": "internal"
+      },
+      "token1Meta": {
+        "name": "Injective",
+        "symbol": "INJ",
+        "decimals": 18,
+        "logo": "injective-v3.svg",
+        "coinGeckoId": "injective-protocol",
+        "erc20": {
+          "decimals": 18,
+          "address": "0xe28b3B32B6c345A34Ff64674606124Dd5Aceca30",
+          "tokenType": "erc20"
+        },
+        "tokenVerification": "verified",
+        "tokenType": "native",
+        "denom": "inj"
+      },
+      "astroportLink": "https://app.astroport.fi/swap?from=factory/inj1ztugej2ytfwj9kxa8m5md85e5z3v8jvaxapz6n/skibidi&to=inj",
+      "coinhallLink": "https://coinhall.org/injective/inj12w09rlksf9wyae3h3yc4pxxrdhfcgd8tm96tpa",
+      "dexscreenerLink": "https://dexscreener.com/injective/inj12w09rlksf9wyae3h3yc4pxxrdhfcgd8tm96tpa?maker=inj1sy2aad37tku3dz0353epczxd95hvuhzl0lhfqh"
     }
   ],
   "ignoredPairs": [
@@ -11478,6 +11527,7 @@
     "inj1vaj5j879d35x4tevpnuwmvq7wpl63mcrkceav6",
     "inj1eg22t8e9k5t0869q8zwjkuceqgls2420lvtyyl",
     "inj16urk83u5kdju9fejscn3jc8khgvz4ftzz8usj3",
-    "inj1njefq7zzkz6ef44ke88uk35y90cpmqfy2fvl45"
+    "inj1njefq7zzkz6ef44ke88uk35y90cpmqfy2fvl45",
+    "inj1xu0sve0p36pry4l4rwpstmkeqk2mecxe884k5p"
   ]
 }

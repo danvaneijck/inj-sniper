@@ -283,7 +283,7 @@ class AstroportSniper {
 
                 const [token0Info, token1Info] = tokenInfos;
                 if (!token0Info || !token1Info) {
-                    console.error(`Failed getting token info ${JSON.stringify(token0Info)} ${JSON.stringify(token1Info)}`)
+                    console.error(`Failed getting token info for ${pairContract}`)
                     retryCount += 1
                     continue
                 }
@@ -657,10 +657,10 @@ class AstroportSniper {
                                     "amount_in": this.snipeAmount * Math.pow(10, this.baseAsset ? this.baseAsset.decimals : 18),
                                     "token_denom": tokenDenom.denom
                                 });
+                            console.log(`found balance for ${pairName}: ${(balance.amount / Math.pow(10, tokenDenom.decimals)).toFixed(2)} ${tokenDenom.symbol} (${amountBack} ${this.baseAssetName} $${usdValue.toFixed(2)})`)
 
                             if (usdValue > 1) {
                                 this.monitorPairToSell(pair, 10)
-                                console.log(`found balance for ${pairName}: ${(balance.amount / Math.pow(10, tokenDenom.decimals)).toFixed(2)} ${tokenDenom.symbol} (${amountBack} ${this.baseAssetName} $${usdValue.toFixed(2)})`)
                             }
                         }
                     }

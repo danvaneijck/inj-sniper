@@ -6,7 +6,7 @@ const main = async () => {
         live: true,
         maxSpread: 0.49,
         snipeAmount: 0.1,
-        profitGoalPercent: 20,
+        profitGoalPercent: 10,
         lowLiquidityThreshold: 1000,
         highLiquidityThreshold: 100000
     }
@@ -28,8 +28,8 @@ const main = async () => {
 
     await astroportSniper.getPortfolio()
 
-    const pairToBuy = await astroportSniper.getPairInfo("inj1lxwe2enwcaffnpzu950rvg59sz6h0pzxk36gcc")
-    await astroportSniper.buyMemeToken(pairToBuy, config.snipeAmount)
+    // const pairToBuy = await astroportSniper.getPairInfo("inj12w09rlksf9wyae3h3yc4pxxrdhfcgd8tm96tpa")
+    // await astroportSniper.sellMemeToken(pairToBuy)
 
     // const sortedPairsArray = Array.from(astroportSniper.allPairs.entries()).sort(
     //     ([, pairA], [, pairB]) => (pairB.liquidity ?? 0) - (pairA.liquidity ?? 0)
