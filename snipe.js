@@ -192,6 +192,10 @@ class AstroportSniper {
             const startTime = new Date().getTime();
             let previousPairs = null;
 
+            if (backfill) {
+                this.ignoredPairs = new Set()
+            }
+
             while (true) {
                 const queryObject = Buffer.from(JSON.stringify(this.allPairsQuery)).toString('base64');
 
@@ -244,7 +248,7 @@ class AstroportSniper {
 
                         } else {
                             console.log(`Ignored pair ${contractAddr}`);
-                            if (!backfill) this.sendMessageToDiscord(`Ignored new pair ${contractAddr}`);
+                            if (!backfill) this.sendMessageToDiscord(`Ignored new pair https://dexscreener.com/injective/${contractAddr}`);
                             this.ignoredPairs.add(contractAddr);
                         }
                     }
@@ -676,9 +680,9 @@ class AstroportSniper {
                                 });
                             console.log(`found balance for ${pairName}: ${(balance.amount / Math.pow(10, tokenDenom.decimals)).toFixed(2)} ${tokenDenom.symbol} (${amountBack} ${this.baseAssetName} $${usdValue.toFixed(2)})`)
 
-                            if (usdValue > 0.5) {
-                                this.monitorPairToSell(pair, 10)
-                            }
+                            // if (usdValue > 0.5) {
+                            //     this.monitorPairToSell(pair, 10)
+                            // }
                         }
                     }
                 } catch (error) {
@@ -692,9 +696,10 @@ class AstroportSniper {
     }
 
     async updateLiquidityAllPairs() {
+        console.log("update liquidity for all pairs")
         for (const pair of this.allPairs.values()) {
             await this.calculateLiquidity(pair);
-            if (pair.liquidity < 10 && pair.liquidity > 0) {
+            if (pair.liquidity < 10 && pair.liquidity > 0 && !this.positions.has(pair.contract_addr)) {
                 this.allPairs.delete(pair.contract_addr)
                 this.ignoredPairs.add(pair.contract_addr)
             }
@@ -702,7 +707,7 @@ class AstroportSniper {
         await this.saveToFile('data.json')
     }
 
-    async buyMemeToken(pair, amount, retries = 3) {
+    async buyMemeToken(pair, amount, retries = 5) {
         if (!pair || !this.live) {
             console.error("Invalid pair or live trading not enabled");
             return;
@@ -792,7 +797,7 @@ class AstroportSniper {
             `<@352761566401265664>\n${pair.dexscreenerLink}`);
     }
 
-    async sellMemeToken(pair, amount = null, maxRetries = 3) {
+    async sellMemeToken(pair, amount = null, maxRetries = 5) {
         if (!pair) {
             console.error("Invalid pair for sellMemeToken");
             return;

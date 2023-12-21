@@ -5,7 +5,7 @@ const CONFIG = {
     gRpc: "https://sentry.chain.grpc-web.injective.network",
     tokenTypes: ['native', 'tokenFactory'],
     pairType: '{"xyk":{}}',
-    maxSpread: 0.2, // 20%
+    maxSpread: 0.49,
     snipeAmount: 0.1, // INJ
     profitGoalPercent: 10, // %
     tradeTimeLimit: 5, // mins
@@ -14,7 +14,6 @@ const CONFIG = {
 }
 
 const BACKFILL_PAIRS = false
-
 
 const main = async () => {
 
@@ -28,14 +27,14 @@ const main = async () => {
         BACKFILL_PAIRS
     );
 
+    await astroportSniper.getPortfolio()
+
     // await astroportSniper.updateLiquidityAllPairs()
     console.log(`Number of pairs: ${astroportSniper.allPairs.size}`);
 
-    astroportSniper.startMonitoringNewPairs(20); // monitor for new tokens
+    astroportSniper.startMonitoringNewPairs(20);
 
-    await astroportSniper.getPortfolio()
-
-    const pair = await astroportSniper.getPairInfo("inj1kxlaeevaqy24ug54seqqetpl8cunsskzhdtcxh")
+    // const pair = await astroportSniper.getPairInfo("inj1kn45glfp303sc0zv4ye7ypd4ndvfsh5l7dcvas")
     // await astroportSniper.buyMemeToken(pair, CONFIG.snipeAmount)
     // await astroportSniper.monitorPairToSell(pair, 5)
     // await astroportSniper.sellMemeToken(pair)
