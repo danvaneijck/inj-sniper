@@ -1,7 +1,6 @@
 const { ChainGrpcWasmApi, IndexerGrpcAccountPortfolioApi, PrivateKey, PublicKey, MsgExecuteContractCompat } = require('@injectivelabs/sdk-ts');
 const { getNetworkEndpoints, Network } = require('@injectivelabs/networks');
 const { DenomClientAsync } = require('@injectivelabs/sdk-ui-ts');
-const { BigNumberInBase } = require('@injectivelabs/utils')
 const { Client, GatewayIntentBits, ActivityType } = require('discord.js');
 const { SlashCommandBuilder } = require('@discordjs/builders');
 const moment = require('moment');
@@ -38,9 +37,8 @@ class AstroportSniper {
         this.tokenTypes = ['native', 'tokenFactory'];
         this.pairType = '{"xyk":{}}';
 
-        // snipe coins 10k to 100k liquidity
-        this.lowLiquidityThreshold = 10000
-        this.highLiquidityThreshold = 100000
+        this.lowLiquidityThreshold = config.lowLiquidityThreshold
+        this.highLiquidityThreshold = config.highLiquidityThreshold
 
         this.snipeAmount = config.snipeAmount
         this.maxSpread = config.maxSpread
@@ -88,20 +86,18 @@ class AstroportSniper {
         await this.updateBaseAssetPrice()
 
         try {
-            await this.loadFromFile('data.json');
-            await this.getPairs(pairType, tokenTypes);
-
             this.setupDiscordCommands()
 
-            // await this.updateLiquidityAllPairs()
+            await this.loadFromFile('data.json');
+            await this.getPairs(pairType, tokenTypes);
 
             this.allPairs = this.allPairs.sort((a, b) => (b.liquidity ?? 0) - (a.liquidity ?? 0));
             console.log(`Number of pairs: ${this.allPairs.length}`);
 
-            // this.allPairs.forEach((pair) => {
-            //     const pairName = `${pair.token0Meta.symbol}, ${pair.token1Meta.symbol}`;
-            //     if (Math.round(pair.liquidity) > 0) console.log(`${pairName}: ${pair.astroportLink}, Liquidity: $${Math.round(pair.liquidity)}`);
-            // });
+            this.allPairs.forEach((pair) => {
+                const pairName = `${pair.token0Meta.symbol}, ${pair.token1Meta.symbol}`;
+                if (Math.round(pair.liquidity) > 0) console.log(`${pairName}: ${pair.astroportLink}, Liquidity: $${Math.round(pair.liquidity)}`);
+            });
         } catch (error) {
             console.error('Error during initialization:', error);
         }
@@ -238,7 +234,7 @@ class AstroportSniper {
                                     // await this.monitorPairForPriceChange({ ...pair, ...pairInfo }, 5, 5, 5)
                                 }
                                 else {
-                                    await this.monitorLowLiquidityPair({ ...pair, ...pairInfo }, 10, this.lowLiquidityThreshold)
+                                    await this.monitorLowLiquidityPair({ ...pair, ...pairInfo }, 2, this.lowLiquidityThreshold)
                                 }
                             }
                             else {
@@ -638,6 +634,7 @@ class AstroportSniper {
             const monitoringIntervalId = setInterval(async () => {
                 const updatedPair = await this.getPairInfo(pair.contract_addr);
                 const currentLiquidity = await this.calculateLiquidity(updatedPair);
+                console.log(`${pairName} liquidity: ${currentLiquidity}`)
                 if (currentLiquidity && currentLiquidity > liquidityThreshold) {
                     console.log(`Monitoring ${pairName} - Liquidity Added: $${currentLiquidity}`);
                     this.sendMessageToDiscord(`:eyes: ${pairName} - Liquidity Added: $${currentLiquidity}\n${pair.astroportLink}\n${pair.dexscreenerLink}\n<@352761566401265664>`)
@@ -648,6 +645,7 @@ class AstroportSniper {
             }, intervalInSeconds * 1000);
             this.lowLiquidityPairMonitoringIntervals.set(pair.contract_addr, monitoringIntervalId);
             console.log(`Low Liquidity - Monitoring started for ${pairName}`);
+
         } catch (error) {
             console.error('Error monitoring low liquidity pair:', error);
         }
@@ -962,18 +960,18 @@ class AstroportSniper {
         }
     }
 
-    async startMonitoringLowLiquidityPairs(lowLiquidityThreshold) {
+    async startMonitoringLowLiquidityPairs() {
 
         const lowLiquidityPairs = this.allPairs.filter(pair => {
-            return pair.liquidity < lowLiquidityThreshold;
+            return pair.liquidity < this.lowLiquidityThreshold;
         });
 
-        const lowLiquidityPollInterval = 10; // seconds
+        const lowLiquidityPollInterval = 30; // seconds
         for (const pair of lowLiquidityPairs) {
             await this.monitorLowLiquidityPair(
                 pair,
                 lowLiquidityPollInterval,
-                lowLiquidityThreshold
+                this.lowLiquidityThreshold
             );
         }
     }
