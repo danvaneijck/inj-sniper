@@ -3,7 +3,6 @@ const {
     TxGrpcClient,
     ChainRestAuthApi,
     createTransaction,
-    MsgSend,
     BaseAccount,
     ChainRestTendermintApi
 } = require('@injectivelabs/sdk-ts');
