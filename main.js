@@ -7,7 +7,7 @@ const CONFIG = {
     pairType: '{"xyk":{}}',
     maxSpread: 0.2, // 20%
     snipeAmount: 0.1, // INJ
-    profitGoalPercent: 5, // %
+    profitGoalPercent: 10, // %
     tradeTimeLimit: 5, // mins
     lowLiquidityThreshold: 1000, // USD
     highLiquidityThreshold: 100000 // USD
@@ -35,7 +35,7 @@ const main = async () => {
 
     await astroportSniper.getPortfolio()
 
-    // const pair = await astroportSniper.getPairInfo("inj18lyzlqaee2fv4xm78jchdmp3hthz9w7x0jfm9d")
+    const pair = await astroportSniper.getPairInfo("inj1kxlaeevaqy24ug54seqqetpl8cunsskzhdtcxh")
     // await astroportSniper.buyMemeToken(pair, CONFIG.snipeAmount)
     // await astroportSniper.monitorPairToSell(pair, 5)
     // await astroportSniper.sellMemeToken(pair)

@@ -600,9 +600,9 @@ class AstroportSniper {
                 const currentLiquidity = await this.calculateLiquidity(updatedPair);
                 console.log(`${pairName} liquidity: ${currentLiquidity}`)
                 if (currentLiquidity && currentLiquidity > liquidityThreshold) {
+                    this.stopMonitoringLowLiquidityPair(pair)
                     console.log(`Monitoring ${pairName} - Liquidity Added: $${currentLiquidity}`);
                     this.sendMessageToDiscord(`:eyes: ${pairName} - Liquidity Added: $${currentLiquidity}\n${pair.astroportLink}\n${pair.dexscreenerLink}\n<@352761566401265664>`)
-                    this.stopMonitoringLowLiquidityPair(pair)
                     await this.buyMemeToken(pair, this.snipeAmount)
                 }
             }, intervalInSeconds * 1000);
@@ -814,8 +814,12 @@ class AstroportSniper {
                 amount = this.positions.get(pair.contract_addr).balance;
             } else {
                 amount = await this.getBalanceOfToken(memeTokenMeta.denom).amount;
-                console.log(amount);
             }
+        }
+
+        if (!amount) {
+            console.log(`No balance to sell for ${memeTokenMeta.symbol}`)
+            return
         }
 
         const swapOperations = {
@@ -852,6 +856,8 @@ class AstroportSniper {
                     retryCount += 1;
                 } else {
                     this.positions.delete(pair.contract_addr);
+                    this.stopMonitoringPairToSell(pair)
+
                     console.log("Swap executed successfully:", result.txHash);
                     this.sendMessageToDiscord(
                         `:checkered_flag: Sold token ${memeTokenMeta.symbol} <@352761566401265664>\n${pair.dexscreenerLink}`
