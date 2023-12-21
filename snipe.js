@@ -177,8 +177,8 @@ class AstroportSniper {
 
     startMonitoringBasePair(intervalInSeconds) {
         console.log('Base Asset monitoring started.');
-        this.monitoringBasePairIntervalId = setInterval(() => {
-            this.updateBaseAssetPrice();
+        this.monitoringBasePairIntervalId = setInterval(async () => {
+            await this.updateBaseAssetPrice();
         }, intervalInSeconds * 1000);
     }
 
