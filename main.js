@@ -1,19 +1,22 @@
 const AstroportSniper = require("./snipe")
 
+const BACKFILL_PAIRS = false
+
+const LIVE_TRADING = true
+
 const CONFIG = {
-    live: true,
+    live: LIVE_TRADING,
     gRpc: "https://sentry.chain.grpc-web.injective.network",
     tokenTypes: ['native', 'tokenFactory'],
     pairType: '{"xyk":{}}',
     maxSpread: 0.49,
     snipeAmount: 0.1, // INJ
-    profitGoalPercent: 10, // %
+    profitGoalPercent: 20, // %
+    stopLoss: 10, // %
     tradeTimeLimit: 5, // mins
     lowLiquidityThreshold: 1000, // USD
     highLiquidityThreshold: 100000 // USD
 }
-
-const BACKFILL_PAIRS = false
 
 const main = async () => {
 
@@ -32,7 +35,7 @@ const main = async () => {
     // await astroportSniper.updateLiquidityAllPairs()
     console.log(`Number of pairs: ${astroportSniper.allPairs.size}`);
 
-    astroportSniper.startMonitoringNewPairs(20);
+    astroportSniper.startMonitoringNewPairs(15);
 
     // const pair = await astroportSniper.getPairInfo("inj1kn45glfp303sc0zv4ye7ypd4ndvfsh5l7dcvas")
     // await astroportSniper.buyMemeToken(pair, CONFIG.snipeAmount)

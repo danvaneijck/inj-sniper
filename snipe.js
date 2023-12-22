@@ -53,6 +53,7 @@ class AstroportSniper {
 
         this.snipeAmount = config.snipeAmount
         this.profitGoalPercent = config.profitGoalPercent
+        this.stopLoss = config.stopLoss
         this.maxSpread = config.maxSpread
         this.tradeTimeLimit = config.tradeTimeLimit
         this.positions = new Map()
@@ -96,6 +97,9 @@ class AstroportSniper {
         this.pairType = pairType
         this.tokenTypes = tokenTypes
         this.setupDiscordCommands()
+        if (backfill) {
+            this.live = false
+        }
         try {
             await this.updateBaseAssetPrice()
             await this.loadFromFile('data.json');
@@ -191,10 +195,6 @@ class AstroportSniper {
         try {
             const startTime = new Date().getTime();
             let previousPairs = null;
-
-            if (backfill) {
-                this.ignoredPairs = new Set()
-            }
 
             while (true) {
                 const queryObject = Buffer.from(JSON.stringify(this.allPairsQuery)).toString('base64');
@@ -813,8 +813,8 @@ class AstroportSniper {
             ? pair.token1Meta
             : pair.token0Meta;
 
+        let position = this.positions.get(pair.contract_addr);
         if (!amount) {
-            let position = this.positions.get(pair.contract_addr);
             if (position) {
                 amount = this.positions.get(pair.contract_addr).balance;
             } else {
@@ -864,12 +864,26 @@ class AstroportSniper {
                     this.stopMonitoringPairToSell(pair)
 
                     console.log("Swap executed successfully:", result.txHash);
+
+                    let profit = 0
+                    const returnAmount = this.parseReturnAmountFromEvents(result.rawLog);
+                    if (returnAmount !== undefined) {
+                        profit = returnAmount - position.amount_in
+                    } else {
+                        console.error("Return amount not found in sell events.");
+                    }
+                    profit = (profit / Math.pow(10, this.baseAsset.decimals))
+
+                    const baseAssetPriceConverted = this.baseAssetPrice / Math.pow(10, this.stableAsset.decimals)
+                    const usdValue = (profit * baseAssetPriceConverted)
+
                     this.sendMessageToDiscord(
-                        `:checkered_flag: Sold token ${memeTokenMeta.symbol} <@352761566401265664>\n${pair.dexscreenerLink}`
+                        `${profit > 0 ? ':dollar:' : ':small_red_triangle_down:'} ` +
+                        `Sold token ${memeTokenMeta.symbol} for ${profit} ${this.baseAssetName} ` +
+                        `($${usdValue.toFixed(3)}) <@352761566401265664>\n${pair.dexscreenerLink}`
                     );
                     return result;
                 }
-
             } catch (error) {
                 console.error(`Error executing swap (Attempt ${retryCount + 1}/${maxRetries}):`, error);
                 retryCount += 1;
@@ -909,7 +923,12 @@ class AstroportSniper {
         for (const balance of portfolio.bankBalancesList) {
             if (balance.denom === this.baseDenom || balance.amount <= 0) continue;
 
-            const pair = this.allPairs.get(balance.denom)
+            const pair = Array.from(this.allPairs.values()).find(pair => {
+                return (
+                    pair.token0Meta.denom === balance.denom ||
+                    pair.token1Meta.denom === balance.denom
+                );
+            });
 
             if (pair) {
                 const pairName = `${pair.token0Meta.symbol}, ${pair.token1Meta.symbol}`;
@@ -927,7 +946,8 @@ class AstroportSniper {
                     const usdValue = (convertedQuote * baseAssetPriceConverted)
 
                     if (usdValue > 1) {
-                        formattedMessage += `${pairName}: ${(balance.amount / Math.pow(10, tokenDenom.decimals)).toFixed(2)} ${tokenDenom.symbol} (${amountBack} ${this.baseAssetName} $${usdValue.toFixed(2)})\n`;
+                        formattedMessage += `${pairName}: ${(balance.amount / Math.pow(10, tokenDenom.decimals)).toFixed(2)} ` +
+                            `${tokenDenom.symbol} (${amountBack} ${this.baseAssetName} $${usdValue.toFixed(2)})\n${pair.dexscreenerLink}\n`;
                     }
                 }
             }
@@ -939,7 +959,6 @@ class AstroportSniper {
     async monitorPairToSell(pair, intervalInSeconds) {
         try {
             let position = this.positions.get(pair.contract_addr)
-
             let pairName = `${pair.token0Meta.symbol}, ${pair.token1Meta.symbol}`;
 
             if (this.sellPairPriceMonitoringIntervals.has(pair.contract_addr)) {
@@ -969,6 +988,13 @@ class AstroportSniper {
                 if (quote) {
                     const percentageIncrease = ((quote.amount - position.amount_in) / position.amount_in) * 100;
 
+                    if (percentageIncrease <= this.stopLoss * -1 && quote.amount < position.amount_in) {
+                        console.log(`stop loss hit for ${tokenDenom.symbol}`)
+                        this.stopMonitoringPairToSell(pair)
+                        result = await this.sellMemeToken(pair, position.balance)
+                        if (!result) this.monitorPairToSell(pair)
+                        return
+                    }
                     if (percentageIncrease >= this.profitGoalPercent && quote.amount > position.amount_in) {
                         console.log("profit goal reached")
                         this.stopMonitoringPairToSell(pair)

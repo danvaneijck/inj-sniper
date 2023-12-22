@@ -4433,6 +4433,104 @@
       "astroportLink": "https://app.astroport.fi/swap?from=factory/inj1tgphgjqsz8fupkfjx6cy275e3s0l8xfu6rd6jh/DINO&to=inj",
       "coinhallLink": "https://coinhall.org/injective/inj18tdckye58macy2m54jwxvxfu7p69wamux87s3t",
       "dexscreenerLink": "https://dexscreener.com/injective/inj18tdckye58macy2m54jwxvxfu7p69wamux87s3t?maker=inj1sy2aad37tku3dz0353epczxd95hvuhzl0lhfqh"
+    },
+    {
+      "asset_infos": [
+        {
+          "native_token": {
+            "denom": "factory/inj1499ez5npathr0zkphz2yq6npdfc6xvg3d4zynj/iSILLY"
+          }
+        },
+        {
+          "native_token": {
+            "denom": "inj"
+          }
+        }
+      ],
+      "contract_addr": "inj1apsvz75c7aueuz8f20ckeyy7xeuhxdyyvcvxg3",
+      "liquidity_token": "inj18m8ds3d6heu42jz99efc8ccv6gfvnws568wy59",
+      "pair_type": {
+        "xyk": {}
+      },
+      "token0Meta": {
+        "denom": "factory/inj1499ez5npathr0zkphz2yq6npdfc6xvg3d4zynj/iSILLY",
+        "name": "ISILLY",
+        "display": "ISILLY",
+        "description": "ISILLY",
+        "symbol": "ISILLY",
+        "decimals": 6,
+        "logo": "https://twitter.com/SillyDragonINJ/photo",
+        "coinGeckoId": "",
+        "tokenType": "tokenFactory",
+        "tokenVerification": "internal"
+      },
+      "token1Meta": {
+        "name": "Injective",
+        "symbol": "INJ",
+        "decimals": 18,
+        "logo": "injective-v3.svg",
+        "coinGeckoId": "injective-protocol",
+        "erc20": {
+          "decimals": 18,
+          "address": "0xe28b3B32B6c345A34Ff64674606124Dd5Aceca30",
+          "tokenType": "erc20"
+        },
+        "tokenVerification": "verified",
+        "tokenType": "native",
+        "denom": "inj"
+      },
+      "astroportLink": "https://app.astroport.fi/swap?from=factory/inj1499ez5npathr0zkphz2yq6npdfc6xvg3d4zynj/iSILLY&to=inj",
+      "coinhallLink": "https://coinhall.org/injective/inj1apsvz75c7aueuz8f20ckeyy7xeuhxdyyvcvxg3",
+      "dexscreenerLink": "https://dexscreener.com/injective/inj1apsvz75c7aueuz8f20ckeyy7xeuhxdyyvcvxg3?maker=inj1sy2aad37tku3dz0353epczxd95hvuhzl0lhfqh"
+    },
+    {
+      "asset_infos": [
+        {
+          "native_token": {
+            "denom": "factory/inj14vrd79l2pxvqctawz39qewfh72x62pfjecxsmv/GEMININJ"
+          }
+        },
+        {
+          "native_token": {
+            "denom": "inj"
+          }
+        }
+      ],
+      "contract_addr": "inj177zuyfc22ypt5v9e3ewtpmx2wvts3wh4qu0cfm",
+      "liquidity_token": "inj1s5g2qm6t3v0lylgf0m8cxk7hw6cxk36lfv0h7l",
+      "pair_type": {
+        "xyk": {}
+      },
+      "token0Meta": {
+        "denom": "factory/inj14vrd79l2pxvqctawz39qewfh72x62pfjecxsmv/GEMININJ",
+        "name": "GEMININJ",
+        "display": "GEMININJ",
+        "description": "THE FIRST AI POWERED BY INJECTIVE",
+        "symbol": "GEMININJ",
+        "decimals": 6,
+        "logo": "unknown.svg",
+        "coinGeckoId": "",
+        "tokenType": "tokenFactory",
+        "tokenVerification": "internal"
+      },
+      "token1Meta": {
+        "name": "Injective",
+        "symbol": "INJ",
+        "decimals": 18,
+        "logo": "injective-v3.svg",
+        "coinGeckoId": "injective-protocol",
+        "erc20": {
+          "decimals": 18,
+          "address": "0xe28b3B32B6c345A34Ff64674606124Dd5Aceca30",
+          "tokenType": "erc20"
+        },
+        "tokenVerification": "verified",
+        "tokenType": "native",
+        "denom": "inj"
+      },
+      "astroportLink": "https://app.astroport.fi/swap?from=factory/inj14vrd79l2pxvqctawz39qewfh72x62pfjecxsmv/GEMININJ&to=inj",
+      "coinhallLink": "https://coinhall.org/injective/inj177zuyfc22ypt5v9e3ewtpmx2wvts3wh4qu0cfm",
+      "dexscreenerLink": "https://dexscreener.com/injective/inj177zuyfc22ypt5v9e3ewtpmx2wvts3wh4qu0cfm?maker=inj1sy2aad37tku3dz0353epczxd95hvuhzl0lhfqh"
     }
   ],
   "ignoredPairs": [
@@ -4733,6 +4831,8 @@
     "inj1erv7n7wl83wzqwgq93sx823z8qu8d5fvt6yc77",
     "inj120dl8yhazucpq2yycm4w94vqvy0vlamp6nmz0q",
     "inj1cqqa8xljy53p8sazvw303v8vuv723h839j2yhw",
-    "inj1dnflpf92n39pct97x5s8kmuk76gz8rqx6hc0mf"
+    "inj1dnflpf92n39pct97x5s8kmuk76gz8rqx6hc0mf",
+    "inj1nrwudt766aaeshkmz7s2lh6zg44fl32nfxdt7d",
+    "inj126gy33qad9mzwafm4yu3qjshyhx3hn28z4xt8x"
   ]
 }
