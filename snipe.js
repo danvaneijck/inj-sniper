@@ -171,6 +171,10 @@ class AstroportSniper {
     async executeBuyCommand(pairContract, amount) {
         try {
             let pair = await this.getPairInfo(pairContract)
+            if (!pair) {
+                this.sendMessageToDiscord(`Could not get pair`)
+                return
+            }
             await this.calculateLiquidity(pair)
             if (pair.liquidity < this.lowLiquidityThreshold) {
                 this.monitorLowLiquidityPair(pair, 5, this.lowLiquidityThreshold)
@@ -512,13 +516,17 @@ class AstroportSniper {
                 throw new Error(`Invalid pair or asset_infos for getSellQuoteFromRouter: ${pair}`);
             }
 
-            const assetToSell = pair.asset_infos.findIndex(assetInfo => assetInfo.native_token.denom !== this.baseDenom);
+            const assetToSell = pair.asset_infos.findIndex(assetInfo => {
+                const isNativeToken = assetInfo.native_token && assetInfo.native_token.denom !== this.baseDenom;
+                const isCW20Token = assetInfo.token && assetInfo.token.contract_addr !== this.baseTokenContractAddr;
+                return isNativeToken || isCW20Token;
+            });
 
             if (assetToSell === -1) {
                 throw new Error(`Error finding ask asset for ${pairName}`);
             }
-
             const assetInfo = pair.asset_infos[assetToSell];
+            console.log(assetInfo)
 
             const simulationQuery = {
                 simulate_swap_operations: {
@@ -526,11 +534,7 @@ class AstroportSniper {
                     operations: [
                         {
                             astro_swap: {
-                                offer_asset_info: {
-                                    native_token: {
-                                        denom: assetInfo.native_token.denom
-                                    }
-                                },
+                                offer_asset_info: assetInfo,
                                 ask_asset_info: {
                                     native_token: {
                                         denom: this.baseDenom
@@ -773,14 +777,18 @@ class AstroportSniper {
                             const baseAssetPriceConverted = this.baseAssetPrice / Math.pow(10, this.stableAsset.decimals)
                             const usdValue = (convertedQuote * baseAssetPriceConverted)
 
-                            this.positions.set(
-                                pair.contract_addr,
-                                {
-                                    pair_contract: pair.contract_addr,
-                                    balance: balance.amount,
-                                    amount_in: this.snipeAmount * Math.pow(10, this.baseAsset ? this.baseAsset.decimals : 18),
-                                    token_denom: tokenDenom.denom
-                                });
+                            if (!this.positions.has(pair.contract_addr)) {
+                                this.positions.set(
+                                    pair.contract_addr,
+                                    {
+                                        pair_contract: pair.contract_addr,
+                                        balance: balance.amount,
+                                        amount_in: this.snipeAmount * Math.pow(10, this.baseAsset ? this.baseAsset.decimals : 18),
+                                        token_denom: tokenDenom.denom,
+                                        profit: 0
+                                    });
+                            }
+
                             console.log(`found balance for ${pairName}: ${(balance.amount / Math.pow(10, tokenDenom.decimals)).toFixed(2)} ${tokenDenom.symbol} (${amountBack} ${this.baseAssetName} $${usdValue.toFixed(2)})`)
 
                             if (usdValue > 1) {
@@ -887,16 +895,20 @@ class AstroportSniper {
 
     handleSuccessfulSwap(pair, returnAmount, adjustedAmount, memeTokenMeta) {
         const balance = this.positions.get(pair.contract_addr)?.balance || 0;
+        const profit = this.positions.get(pair.contract_addr)?.profit || 0;
+        const amountIn = this.positions.get(pair.contract_addr)?.amount_in || 0;
+
         console.log(`${memeTokenMeta.denom} existing balance ${balance}`)
-        const updatedBalance = balance + returnAmount;
+        const updatedBalance = Number(balance) + Number(returnAmount);
         console.log(`${memeTokenMeta.denom} updated balance ${updatedBalance}`)
 
         this.positions.set(pair.contract_addr, {
             pair_contract: pair.contract_addr,
             balance: updatedBalance,
-            amount_in: adjustedAmount,
+            amount_in: Number(amountIn) + Number(adjustedAmount),
             token_denom: memeTokenMeta.denom,
-            time_bought: moment()
+            time_bought: moment(),
+            profit: profit
         });
 
         console.log(this.positions.get(pair.contract_addr))
@@ -941,7 +953,6 @@ class AstroportSniper {
 
         amount = Math.round(amount)
 
-        console.log(amount)
         let spread = this.maxSpread
         // if (memeTokenMeta.symbol == "n/a") {
         //     amount = amount / Math.pow(10, memeTokenMeta.decimals)
@@ -964,7 +975,6 @@ class AstroportSniper {
                     max_spread: spread.toString(),
                 },
             };
-            console.log(amount.toString())
 
             const msg = MsgExecuteContractCompat.fromJSON({
                 contractAddress: pair.contract_addr,
@@ -985,7 +995,6 @@ class AstroportSniper {
                     spread += 0.2
                 }
                 else {
-                    this.positions.delete(pair.contract_addr);
                     this.stopMonitoringPairToSell(pair)
 
                     console.log("Swap executed successfully:", result.txHash);
@@ -997,6 +1006,12 @@ class AstroportSniper {
                     } else {
                         console.error("Return amount not found in sell events.");
                     }
+                    this.positions.set(pair.contract_addr, {
+                        ...position,
+                        balance: Number(position.balance) - Number(amount),
+                        profit: Number(position.profit) + Number(profit)
+                    });
+
                     profit = (profit / Math.pow(10, this.baseAsset.decimals))
                     let returnAmountAdjusted = (returnAmount / Math.pow(10, this.baseAsset.decimals))
 
@@ -1078,7 +1093,7 @@ class AstroportSniper {
 
                 const quote = await this.getSellQuoteFromRouter(updatedPair, position.balance);
 
-                const tokenDenom = pair.asset_infos[0].native_token.denom === position.token_denom
+                const tokenDenom = pair.token0Meta.denom === position.token_denom
                     ? pair.token0Meta
                     : pair.token1Meta;
 
@@ -1105,10 +1120,10 @@ class AstroportSniper {
                         console.log(`profit goal reached for ${tokenDenom.symbol} ${percentageIncrease}%`)
                         this.stopMonitoringPairToSell(pair)
                         if (percentageIncrease >= this.profitGoalPercent * 2) {
-                            result = await this.sellMemeToken(pair, Number(position.balance) * 0.5)
+                            result = await this.sellMemeToken(pair, Number(position.balance) * 0.6)
                         }
                         else {
-                            result = await this.sellMemeToken(pair, Number(position.balance) * 0.8)
+                            result = await this.sellMemeToken(pair, Number(position.balance) * 0.85)
                         }
                         return result
                     }

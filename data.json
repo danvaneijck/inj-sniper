@@ -4923,6 +4923,58 @@
       ],
       "liquidity": 236.441935716,
       "liquidityUpdate": "2023-12-22T07:02:11.499Z"
+    },
+    {
+      "token0Meta": {
+        "denom": "inj12d7qq0lp656jkrr2d3ez55cr330f3we9c75ml6",
+        "name": "Jesus Injective",
+        "symbol": "INJESUS",
+        "decimals": 8,
+        "tokenType": "cw20",
+        "logo": "unknown.svg",
+        "coinGeckoId": "",
+        "tokenVerification": "internal",
+        "cw20": {
+          "decimals": 8,
+          "address": "inj12d7qq0lp656jkrr2d3ez55cr330f3we9c75ml6",
+          "symbol": "INJESUS",
+          "tokenType": "cw20"
+        }
+      },
+      "token1Meta": {
+        "denom": "inj",
+        "name": "Injective",
+        "symbol": "INJ",
+        "decimals": 18,
+        "tokenType": "native",
+        "logo": "injective-v3.svg",
+        "coinGeckoId": "injective-protocol",
+        "erc20": {
+          "decimals": 18,
+          "address": "0xe28b3B32B6c345A34Ff64674606124Dd5Aceca30",
+          "tokenType": "erc20"
+        },
+        "tokenVerification": "verified"
+      },
+      "astroportLink": "https://app.astroport.fi/swap?from=inj12d7qq0lp656jkrr2d3ez55cr330f3we9c75ml6&to=inj",
+      "coinhallLink": "https://coinhall.org/injective/inj169vfu0kqvqkfr4a5f3pvm65xxjhq7l4wvrmak3",
+      "dexscreenerLink": "https://dexscreener.com/injective/inj169vfu0kqvqkfr4a5f3pvm65xxjhq7l4wvrmak3?maker=inj1sy2aad37tku3dz0353epczxd95hvuhzl0lhfqh",
+      "contract_addr": "inj169vfu0kqvqkfr4a5f3pvm65xxjhq7l4wvrmak3",
+      "pair_type": {
+        "custom": "concentrated"
+      },
+      "asset_infos": [
+        {
+          "token": {
+            "contract_addr": "inj12d7qq0lp656jkrr2d3ez55cr330f3we9c75ml6"
+          }
+        },
+        {
+          "native_token": {
+            "denom": "inj"
+          }
+        }
+      ]
     }
   ],
   "positions": [
@@ -4955,6 +5007,22 @@
       "balance": "87089545178293",
       "amount_in": 100000000000000000,
       "token_denom": "factory/inj1g8s4usdsy7gujf96qma3p8r2a7m02juzfm4neh/CHIKU"
+    },
+    {
+      "pair_contract": "inj179vaaw6d507vkjz0ay0jc4lyzlmv6knffhp5jr",
+      "balance": "014013630340220",
+      "amount_in": 100000000000000000,
+      "token_denom": "factory/inj13ze65lwstqrz4qy6vvxx3lglnkkuan436aw45e/HACHI",
+      "time_bought": "2023-12-22T08:13:45.778Z",
+      "profit": 0
+    },
+    {
+      "pair_contract": "inj169vfu0kqvqkfr4a5f3pvm65xxjhq7l4wvrmak3",
+      "balance": "0117250791980884691501478",
+      "amount_in": 11000000000000000,
+      "token_denom": "inj12d7qq0lp656jkrr2d3ez55cr330f3we9c75ml6",
+      "time_bought": "2023-12-22T08:27:00.385Z",
+      "profit": 0
     }
   ],
   "ignoredPairs": [
@@ -5265,6 +5333,7 @@
     "inj1dzkevx45uxs4d7dvnsmlsuasun54m8d55he5kd",
     "inj1wxsxa3zr37k9e96mdqzwnaa0832gsz506tdgae",
     "inj1w38keakdc6749c3rx0uhxx596wr09heacnlwer",
-    "inj1dw0s7gkj404msd44m7pdakv0vxfxhuvrgfca0k"
+    "inj1dw0s7gkj404msd44m7pdakv0vxfxhuvrgfca0k",
+    "inj169vfu0kqvqkfr4a5f3pvm65xxjhq7l4wvrmak3"
   ]
 }

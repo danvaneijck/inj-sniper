@@ -7,14 +7,14 @@ const LIVE_TRADING = true
 const CONFIG = {
     live: LIVE_TRADING,
     gRpc: "https://sentry.chain.grpc-web.injective.network",
-    tokenTypes: ['native', 'tokenFactory'],
+    tokenTypes: ['native', 'tokenFactory', 'cw20'],
     pairType: '{"xyk":{}}',
     maxSpread: 0.49,
     snipeAmount: 0.1, // INJ
     profitGoalPercent: 40, // %
     stopLoss: 50, // %
     tradeTimeLimit: 60, // mins
-    lowLiquidityThreshold: 1000, // USD
+    lowLiquidityThreshold: 500, // USD
     highLiquidityThreshold: 100000 // USD
 }
 

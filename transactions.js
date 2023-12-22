@@ -73,10 +73,17 @@ class TransactionManager {
                 DEFAULT_BLOCK_TIMEOUT_HEIGHT,
             )
 
+            const GAS = {
+                ...DEFAULT_STD_FEE,
+                gas: '500000'
+            }
+            console.log("gas fee")
+            console.log(GAS)
+
             const { signBytes, txRaw } = createTransaction({
                 message: msg,
                 memo: memo,
-                fee: DEFAULT_STD_FEE,
+                fee: GAS,
                 pubKey: publicKey,
                 sequence: baseAccount.sequence,
                 timeoutHeight: timeoutHeight.toNumber(),
