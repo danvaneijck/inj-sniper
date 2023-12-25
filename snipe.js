@@ -3,7 +3,9 @@ const {
     IndexerGrpcAccountPortfolioApi,
     PrivateKey,
     ChainGrpcBankApi,
-    MsgExecuteContractCompat
+    MsgExecuteContractCompat,
+    IndexerGrpcExplorerStream,
+    IndexerRestExplorerApi
 } = require('@injectivelabs/sdk-ts');
 const { getNetworkEndpoints, Network } = require('@injectivelabs/networks');
 const { DenomClientAsync } = require('@injectivelabs/sdk-ui-ts');
@@ -36,6 +38,11 @@ class AstroportSniper {
         })
 
         this.chainGrpcBankApi = new ChainGrpcBankApi(this.RPC)
+        this.indexerRestExplorerApi = new IndexerRestExplorerApi(
+            `${getNetworkEndpoints(Network.Mainnet).explorer}/api/explorer/v1`,
+        )
+
+        this.monitorNewPairs = false
 
         this.privateKey = PrivateKey.fromMnemonic(process.env.MNEMONIC)
         this.publicKey = this.privateKey.toAddress()
@@ -71,6 +78,8 @@ class AstroportSniper {
         this.lowLiquidityPairMonitoringIntervals = new Map();
         this.sellPairPriceMonitoringIntervals = new Map();
         this.lastPrices = new Map();
+
+        this.lowLiqPairsToMonitor = new Set()
 
         this.monitoringNewPairIntervalId = null;
         this.monitoringBasePairIntervalId = null;
@@ -127,7 +136,7 @@ class AstroportSniper {
         try {
             await this.loadFromFile('data.json');
             await this.updateBaseAssetPrice()
-            await this.getPairs(pairType, tokenTypes, backfill);
+            // await this.getPairs(pairType, tokenTypes, backfill);
         } catch (error) {
             console.error('Error during initialization:', error);
         }
@@ -397,7 +406,7 @@ class AstroportSniper {
 
             const endTime = new Date().getTime(); // Record the end time
             const executionTime = endTime - startTime;
-            console.log(`Finished check for new pairs in ${executionTime} milliseconds`);
+            // console.log(`Finished check for new pairs in ${executionTime} milliseconds`);
             await this.saveToFile('data.json');
             return this.allPairs;
         } catch (error) {
@@ -415,7 +424,7 @@ class AstroportSniper {
         }
     }
 
-    async getPairHistory(pairContract) {
+    async getContractHistory(pairContract) {
         const contractHistory = await this.chainGrpcWasmApi.fetchContractHistory(
             pairContract
         )
@@ -605,7 +614,7 @@ class AstroportSniper {
         })
     }
 
-    startMonitoringNewPairs(intervalInSeconds) {
+    startMonitoringNewPairsOld(intervalInSeconds) {
         if (!this.monitoringNewPairIntervalId) {
             this.sendMessageToDiscord(`Monitoring for new pairs started. Checking every ${intervalInSeconds} seconds.`);
 
@@ -1263,6 +1272,254 @@ class AstroportSniper {
                 trackingPriceDuration,
                 priceChangePercentNotificationThreshold
             );
+        }
+    }
+
+    startStreamingTransactions() {
+        const endpoints = getNetworkEndpoints(Network.Mainnet)
+        const indexerGrpcExplorerStream = new IndexerGrpcExplorerStream(
+            endpoints.indexer,
+        )
+
+        const streamFn = indexerGrpcExplorerStream.streamTransactions.bind(
+            indexerGrpcExplorerStream,
+        )
+
+        const callback = (transactions) => {
+            console.log(transactions)
+        }
+
+        const streamFnArgs = {
+            callback,
+        }
+
+        streamFn(streamFnArgs)
+    }
+
+    async getTxByHash(txHash) {
+        const txsHash = txHash
+        const transaction = await this.indexerRestExplorerApi.fetchTransaction(txsHash)
+        return transaction
+    }
+
+    async checkFactoryForNewPairs() {
+        const startTime = new Date().getTime();
+
+        const contractAddress = this.astroFactory;
+        const limit = 5;
+        const skip = 0;
+
+        const transactions = await this.indexerRestExplorerApi.fetchContractTransactions({
+            contractAddress,
+            params: {
+                limit,
+                skip,
+            },
+        });
+
+        await Promise.all(
+            transactions.transactions.map(async (tx) => {
+                const txHash = tx.txHash;
+                let txInfo = await this.getTxByHash(txHash);
+                await Promise.all(
+                    txInfo.messages.map(async (msg) => {
+                        let message;
+                        try {
+                            message = JSON.parse(msg.message.msg);
+                        } catch (error) {
+                            message = msg.message.msg;
+                        }
+                        if (typeof message === 'object') {
+                            const firstKey = Object.keys(message)[0];
+                            if (firstKey == "create_pair") {
+                                const blockTimestamp = txInfo['blockTimestamp'];
+                                const pairAddress = txInfo.logs[0].events[txInfo.logs[0].events.length - 1].attributes.find((attr) => attr.key === "pair_contract_addr").value;
+
+                                if (!this.allPairs.has(pairAddress) && !this.ignoredPairs.has(pairAddress)) {
+                                    console.log("get pair info for", pairAddress);
+                                    let pairInfo = await this.getPairInfo(pairAddress);
+
+                                    if (
+                                        pairInfo &&
+                                        pairInfo.token0Meta &&
+                                        pairInfo.token1Meta &&
+                                        this.tokenTypes.includes(pairInfo.token0Meta.tokenType) &&
+                                        this.tokenTypes.includes(pairInfo.token1Meta.tokenType) &&
+                                        this.pairType === JSON.stringify(pairInfo.pair_type) &&
+                                        (pairInfo.token0Meta.denom === this.baseDenom ||
+                                            pairInfo.token1Meta.denom === this.baseDenom)
+                                    ) {
+                                        this.allPairs.set(pairAddress, { ...pairInfo });
+                                        const message = `:new: New pair found from tx: ${pairInfo.token0Meta.symbol}, ` +
+                                            `${pairInfo.token1Meta.symbol}: \n${pairInfo.astroportLink}\n` +
+                                            `${pairInfo.dexscreenerLink}\n <@352761566401265664>`;
+
+                                        this.sendMessageToDiscord(message);
+                                        await this.calculateLiquidity(pairInfo);
+                                        console.log(`${pairAddress} liquidity: ${pairInfo.liquidity}`)
+
+                                        if (pairInfo.liquidity > this.lowLiquidityThreshold &&
+                                            pairInfo.liquidity < this.highLiquidityThreshold) {
+                                            await this.buyMemeToken(pairInfo, this.snipeAmount);
+                                        } else {
+                                            this.startMonitorPairForLiq(pairAddress);
+                                        }
+                                    } else {
+                                        console.log(`Ignored pair ${pairAddress}, ${JSON.stringify(pairInfo, null, 2)}`);
+                                        this.sendMessageToDiscord(`Ignored new pair https://dexscreener.com/injective/${pairAddress}`);
+
+                                        this.ignoredPairs.add(pairAddress);
+                                    }
+                                }
+                            }
+                        }
+                    })
+                );
+            })
+        );
+
+        const endTime = new Date().getTime();
+        const executionTime = endTime - startTime;
+        // console.log(`Finished check for new pairs in ${executionTime} milliseconds`);
+    }
+
+    async checkPairForProvideLiquidity(pairContract) {
+        let pair = await this.getPairInfo(pairContract)
+        const pairName = `${pair.token0Meta.symbol}, ${pair.token1Meta.symbol}`;
+
+        const startTime = new Date().getTime();
+        const contractAddress = pairContract;
+        let limit = 10;
+        let skip = 0;
+
+        let allTransactions = [];
+        let transactions = await this.indexerRestExplorerApi.fetchContractTransactions({
+            contractAddress,
+            params: {
+                limit,
+                skip,
+            },
+        });
+
+        try {
+            console.log(`total tx for ${pairName} : ${transactions.paging.total}`);
+            do {
+                const currentTransactions = transactions.transactions || [];
+                allTransactions.push(...currentTransactions);
+                let toSkip = limit > transactions.paging.total ? transactions.paging.total : limit
+                skip += toSkip;
+                transactions = await this.indexerRestExplorerApi.fetchContractTransactions({
+                    contractAddress,
+                    params: {
+                        limit,
+                        skip,
+                    },
+                });
+            } while (allTransactions.length < transactions.paging.total);
+        } catch (error) {
+            console.error("An error occurred getting pair transactions:", error);
+            console.log(transactions)
+        }
+
+        await Promise.all(
+            allTransactions.map(async (tx) => {
+                const txHash = tx.txHash;
+                const txInfo = await this.getTxByHash(txHash);
+                await Promise.all(
+                    txInfo.messages.map(async (msg) => {
+                        let message;
+                        try {
+                            message = JSON.parse(msg.message.msg);
+                        } catch (error) {
+                            message = msg.message.msg;
+                        }
+
+                        if (typeof message === 'object' && message.provide_liquidity) {
+                            let baseAssetAmount;
+
+                            if (message.provide_liquidity && message.provide_liquidity.pair_msg && message.provide_liquidity.pair_msg.provide_liquidity) {
+                                const info = message.provide_liquidity.pair_msg.provide_liquidity;
+                                baseAssetAmount = info.assets[0].info.native_token.denom === this.baseDenom ?
+                                    info.assets[0].amount : info.assets[1].amount;
+                            } else if (message.provide_liquidity && message.provide_liquidity.assets) {
+                                const info = message.provide_liquidity;
+                                baseAssetAmount = info.assets[0].info.native_token.denom === this.baseDenom ?
+                                    info.assets[0].amount : info.assets[1].amount;
+                            } else {
+                                baseAssetAmount = 0;
+                            }
+
+                            const numericBaseAssetAmount = Number(baseAssetAmount) / 10 ** (this.baseAsset.decimals || 0);
+                            const liquidity = (numericBaseAssetAmount * this.baseAssetPrice * 2) / 10 ** this.stableAsset.decimals;
+                            const txTime = moment(txInfo['blockTimestamp'], 'YYYY-MM-DD HH:mm:ss.SSS Z');
+                            console.log(`${pairName} liquidity added: $${liquidity} ${txTime.fromNow()}`);
+
+                            if (txTime < moment().subtract(15, 'minute')) {
+                                console.log(`liq added more than 15 minutes ago ${txTime.fromNow()}`)
+                                this.stopMonitorPairForLiq(pairContract);
+                                return
+                            }
+
+                            if (liquidity > 20 && liquidity < 200 && txTime > moment().subtract(1, 'minute')) {
+                                this.stopMonitorPairForLiq(pairContract);
+                                console.log("small amount of liquidity added")
+                                this.sendMessageToDiscord(`:eyes: ${pairName} - Small liquidity Added: $${liquidity}\n${pair.astroportLink}\n${pair.dexscreenerLink}\n<@352761566401265664>`)
+                                await this.buyMemeToken(pair, this.snipeAmount / 10);
+                                return;
+                            }
+
+                            if (liquidity > this.lowLiquidityThreshold && txTime > moment().subtract(1, 'minute')) {
+                                this.stopMonitorPairForLiq(pairContract);
+                                this.sendMessageToDiscord(`:eyes: ${pairName} - Liquidity Added from tx: $${liquidity}\n${pair.astroportLink}\n${pair.dexscreenerLink}\n<@352761566401265664>`)
+                                await this.buyMemeToken(pair, this.snipeAmount);
+                                return;
+                            }
+                        }
+                    })
+                );
+            })
+        );
+
+        const endTime = new Date().getTime();
+        const executionTime = endTime - startTime;
+        console.log(`Finished check for liq for pair ${pairName} in ${executionTime} milliseconds`);
+    }
+
+    startMonitorPairForLiq(pair) {
+        this.lowLiqPairsToMonitor.add(pair)
+        if (this.lowLiqPairsToMonitor.size == 1) {
+            this.liquidityLoop()
+        }
+    }
+
+    stopMonitorPairForLiq(pair) {
+        this.lowLiqPairsToMonitor.delete(pair)
+    }
+
+    async liquidityLoop() {
+        console.log(`liquidity loop: ${this.lowLiqPairsToMonitor.size > 0}`);
+
+        while (this.lowLiqPairsToMonitor.size > 0) {
+            for (const pair of this.lowLiqPairsToMonitor.values()) {
+                await this.checkPairForProvideLiquidity(pair);
+            }
+            await new Promise(resolve => setTimeout(resolve, 100));
+        }
+    }
+
+    setMonitorNewPairs(monitor) {
+        this.monitorNewPairs = monitor
+        if (monitor) {
+            this.sendMessageToDiscord('Monitoring for new pairs')
+            this.newPairsLoop()
+        }
+    }
+
+    async newPairsLoop() {
+        console.log(`new pairs loop: ${this.monitorNewPairs}`)
+        while (this.monitorNewPairs) {
+            await this.checkFactoryForNewPairs();
+            await new Promise(resolve => setTimeout(resolve, 100));
         }
     }
 
