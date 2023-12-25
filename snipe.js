@@ -81,6 +81,7 @@ class AstroportSniper {
         this.discordClient = new Client({ intents: [GatewayIntentBits.Guilds] });
         this.discordClient.login(this.discordToken);
 
+        this.discordTag = `<@352761566401265664>`
         this.discordClient.on('ready', () => {
             console.log(`Logged in as ${this.discordClient.user.tag}!`);
             this.discordClient.guilds.cache.forEach(guild => {
@@ -98,6 +99,11 @@ class AstroportSniper {
                     .setName('sell_token')
                     .addStringOption(option => option.setName('pair').setDescription('The pair to sell').setRequired(true))
                     .setDescription('Sell a token using the pair address')
+                );
+                guild.commands.create(new SlashCommandBuilder()
+                    .setName('monitor_to_sell')
+                    .addStringOption(option => option.setName('pair').setDescription('The pair to monitor').setRequired(true))
+                    .setDescription('Monitor a pair for opportunity to sell')
                 );
             });
             console.log("set up discord slash commands")
@@ -153,6 +159,11 @@ class AstroportSniper {
                 const pairContract = interaction.options.getString('pair');
                 await this.executeSellCommand(pairContract);
             }
+            if (commandName === 'monitor_to_sell') {
+                await interaction.reply("Monitoring token to sell");
+                const pairContract = interaction.options.getString('pair');
+                await this.executeMonitorToSellCommand(pairContract);
+            }
         });
     }
 
@@ -195,14 +206,35 @@ class AstroportSniper {
     async executeSellCommand(pairContract) {
         try {
             let pair = await this.getPairInfo(pairContract)
-            let result = await this.sellMemeToken(pair)
-            if (result && !this.allPairs.has(pairContract)) {
+            const memeTokenMeta = pair.token0Meta.denom === this.baseDenom
+                ? pair.token1Meta
+                : pair.token0Meta;
+            let balance = await this.getBalanceOfToken(memeTokenMeta.denom);
+            if (balance) {
+                let result = await this.sellMemeToken(pair, balance.amount)
+                if (result && !this.allPairs.has(pairContract)) {
+                    this.allPairs.set(pairContract, pair);
+                    this.ignoredPairs.delete(pairContract);
+                }
+            }
+
+        } catch (error) {
+            console.error('Error executing /sell_token command:', error);
+            await this.sendMessageToDiscord('Error executing /sell_token command')
+        }
+    }
+
+    async executeMonitorToSellCommand(pairContract) {
+        try {
+            let pair = await this.getPairInfo(pairContract)
+            await this.monitorPairToSell(pair, 5)
+            if (pair && !this.allPairs.has(pairContract)) {
                 this.allPairs.set(pairContract, pair);
                 this.ignoredPairs.delete(pairContract);
             }
         } catch (error) {
-            console.error('Error executing /sell_token command:', error);
-            await this.sendMessageToDiscord('Error executing /sell_token command')
+            console.error('Error executing /monitor_to_sell command:', error);
+            await this.sendMessageToDiscord('Error executing /monitor_to_sell command')
         }
     }
 
@@ -345,7 +377,7 @@ class AstroportSniper {
                                     pair.liquidity < this.highLiquidityThreshold) {
                                     await this.buyMemeToken(pair, this.snipeAmount);
                                 } else {
-                                    await this.monitorLowLiquidityPair({ ...pair, ...pairInfo }, 5, this.lowLiquidityThreshold);
+                                    await this.monitorLowLiquidityPair({ ...pair, ...pairInfo }, 2, this.lowLiquidityThreshold);
                                 }
                             }
 
@@ -383,6 +415,16 @@ class AstroportSniper {
         }
     }
 
+    async getPairHistory(pairContract) {
+        const contractHistory = await this.chainGrpcWasmApi.fetchContractHistory(
+            pairContract
+        )
+        console.log(contractHistory)
+        contractHistory.entriesList.map((item) => {
+            console.log(new TextDecoder().decode(item.msg))
+        })
+    }
+
     async getPairInfo(pairContract) {
         let retryCount = 0;
 
@@ -417,9 +459,7 @@ class AstroportSniper {
                     astroportLink: `https://app.astroport.fi/swap?from=${token0Info.denom}&to=${token1Info.denom}`,
                     coinhallLink: `https://coinhall.org/injective/${pairContract}`,
                     dexscreenerLink: `https://dexscreener.com/injective/${pairContract}?maker=${this.walletAddress}`,
-                    contract_addr: pairContract,
-                    pair_type: infoDecoded.pair_type,
-                    asset_infos: infoDecoded.asset_infos,
+                    ...infoDecoded
                 };
 
             } catch (error) {
@@ -526,7 +566,6 @@ class AstroportSniper {
                 throw new Error(`Error finding ask asset for ${pairName}`);
             }
             const assetInfo = pair.asset_infos[assetToSell];
-            console.log(assetInfo)
 
             const simulationQuery = {
                 simulate_swap_operations: {
@@ -595,6 +634,9 @@ class AstroportSniper {
             const poolQuery = Buffer.from(JSON.stringify({ pool: {} })).toString('base64');
             let poolInfo = await this.chainGrpcWasmApi.fetchSmartContractState(pair.contract_addr, poolQuery)
             let poolDecoded = JSON.parse(new TextDecoder().decode(poolInfo.data))
+
+            // console.log(`pool decoded ${JSON.stringify(poolDecoded, null, 2)}`)
+
             const baseAssetAmount = poolDecoded.assets.find(asset => {
                 if (asset.info.native_token) {
                     return asset.info.native_token.denom === this.baseAsset.denom;
@@ -783,17 +825,15 @@ class AstroportSniper {
                                     {
                                         pair_contract: pair.contract_addr,
                                         balance: balance.amount,
-                                        amount_in: this.snipeAmount * Math.pow(10, this.baseAsset ? this.baseAsset.decimals : 18),
+                                        amount_in: 0,
                                         token_denom: tokenDenom.denom,
-                                        profit: 0
+                                        profit: 0,
+                                        is_moon_bag: true
                                     });
                             }
 
                             console.log(`found balance for ${pairName}: ${(balance.amount / Math.pow(10, tokenDenom.decimals)).toFixed(2)} ${tokenDenom.symbol} (${amountBack} ${this.baseAssetName} $${usdValue.toFixed(2)})`)
 
-                            if (usdValue > 1) {
-                                this.monitorPairToSell(pair, 10)
-                            }
                         }
                     }
                 } catch (error) {
@@ -908,7 +948,8 @@ class AstroportSniper {
             amount_in: Number(amountIn) + Number(adjustedAmount),
             token_denom: memeTokenMeta.denom,
             time_bought: moment(),
-            profit: profit
+            profit: profit,
+            is_moon_bag: false
         });
 
         console.log(this.positions.get(pair.contract_addr))
@@ -929,8 +970,7 @@ class AstroportSniper {
             return;
         }
 
-        const baseDenom = this.baseDenom;
-        const memeTokenMeta = pair.token0Meta.denom === baseDenom
+        const memeTokenMeta = pair.token0Meta.denom === this.baseDenom
             ? pair.token1Meta
             : pair.token0Meta;
 
@@ -993,6 +1033,11 @@ class AstroportSniper {
                     console.log("Sell failed");
                     retryCount += 1;
                     spread += 0.2
+                    if (!amount) {
+                        console.log("refreshing balance, attempting sell again")
+                        amount = await this.getBalanceOfToken(memeTokenMeta.denom).amount;
+                        amount = Math.round(amount)
+                    }
                 }
                 else {
                     this.stopMonitoringPairToSell(pair)
@@ -1006,10 +1051,19 @@ class AstroportSniper {
                     } else {
                         console.error("Return amount not found in sell events.");
                     }
+
+                    let updatedBalance = Number(position.balance) - Number(amount)
+                    let updatedAmountIn = Number(position.amount_in) - Number(returnAmount)
+                    if (updatedAmountIn < 0) {
+                        updatedAmountIn = 0
+                    }
+
                     this.positions.set(pair.contract_addr, {
                         ...position,
-                        balance: Number(position.balance) - Number(amount),
-                        profit: Number(position.profit) + Number(profit)
+                        amount_in: updatedAmountIn,
+                        balance: updatedBalance,
+                        profit: Number(position.profit) + Number(profit),
+                        is_moon_bag: updatedBalance > 0 && updatedAmountIn == 0
                     });
 
                     profit = (profit / Math.pow(10, this.baseAsset.decimals))
@@ -1032,6 +1086,7 @@ class AstroportSniper {
             }
         }
         console.error(`Exceeded maximum retry attempts (${maxRetries}). Sell operation failed.`);
+        this.sendMessageToDiscord(`Failed to sell token ${memeTokenMeta.symbol} ${pair.dexscreenerLink} ${this.discordTag}`)
 
         return null
     }
@@ -1064,7 +1119,7 @@ class AstroportSniper {
 
                     const usdValue = (convertedQuote * baseAssetPriceConverted)
 
-                    if (usdValue > 1) {
+                    if (usdValue > 0.1) {
                         formattedMessage += `${pairName}: ${(balance.amount / Math.pow(10, tokenDenom.decimals)).toFixed(2)} ` +
                             `${tokenDenom.symbol} (${amountBack} ${this.baseAssetName} $${usdValue.toFixed(2)})\n${pair.dexscreenerLink}\n`;
                     }
@@ -1108,6 +1163,27 @@ class AstroportSniper {
                 }
 
                 if (quote) {
+                    const baseAssetPriceConverted = this.baseAssetPrice / Math.pow(10, this.stableAsset.decimals)
+                    const convertedQuote = quote.amount / Math.pow(10, this.baseAsset.decimals)
+                    const amountBack = (quote.amount / Math.pow(10, this.baseAsset.decimals)).toFixed(3);
+                    const usdValue = (convertedQuote * baseAssetPriceConverted)
+                    const convertedBalance = position.balance / Math.pow(10, tokenDenom.decimals)
+                    const price = usdValue / convertedBalance
+
+                    const moonBagGoal = Math.round((this.snipeAmount * 5) * Math.pow(10, this.baseAsset.decimals))
+
+                    if (position.is_moon_bag && Number(quote.amount) > Number(moonBagGoal)) {
+                        console.log(`taking profit on moon bag for ${tokenDenom.symbol}`)
+                        this.stopMonitoringPairToSell(pair)
+                        result = await this.sellMemeToken(pair, position.balance)
+                        return
+                    }
+                    if (position.is_moon_bag) {
+                        console.log(`${pairName} moon bag balance: ${(convertedBalance).toFixed(2)} ${tokenDenom.symbol}, ` +
+                            `price: $${price.toFixed(8)} (${amountBack} ${this.baseAssetName} $${usdValue.toFixed(2)})`)
+                        return
+                    }
+
                     const percentageIncrease = ((quote.amount - position.amount_in) / position.amount_in) * 100;
 
                     if (percentageIncrease <= this.stopLoss * -1 && quote.amount < position.amount_in) {
@@ -1127,14 +1203,6 @@ class AstroportSniper {
                         }
                         return result
                     }
-
-                    const amountBack = (quote.amount / Math.pow(10, this.baseAsset.decimals)).toFixed(3);
-                    const convertedQuote = quote.amount / Math.pow(10, this.baseAsset.decimals)
-                    const baseAssetPriceConverted = this.baseAssetPrice / Math.pow(10, this.stableAsset.decimals)
-
-                    const usdValue = (convertedQuote * baseAssetPriceConverted)
-                    const convertedBalance = position.balance / Math.pow(10, tokenDenom.decimals)
-                    const price = usdValue / convertedBalance
 
                     console.log(`${pairName}: balance: ${(convertedBalance).toFixed(2)} ${tokenDenom.symbol}, ` +
                         `price: $${price.toFixed(8)} (${amountBack} ${this.baseAssetName} $${usdValue.toFixed(2)}) ${percentageIncrease.toFixed(2)}%`)
