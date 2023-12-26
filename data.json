@@ -5783,6 +5783,55 @@
       "pair_type": {
         "xyk": {}
       }
+    },
+    {
+      "token0Meta": {
+        "denom": "factory/inj13m5k0v69lrrng4y3h5895dlkr6zcp272jmhrve/Ninjutsu",
+        "name": "NINJUTSU",
+        "symbol": "NINJ",
+        "decimals": 6,
+        "tokenType": "tokenFactory",
+        "display": "NINJ",
+        "description": "NINJUTSU - 100% Community driven Meme on #INJ @ninjutsuinj",
+        "logo": "unknown.svg",
+        "coinGeckoId": "",
+        "tokenVerification": "internal"
+      },
+      "token1Meta": {
+        "denom": "inj",
+        "name": "Injective",
+        "symbol": "INJ",
+        "decimals": 18,
+        "tokenType": "native",
+        "logo": "injective-v3.svg",
+        "coinGeckoId": "injective-protocol",
+        "erc20": {
+          "decimals": 18,
+          "address": "0xe28b3B32B6c345A34Ff64674606124Dd5Aceca30",
+          "tokenType": "erc20"
+        },
+        "tokenVerification": "verified"
+      },
+      "astroportLink": "https://app.astroport.fi/swap?from=factory/inj13m5k0v69lrrng4y3h5895dlkr6zcp272jmhrve/Ninjutsu&to=inj",
+      "coinhallLink": "https://coinhall.org/injective/inj1h3e69mew0a2vum2p0fl83e9lpe7v8w0tqmfhp0",
+      "dexscreenerLink": "https://dexscreener.com/injective/inj1h3e69mew0a2vum2p0fl83e9lpe7v8w0tqmfhp0?maker=inj1v7t5ladtx3cfspt0576eu6ke3gndlfd8dtlqsr",
+      "asset_infos": [
+        {
+          "native_token": {
+            "denom": "factory/inj13m5k0v69lrrng4y3h5895dlkr6zcp272jmhrve/Ninjutsu"
+          }
+        },
+        {
+          "native_token": {
+            "denom": "inj"
+          }
+        }
+      ],
+      "contract_addr": "inj1h3e69mew0a2vum2p0fl83e9lpe7v8w0tqmfhp0",
+      "liquidity_token": "inj1umggjkwe8y39jq89wc7qlffl5aq3mgnfmhx49u",
+      "pair_type": {
+        "xyk": {}
+      }
     }
   ],
   "positions": [
@@ -6123,6 +6172,15 @@
       "token_denom": "factory/inj1lqv3a2hxggzall4jekg7lpe6lwqsjevnm9ztnf/doomer",
       "time_bought": "2023-12-25T14:06:33.648Z",
       "profit": 68933660895910210,
+      "is_moon_bag": true
+    },
+    {
+      "pair_contract": "inj1h3e69mew0a2vum2p0fl83e9lpe7v8w0tqmfhp0",
+      "balance": 1648652752,
+      "amount_in": 0,
+      "token_denom": "factory/inj13m5k0v69lrrng4y3h5895dlkr6zcp272jmhrve/Ninjutsu",
+      "time_bought": "2023-12-26T00:19:50.759Z",
+      "profit": 19703168677962350,
       "is_moon_bag": true
     }
   ],
@@ -6624,6 +6682,11 @@
     "inj172qc307gncrzakm96ye5pa9ks065zwthsaewl6",
     "inj1qgl5v6tyqzu5lw7wlhmumrv2eg056hk2d8u65h",
     "inj1qlgq8lmq54rek7h9vrghe6t4xv30kerzwsyeaa",
-    "inj15gr03ahu60mqcv8cgcct5glp3j9uurjep2nnvy"
+    "inj15gr03ahu60mqcv8cgcct5glp3j9uurjep2nnvy",
+    "inj1salvmwf4t0lyzuxnzelre099wj2xc0dcwcr0yh",
+    "inj169qvw83up9xqer5qxagnh2c0nr8hx6eydaram7",
+    "inj1zeapuglys08nkm8aytr69yf2twjwkh77hxyztr",
+    "inj1j98pstwkpkmvwsr3jqt66u0yhmv2khld0gutkj",
+    "inj17y6zf5ryz8hhr8ad699p0vx3p0y9v4wx5ekpg4"
   ]
 }

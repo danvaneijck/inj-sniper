@@ -11,8 +11,8 @@ const CONFIG = {
     pairType: '{"xyk":{}}',
     maxSpread: 0.49,
     snipeAmount: 0.5, // INJ
-    profitGoalPercent: 40, // %
-    stopLoss: 30, // %
+    profitGoalPercent: 35, // %
+    stopLoss: 50, // %
     tradeTimeLimit: 600, // mins
     lowLiquidityThreshold: 500, // USD
     highLiquidityThreshold: 100000, // USD
