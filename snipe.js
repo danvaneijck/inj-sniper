@@ -1389,7 +1389,7 @@ class AstroportSniper {
 
         const startTime = new Date().getTime();
         const contractAddress = pairContract;
-        let limit = 10;
+        let limit = 100;
         let skip = 0;
 
         let allTransactions = [];
@@ -1402,12 +1402,20 @@ class AstroportSniper {
         });
 
         try {
-            console.log(`total tx for ${pairName} : ${transactions.paging.total}`);
+            // console.log(`total tx for ${pairName} : ${transactions.paging.total}`);
             do {
                 const currentTransactions = transactions.transactions || [];
                 allTransactions.push(...currentTransactions);
-                let toSkip = limit > transactions.paging.total ? transactions.paging.total : limit
-                skip += toSkip;
+
+                if (currentTransactions.length == 0) {
+                    console.log("no more tx, breaking", pairName)
+                    break
+                }
+
+                let toSkip = (skip + limit) > transactions.paging.total ? transactions.paging.total - skip : limit;
+                skip += Number(toSkip);
+                skip = Math.min(skip, 10000);
+
                 transactions = await this.indexerRestExplorerApi.fetchContractTransactions({
                     contractAddress,
                     params: {
@@ -1418,7 +1426,7 @@ class AstroportSniper {
             } while (allTransactions.length < transactions.paging.total);
         } catch (error) {
             console.error("An error occurred getting pair transactions:", error);
-            console.log(transactions)
+            // console.log(transactions);
         }
 
         await Promise.all(
@@ -1455,7 +1463,7 @@ class AstroportSniper {
                             console.log(`${pairName} liquidity added: $${liquidity} ${txTime.fromNow()}`);
 
                             if (txTime < moment().subtract(15, 'minute')) {
-                                console.log(`liq added more than 15 minutes ago ${txTime.fromNow()}`)
+                                console.log(`liq added over time limit: ${txTime.fromNow()}`)
                                 this.stopMonitorPairForLiq(pairContract);
                                 return
                             }
@@ -1482,7 +1490,7 @@ class AstroportSniper {
 
         const endTime = new Date().getTime();
         const executionTime = endTime - startTime;
-        console.log(`Finished check for liq for pair ${pairName} in ${executionTime} milliseconds`);
+        // console.log(`Finished check for liq for pair ${pairName} in ${executionTime} milliseconds`);
     }
 
     startMonitorPairForLiq(pair) {

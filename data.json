@@ -3558,7 +3558,7 @@
       },
       "astroportLink": "https://app.astroport.fi/swap?from=peggy0xdAC17F958D2ee523a2206206994597C13D831ec7&to=inj",
       "coinhallLink": "https://coinhall.org/injective/inj1c95v0zr7ah777qn05sqwfnd03le4f40rucs0dp",
-      "dexscreenerLink": "https://dexscreener.com/injective/inj1c95v0zr7ah777qn05sqwfnd03le4f40rucs0dp?maker=inj1v7t5ladtx3cfspt0576eu6ke3gndlfd8dtlqsr",
+      "dexscreenerLink": "https://dexscreener.com/injective/inj1c95v0zr7ah777qn05sqwfnd03le4f40rucs0dp?maker=inj1sy2aad37tku3dz0353epczxd95hvuhzl0lhfqh",
       "asset_infos": [
         {
           "native_token": {
@@ -5540,7 +5540,7 @@
       },
       "astroportLink": "https://app.astroport.fi/swap?from=factory/inj1lqv3a2hxggzall4jekg7lpe6lwqsjevnm9ztnf/doomer&to=inj",
       "coinhallLink": "https://coinhall.org/injective/inj1km669tcs59gncld69pj8kvjtn5698cw4gnfdd5",
-      "dexscreenerLink": "https://dexscreener.com/injective/inj1km669tcs59gncld69pj8kvjtn5698cw4gnfdd5?maker=inj1v7t5ladtx3cfspt0576eu6ke3gndlfd8dtlqsr",
+      "dexscreenerLink": "https://dexscreener.com/injective/inj1km669tcs59gncld69pj8kvjtn5698cw4gnfdd5?maker=inj1sy2aad37tku3dz0353epczxd95hvuhzl0lhfqh",
       "asset_infos": [
         {
           "native_token": {
@@ -5832,355 +5832,1011 @@
       "pair_type": {
         "xyk": {}
       }
+    },
+    {
+      "token0Meta": {
+        "denom": "factory/inj1t02au5gsk40ev9jaq0ggcyry9deuvvza6s4wav/Shinobi",
+        "name": "Shinobi",
+        "symbol": "NOBI",
+        "decimals": 6,
+        "tokenType": "tokenFactory",
+        "display": "Shinobi",
+        "description": "Shinobi",
+        "logo": "https://bafkreihp6rkdh55h3zrarj43a4zkdegrmqysqa3etip33bm3ee3ffbo7xe.ipfs.w3s.link/",
+        "coinGeckoId": "",
+        "tokenVerification": "internal"
+      },
+      "token1Meta": {
+        "denom": "inj",
+        "name": "Injective",
+        "symbol": "INJ",
+        "decimals": 18,
+        "tokenType": "native",
+        "logo": "injective-v3.svg",
+        "coinGeckoId": "injective-protocol",
+        "erc20": {
+          "decimals": 18,
+          "address": "0xe28b3B32B6c345A34Ff64674606124Dd5Aceca30",
+          "tokenType": "erc20"
+        },
+        "tokenVerification": "verified"
+      },
+      "astroportLink": "https://app.astroport.fi/swap?from=factory/inj1t02au5gsk40ev9jaq0ggcyry9deuvvza6s4wav/Shinobi&to=inj",
+      "coinhallLink": "https://coinhall.org/injective/inj1yzrhefq7g75vppxrmd2va6ma853cvka400acvv",
+      "dexscreenerLink": "https://dexscreener.com/injective/inj1yzrhefq7g75vppxrmd2va6ma853cvka400acvv?maker=inj1sy2aad37tku3dz0353epczxd95hvuhzl0lhfqh",
+      "asset_infos": [
+        {
+          "native_token": {
+            "denom": "factory/inj1t02au5gsk40ev9jaq0ggcyry9deuvvza6s4wav/Shinobi"
+          }
+        },
+        {
+          "native_token": {
+            "denom": "inj"
+          }
+        }
+      ],
+      "contract_addr": "inj1yzrhefq7g75vppxrmd2va6ma853cvka400acvv",
+      "liquidity_token": "inj1d5qsftmn7ztx2zgwe409nljz3vxlyks2w0pdyx",
+      "pair_type": {
+        "xyk": {}
+      }
+    },
+    {
+      "token0Meta": {
+        "denom": "factory/inj13yzzxz90naqer4utnp03zlj5rguhu7v0hd2jzl/SHIBINJ",
+        "name": "ShibInuINJ",
+        "symbol": "SHIBINJ",
+        "decimals": 6,
+        "tokenType": "tokenFactory",
+        "display": "ShibInuINJ",
+        "description": "SHIBAINJ IS’NT JUST A CURRENCY ITS A PAWSOME REVOLUTION 🐶🐶",
+        "logo": "unknown.svg",
+        "coinGeckoId": "",
+        "tokenVerification": "internal"
+      },
+      "token1Meta": {
+        "denom": "inj",
+        "name": "Injective",
+        "symbol": "INJ",
+        "decimals": 18,
+        "tokenType": "native",
+        "logo": "injective-v3.svg",
+        "coinGeckoId": "injective-protocol",
+        "erc20": {
+          "decimals": 18,
+          "address": "0xe28b3B32B6c345A34Ff64674606124Dd5Aceca30",
+          "tokenType": "erc20"
+        },
+        "tokenVerification": "verified"
+      },
+      "astroportLink": "https://app.astroport.fi/swap?from=factory/inj13yzzxz90naqer4utnp03zlj5rguhu7v0hd2jzl/SHIBINJ&to=inj",
+      "coinhallLink": "https://coinhall.org/injective/inj1cartcl4s8uze4s8f6uavhpqk07k0hfgfm7pra5",
+      "dexscreenerLink": "https://dexscreener.com/injective/inj1cartcl4s8uze4s8f6uavhpqk07k0hfgfm7pra5?maker=inj1sy2aad37tku3dz0353epczxd95hvuhzl0lhfqh",
+      "asset_infos": [
+        {
+          "native_token": {
+            "denom": "factory/inj13yzzxz90naqer4utnp03zlj5rguhu7v0hd2jzl/SHIBINJ"
+          }
+        },
+        {
+          "native_token": {
+            "denom": "inj"
+          }
+        }
+      ],
+      "contract_addr": "inj1cartcl4s8uze4s8f6uavhpqk07k0hfgfm7pra5",
+      "liquidity_token": "inj1gzcx85m49u6y8a9dwx6eddfw8d9r4xtzzna83y",
+      "pair_type": {
+        "xyk": {}
+      }
+    },
+    {
+      "token0Meta": {
+        "denom": "factory/inj1300jzt0tyjg8x4txsfs79l29k556vqqk22c7es/cope",
+        "name": "CopeCoin",
+        "symbol": "CP",
+        "decimals": 6,
+        "tokenType": "tokenFactory",
+        "display": "cope",
+        "description": "Missed on legit plays buying rugs?  harder",
+        "logo": "unknown.svg",
+        "coinGeckoId": "",
+        "tokenVerification": "internal"
+      },
+      "token1Meta": {
+        "denom": "inj",
+        "name": "Injective",
+        "symbol": "INJ",
+        "decimals": 18,
+        "tokenType": "native",
+        "logo": "injective-v3.svg",
+        "coinGeckoId": "injective-protocol",
+        "erc20": {
+          "decimals": 18,
+          "address": "0xe28b3B32B6c345A34Ff64674606124Dd5Aceca30",
+          "tokenType": "erc20"
+        },
+        "tokenVerification": "verified"
+      },
+      "astroportLink": "https://app.astroport.fi/swap?from=factory/inj1300jzt0tyjg8x4txsfs79l29k556vqqk22c7es/cope&to=inj",
+      "coinhallLink": "https://coinhall.org/injective/inj1tv4jw9ffddq5ds55yfqvscc004zgh5x0sazrlg",
+      "dexscreenerLink": "https://dexscreener.com/injective/inj1tv4jw9ffddq5ds55yfqvscc004zgh5x0sazrlg?maker=inj1sy2aad37tku3dz0353epczxd95hvuhzl0lhfqh",
+      "asset_infos": [
+        {
+          "native_token": {
+            "denom": "factory/inj1300jzt0tyjg8x4txsfs79l29k556vqqk22c7es/cope"
+          }
+        },
+        {
+          "native_token": {
+            "denom": "inj"
+          }
+        }
+      ],
+      "contract_addr": "inj1tv4jw9ffddq5ds55yfqvscc004zgh5x0sazrlg",
+      "liquidity_token": "inj1fjc6w2lwzzwq9m3v7j0w939gzun22juelg59pm",
+      "pair_type": {
+        "xyk": {}
+      }
+    },
+    {
+      "token0Meta": {
+        "denom": "factory/inj1any4rpwq7r850u6feajg5payvhwpunu9cxqevc/DOJO",
+        "name": "n/a",
+        "symbol": "n/a",
+        "decimals": 6,
+        "tokenType": "tokenFactory"
+      },
+      "token1Meta": {
+        "denom": "inj",
+        "name": "Injective",
+        "symbol": "INJ",
+        "decimals": 18,
+        "tokenType": "native",
+        "logo": "injective-v3.svg",
+        "coinGeckoId": "injective-protocol",
+        "erc20": {
+          "decimals": 18,
+          "address": "0xe28b3B32B6c345A34Ff64674606124Dd5Aceca30",
+          "tokenType": "erc20"
+        },
+        "tokenVerification": "verified"
+      },
+      "astroportLink": "https://app.astroport.fi/swap?from=factory/inj1any4rpwq7r850u6feajg5payvhwpunu9cxqevc/DOJO&to=inj",
+      "coinhallLink": "https://coinhall.org/injective/inj1vsxkw3lvlu9583nsgap0krun6pczc4qpmwqxrk",
+      "dexscreenerLink": "https://dexscreener.com/injective/inj1vsxkw3lvlu9583nsgap0krun6pczc4qpmwqxrk?maker=inj1sy2aad37tku3dz0353epczxd95hvuhzl0lhfqh",
+      "asset_infos": [
+        {
+          "native_token": {
+            "denom": "factory/inj1any4rpwq7r850u6feajg5payvhwpunu9cxqevc/DOJO"
+          }
+        },
+        {
+          "native_token": {
+            "denom": "inj"
+          }
+        }
+      ],
+      "contract_addr": "inj1vsxkw3lvlu9583nsgap0krun6pczc4qpmwqxrk",
+      "liquidity_token": "inj1nrde0em5lymxkawzk9ccug6k7fly3qddvslj42",
+      "pair_type": {
+        "xyk": {}
+      }
+    },
+    {
+      "token0Meta": {
+        "denom": "factory/inj1qczkutnsy3nmt909xtyjy4rsrkl2q4dm6aq960/coping",
+        "name": "CopingInj",
+        "symbol": "CPINJ",
+        "decimals": 6,
+        "tokenType": "tokenFactory",
+        "display": "coping",
+        "description": "Missed on legit plays while buying rugs?  HARD",
+        "logo": "unknown.svg",
+        "coinGeckoId": "",
+        "tokenVerification": "internal"
+      },
+      "token1Meta": {
+        "denom": "inj",
+        "name": "Injective",
+        "symbol": "INJ",
+        "decimals": 18,
+        "tokenType": "native",
+        "logo": "injective-v3.svg",
+        "coinGeckoId": "injective-protocol",
+        "erc20": {
+          "decimals": 18,
+          "address": "0xe28b3B32B6c345A34Ff64674606124Dd5Aceca30",
+          "tokenType": "erc20"
+        },
+        "tokenVerification": "verified"
+      },
+      "astroportLink": "https://app.astroport.fi/swap?from=factory/inj1qczkutnsy3nmt909xtyjy4rsrkl2q4dm6aq960/coping&to=inj",
+      "coinhallLink": "https://coinhall.org/injective/inj1fc2a2zkhccau2sugmgt6cvyf4g04t45ghhzeex",
+      "dexscreenerLink": "https://dexscreener.com/injective/inj1fc2a2zkhccau2sugmgt6cvyf4g04t45ghhzeex?maker=inj1sy2aad37tku3dz0353epczxd95hvuhzl0lhfqh",
+      "asset_infos": [
+        {
+          "native_token": {
+            "denom": "factory/inj1qczkutnsy3nmt909xtyjy4rsrkl2q4dm6aq960/coping"
+          }
+        },
+        {
+          "native_token": {
+            "denom": "inj"
+          }
+        }
+      ],
+      "contract_addr": "inj1fc2a2zkhccau2sugmgt6cvyf4g04t45ghhzeex",
+      "liquidity_token": "inj1xmmkd52rmu8cdj8y63578xvatv9jeavz8q3h4v",
+      "pair_type": {
+        "xyk": {}
+      }
+    },
+    {
+      "token0Meta": {
+        "denom": "inj",
+        "name": "Injective",
+        "symbol": "INJ",
+        "decimals": 18,
+        "tokenType": "native",
+        "logo": "injective-v3.svg",
+        "coinGeckoId": "injective-protocol",
+        "erc20": {
+          "decimals": 18,
+          "address": "0xe28b3B32B6c345A34Ff64674606124Dd5Aceca30",
+          "tokenType": "erc20"
+        },
+        "tokenVerification": "verified"
+      },
+      "token1Meta": {
+        "denom": "factory/inj1ml33x7lkxk6x2x95d3alw4h84evlcdz2gnehmk/SNOWY",
+        "name": "Injective Snowy",
+        "symbol": "SNOWY",
+        "decimals": 6,
+        "tokenType": "tokenFactory",
+        "display": "SNOWY",
+        "description": "Introducing Injective Snowy — a fun, adventurous token inspired by Tintin’s loyal companion on the Injective Network.",
+        "logo": "https://ipfs.io/ipfs/QmYEXRmAdNf43wiQrriwYhLcgvRW8qfq1WyqVvKqE1J9ck",
+        "coinGeckoId": "",
+        "tokenVerification": "internal"
+      },
+      "astroportLink": "https://app.astroport.fi/swap?from=inj&to=factory/inj1ml33x7lkxk6x2x95d3alw4h84evlcdz2gnehmk/SNOWY",
+      "coinhallLink": "https://coinhall.org/injective/inj1ftmtt5mafm2xhf5j32r4exm75d4nmhhxnjekv2",
+      "dexscreenerLink": "https://dexscreener.com/injective/inj1ftmtt5mafm2xhf5j32r4exm75d4nmhhxnjekv2?maker=inj1sy2aad37tku3dz0353epczxd95hvuhzl0lhfqh",
+      "asset_infos": [
+        {
+          "native_token": {
+            "denom": "inj"
+          }
+        },
+        {
+          "native_token": {
+            "denom": "factory/inj1ml33x7lkxk6x2x95d3alw4h84evlcdz2gnehmk/SNOWY"
+          }
+        }
+      ],
+      "contract_addr": "inj1ftmtt5mafm2xhf5j32r4exm75d4nmhhxnjekv2",
+      "liquidity_token": "inj10j3cl55ra04jfd9z0ug3qyzajsn5xkc7zxvmau",
+      "pair_type": {
+        "xyk": {}
+      }
+    },
+    {
+      "token0Meta": {
+        "denom": "inj",
+        "name": "Injective",
+        "symbol": "INJ",
+        "decimals": 18,
+        "tokenType": "native",
+        "logo": "injective-v3.svg",
+        "coinGeckoId": "injective-protocol",
+        "erc20": {
+          "decimals": 18,
+          "address": "0xe28b3B32B6c345A34Ff64674606124Dd5Aceca30",
+          "tokenType": "erc20"
+        },
+        "tokenVerification": "verified"
+      },
+      "token1Meta": {
+        "denom": "factory/inj1hrjm0jwfey8e4x3ef3pyeq4mpjvc8356lkgh9f/CHEEMS",
+        "name": "Cheems",
+        "symbol": "CHEEMS",
+        "decimals": 6,
+        "tokenType": "tokenFactory",
+        "display": "CHEEMS",
+        "description": "Welcome to the world of $Cheems, the memecoin sensation riding the waves of the Injective Protocol blockchain. Born from the playful spirit of Cheems, the lovable Shiba Inu, $Cheems brings humor and community to the decentralized space.",
+        "logo": "https://i.ibb.co/HCcBbzL/CHEEMS.jpg",
+        "coinGeckoId": "",
+        "tokenVerification": "internal"
+      },
+      "astroportLink": "https://app.astroport.fi/swap?from=inj&to=factory/inj1hrjm0jwfey8e4x3ef3pyeq4mpjvc8356lkgh9f/CHEEMS",
+      "coinhallLink": "https://coinhall.org/injective/inj1d6mevm9yevgfyym720dtpvs0jhwx7ul2sj0hpe",
+      "dexscreenerLink": "https://dexscreener.com/injective/inj1d6mevm9yevgfyym720dtpvs0jhwx7ul2sj0hpe?maker=inj1sy2aad37tku3dz0353epczxd95hvuhzl0lhfqh",
+      "asset_infos": [
+        {
+          "native_token": {
+            "denom": "inj"
+          }
+        },
+        {
+          "native_token": {
+            "denom": "factory/inj1hrjm0jwfey8e4x3ef3pyeq4mpjvc8356lkgh9f/CHEEMS"
+          }
+        }
+      ],
+      "contract_addr": "inj1d6mevm9yevgfyym720dtpvs0jhwx7ul2sj0hpe",
+      "liquidity_token": "inj1xh27mc8kv4a5plstqy4x49u9gddarz50p9v9kk",
+      "pair_type": {
+        "xyk": {}
+      }
+    },
+    {
+      "token0Meta": {
+        "denom": "inj",
+        "name": "Injective",
+        "symbol": "INJ",
+        "decimals": 18,
+        "tokenType": "native",
+        "logo": "injective-v3.svg",
+        "coinGeckoId": "injective-protocol",
+        "erc20": {
+          "decimals": 18,
+          "address": "0xe28b3B32B6c345A34Ff64674606124Dd5Aceca30",
+          "tokenType": "erc20"
+        },
+        "tokenVerification": "verified"
+      },
+      "token1Meta": {
+        "denom": "factory/inj16fsle0ywczyf8h4xfpwntg3mnv7cukd48nnjjp/CHELE",
+        "name": "n/a",
+        "symbol": "n/a",
+        "decimals": 6,
+        "tokenType": "tokenFactory"
+      },
+      "astroportLink": "https://app.astroport.fi/swap?from=inj&to=factory/inj16fsle0ywczyf8h4xfpwntg3mnv7cukd48nnjjp/CHELE",
+      "coinhallLink": "https://coinhall.org/injective/inj1nj6qs5en4c202896fw2eanqd3mrf86mera5vjz",
+      "dexscreenerLink": "https://dexscreener.com/injective/inj1nj6qs5en4c202896fw2eanqd3mrf86mera5vjz?maker=inj1sy2aad37tku3dz0353epczxd95hvuhzl0lhfqh",
+      "asset_infos": [
+        {
+          "native_token": {
+            "denom": "inj"
+          }
+        },
+        {
+          "native_token": {
+            "denom": "factory/inj16fsle0ywczyf8h4xfpwntg3mnv7cukd48nnjjp/CHELE"
+          }
+        }
+      ],
+      "contract_addr": "inj1nj6qs5en4c202896fw2eanqd3mrf86mera5vjz",
+      "liquidity_token": "inj15k0ufqxfcu5ymxr5jawkau4jjp2pv5uhh680yj",
+      "pair_type": {
+        "xyk": {}
+      }
+    },
+    {
+      "token0Meta": {
+        "denom": "factory/inj1y3g4wpgnc4s28gd9ure3vwm9cmvmdphml6mtul/ipdai",
+        "name": "n/a",
+        "symbol": "n/a",
+        "decimals": 6,
+        "tokenType": "tokenFactory"
+      },
+      "token1Meta": {
+        "denom": "inj",
+        "name": "Injective",
+        "symbol": "INJ",
+        "decimals": 18,
+        "tokenType": "native",
+        "logo": "injective-v3.svg",
+        "coinGeckoId": "injective-protocol",
+        "erc20": {
+          "decimals": 18,
+          "address": "0xe28b3B32B6c345A34Ff64674606124Dd5Aceca30",
+          "tokenType": "erc20"
+        },
+        "tokenVerification": "verified"
+      },
+      "astroportLink": "https://app.astroport.fi/swap?from=factory/inj1y3g4wpgnc4s28gd9ure3vwm9cmvmdphml6mtul/ipdai&to=inj",
+      "coinhallLink": "https://coinhall.org/injective/inj130ftew3nyp26f4v4wdvsu9y8lr4gy9cqm9m0tw",
+      "dexscreenerLink": "https://dexscreener.com/injective/inj130ftew3nyp26f4v4wdvsu9y8lr4gy9cqm9m0tw?maker=inj1sy2aad37tku3dz0353epczxd95hvuhzl0lhfqh",
+      "asset_infos": [
+        {
+          "native_token": {
+            "denom": "factory/inj1y3g4wpgnc4s28gd9ure3vwm9cmvmdphml6mtul/ipdai"
+          }
+        },
+        {
+          "native_token": {
+            "denom": "inj"
+          }
+        }
+      ],
+      "contract_addr": "inj130ftew3nyp26f4v4wdvsu9y8lr4gy9cqm9m0tw",
+      "liquidity_token": "inj1cd0et5rwcflkyzklh4hc50dmmw3zfrpvm4585m",
+      "pair_type": {
+        "xyk": {}
+      }
+    },
+    {
+      "token0Meta": {
+        "denom": "factory/inj14n8f39qdg6t68s5z00t4vczvkcvzlgm6ea5vk5/extravirginoliveinu",
+        "name": "ExtraVirginOliveInu",
+        "symbol": "NOBITCHES",
+        "decimals": 6,
+        "tokenType": "tokenFactory",
+        "display": "NOBITCHES",
+        "description": "Extra Virgin Olive Inu",
+        "logo": "unknown.svg",
+        "coinGeckoId": "",
+        "tokenVerification": "internal"
+      },
+      "token1Meta": {
+        "denom": "inj",
+        "name": "Injective",
+        "symbol": "INJ",
+        "decimals": 18,
+        "tokenType": "native",
+        "logo": "injective-v3.svg",
+        "coinGeckoId": "injective-protocol",
+        "erc20": {
+          "decimals": 18,
+          "address": "0xe28b3B32B6c345A34Ff64674606124Dd5Aceca30",
+          "tokenType": "erc20"
+        },
+        "tokenVerification": "verified"
+      },
+      "astroportLink": "https://app.astroport.fi/swap?from=factory/inj14n8f39qdg6t68s5z00t4vczvkcvzlgm6ea5vk5/extravirginoliveinu&to=inj",
+      "coinhallLink": "https://coinhall.org/injective/inj1p73e8vel8j76wjgaayltaxjhvd7u6avletj44y",
+      "dexscreenerLink": "https://dexscreener.com/injective/inj1p73e8vel8j76wjgaayltaxjhvd7u6avletj44y?maker=inj1sy2aad37tku3dz0353epczxd95hvuhzl0lhfqh",
+      "asset_infos": [
+        {
+          "native_token": {
+            "denom": "factory/inj14n8f39qdg6t68s5z00t4vczvkcvzlgm6ea5vk5/extravirginoliveinu"
+          }
+        },
+        {
+          "native_token": {
+            "denom": "inj"
+          }
+        }
+      ],
+      "contract_addr": "inj1p73e8vel8j76wjgaayltaxjhvd7u6avletj44y",
+      "liquidity_token": "inj1jmpv47gsrvlusvqnz6za45m0m79ulnt2wfgwnq",
+      "pair_type": {
+        "xyk": {}
+      }
+    },
+    {
+      "token0Meta": {
+        "denom": "inj",
+        "name": "Injective",
+        "symbol": "INJ",
+        "decimals": 18,
+        "tokenType": "native",
+        "logo": "injective-v3.svg",
+        "coinGeckoId": "injective-protocol",
+        "erc20": {
+          "decimals": 18,
+          "address": "0xe28b3B32B6c345A34Ff64674606124Dd5Aceca30",
+          "tokenType": "erc20"
+        },
+        "tokenVerification": "verified"
+      },
+      "token1Meta": {
+        "denom": "factory/inj1mwsgdlq6rxs3xte8p2m0pcw565czhgngrxgl38/Santa",
+        "name": "n/a",
+        "symbol": "n/a",
+        "decimals": 6,
+        "tokenType": "tokenFactory"
+      },
+      "astroportLink": "https://app.astroport.fi/swap?from=inj&to=factory/inj1mwsgdlq6rxs3xte8p2m0pcw565czhgngrxgl38/Santa",
+      "coinhallLink": "https://coinhall.org/injective/inj1u2039w7djag27dxm7etdvsvnz3438dgyeyh8jy",
+      "dexscreenerLink": "https://dexscreener.com/injective/inj1u2039w7djag27dxm7etdvsvnz3438dgyeyh8jy?maker=inj1sy2aad37tku3dz0353epczxd95hvuhzl0lhfqh",
+      "asset_infos": [
+        {
+          "native_token": {
+            "denom": "inj"
+          }
+        },
+        {
+          "native_token": {
+            "denom": "factory/inj1mwsgdlq6rxs3xte8p2m0pcw565czhgngrxgl38/Santa"
+          }
+        }
+      ],
+      "contract_addr": "inj1u2039w7djag27dxm7etdvsvnz3438dgyeyh8jy",
+      "liquidity_token": "inj1av9td26hdrgtdnsu8wpqq9wfr9rsdv2qa9eanj",
+      "pair_type": {
+        "xyk": {}
+      }
+    },
+    {
+      "token0Meta": {
+        "denom": "factory/inj1eucxlpy6c387g5wrn4ee7ppshdzg3rh4t50ahf/COCK",
+        "name": "n/a",
+        "symbol": "n/a",
+        "decimals": 6,
+        "tokenType": "tokenFactory"
+      },
+      "token1Meta": {
+        "denom": "inj",
+        "name": "Injective",
+        "symbol": "INJ",
+        "decimals": 18,
+        "tokenType": "native",
+        "logo": "injective-v3.svg",
+        "coinGeckoId": "injective-protocol",
+        "erc20": {
+          "decimals": 18,
+          "address": "0xe28b3B32B6c345A34Ff64674606124Dd5Aceca30",
+          "tokenType": "erc20"
+        },
+        "tokenVerification": "verified"
+      },
+      "astroportLink": "https://app.astroport.fi/swap?from=factory/inj1eucxlpy6c387g5wrn4ee7ppshdzg3rh4t50ahf/COCK&to=inj",
+      "coinhallLink": "https://coinhall.org/injective/inj1u8s25mgurw0g5r76ujs4cd96n89ps62w4w0hgj",
+      "dexscreenerLink": "https://dexscreener.com/injective/inj1u8s25mgurw0g5r76ujs4cd96n89ps62w4w0hgj?maker=inj1sy2aad37tku3dz0353epczxd95hvuhzl0lhfqh",
+      "asset_infos": [
+        {
+          "native_token": {
+            "denom": "factory/inj1eucxlpy6c387g5wrn4ee7ppshdzg3rh4t50ahf/COCK"
+          }
+        },
+        {
+          "native_token": {
+            "denom": "inj"
+          }
+        }
+      ],
+      "contract_addr": "inj1u8s25mgurw0g5r76ujs4cd96n89ps62w4w0hgj",
+      "liquidity_token": "inj1cu4l4srpdpd7yzlc45rpc9su3cqjj208l5vvd8",
+      "pair_type": {
+        "xyk": {}
+      }
+    },
+    {
+      "token0Meta": {
+        "denom": "factory/inj1j7zt6g03vpmg9p7g7qngvylfxqeuds73utsjnk/INJECT",
+        "name": "Injectools",
+        "symbol": "INJECT",
+        "decimals": 6,
+        "tokenType": "tokenFactory",
+        "display": "INJECT",
+        "description": "Injectools for Injective Chain, Socials: https://t.me/InjectiveBuyTechCommunity https://twitter.com/Injectools",
+        "logo": "unknown.svg",
+        "coinGeckoId": "",
+        "tokenVerification": "internal"
+      },
+      "token1Meta": {
+        "denom": "inj",
+        "name": "Injective",
+        "symbol": "INJ",
+        "decimals": 18,
+        "tokenType": "native",
+        "logo": "injective-v3.svg",
+        "coinGeckoId": "injective-protocol",
+        "erc20": {
+          "decimals": 18,
+          "address": "0xe28b3B32B6c345A34Ff64674606124Dd5Aceca30",
+          "tokenType": "erc20"
+        },
+        "tokenVerification": "verified"
+      },
+      "astroportLink": "https://app.astroport.fi/swap?from=factory/inj1j7zt6g03vpmg9p7g7qngvylfxqeuds73utsjnk/INJECT&to=inj",
+      "coinhallLink": "https://coinhall.org/injective/inj1y7e6r2dxsyrfdjpef6c5ghztks0wzfx6ld20sc",
+      "dexscreenerLink": "https://dexscreener.com/injective/inj1y7e6r2dxsyrfdjpef6c5ghztks0wzfx6ld20sc?maker=inj1sy2aad37tku3dz0353epczxd95hvuhzl0lhfqh",
+      "asset_infos": [
+        {
+          "native_token": {
+            "denom": "factory/inj1j7zt6g03vpmg9p7g7qngvylfxqeuds73utsjnk/INJECT"
+          }
+        },
+        {
+          "native_token": {
+            "denom": "inj"
+          }
+        }
+      ],
+      "contract_addr": "inj1y7e6r2dxsyrfdjpef6c5ghztks0wzfx6ld20sc",
+      "liquidity_token": "inj1377t55w6zyjd45naqnx55zncarm4xgakacw2cl",
+      "pair_type": {
+        "xyk": {}
+      }
+    },
+    {
+      "token0Meta": {
+        "denom": "inj1zr4fs5xkkf4h99sdalaxyglr3txjuewtyzjvg5",
+        "name": "ANALOS",
+        "symbol": "ANALOS",
+        "decimals": 8,
+        "tokenType": "cw20",
+        "logo": "unknown.svg",
+        "coinGeckoId": "",
+        "tokenVerification": "internal",
+        "cw20": {
+          "decimals": 8,
+          "address": "inj1zr4fs5xkkf4h99sdalaxyglr3txjuewtyzjvg5",
+          "symbol": "ANALOS",
+          "tokenType": "cw20"
+        }
+      },
+      "token1Meta": {
+        "denom": "inj",
+        "name": "Injective",
+        "symbol": "INJ",
+        "decimals": 18,
+        "tokenType": "native",
+        "logo": "injective-v3.svg",
+        "coinGeckoId": "injective-protocol",
+        "erc20": {
+          "decimals": 18,
+          "address": "0xe28b3B32B6c345A34Ff64674606124Dd5Aceca30",
+          "tokenType": "erc20"
+        },
+        "tokenVerification": "verified"
+      },
+      "astroportLink": "https://app.astroport.fi/swap?from=inj1zr4fs5xkkf4h99sdalaxyglr3txjuewtyzjvg5&to=inj",
+      "coinhallLink": "https://coinhall.org/injective/inj1e86ckf9j3g624xjd6stmjda5rwqtpn7xzham3m",
+      "dexscreenerLink": "https://dexscreener.com/injective/inj1e86ckf9j3g624xjd6stmjda5rwqtpn7xzham3m?maker=inj1sy2aad37tku3dz0353epczxd95hvuhzl0lhfqh",
+      "asset_infos": [
+        {
+          "token": {
+            "contract_addr": "inj1zr4fs5xkkf4h99sdalaxyglr3txjuewtyzjvg5"
+          }
+        },
+        {
+          "native_token": {
+            "denom": "inj"
+          }
+        }
+      ],
+      "contract_addr": "inj1e86ckf9j3g624xjd6stmjda5rwqtpn7xzham3m",
+      "liquidity_token": "inj16agl4awk3jfjnrdexegcgadjzz0sytyl8y4kem",
+      "pair_type": {
+        "xyk": {}
+      }
+    },
+    {
+      "token0Meta": {
+        "denom": "inj1trg4pfcu07ft2dhd9mljp9s8pajxeclzq5cnuw",
+        "name": "Moonlana",
+        "symbol": "Moonlana",
+        "decimals": 8,
+        "tokenType": "cw20",
+        "logo": "unknown.svg",
+        "coinGeckoId": "",
+        "tokenVerification": "internal",
+        "cw20": {
+          "decimals": 8,
+          "address": "inj1trg4pfcu07ft2dhd9mljp9s8pajxeclzq5cnuw",
+          "symbol": "Moonlana",
+          "tokenType": "cw20"
+        }
+      },
+      "token1Meta": {
+        "denom": "inj",
+        "name": "Injective",
+        "symbol": "INJ",
+        "decimals": 18,
+        "tokenType": "native",
+        "logo": "injective-v3.svg",
+        "coinGeckoId": "injective-protocol",
+        "erc20": {
+          "decimals": 18,
+          "address": "0xe28b3B32B6c345A34Ff64674606124Dd5Aceca30",
+          "tokenType": "erc20"
+        },
+        "tokenVerification": "verified"
+      },
+      "astroportLink": "https://app.astroport.fi/swap?from=inj1trg4pfcu07ft2dhd9mljp9s8pajxeclzq5cnuw&to=inj",
+      "coinhallLink": "https://coinhall.org/injective/inj1v08ehtwmx06pdk78clmarvp8tpps9zlmrdp4mw",
+      "dexscreenerLink": "https://dexscreener.com/injective/inj1v08ehtwmx06pdk78clmarvp8tpps9zlmrdp4mw?maker=inj1sy2aad37tku3dz0353epczxd95hvuhzl0lhfqh",
+      "asset_infos": [
+        {
+          "token": {
+            "contract_addr": "inj1trg4pfcu07ft2dhd9mljp9s8pajxeclzq5cnuw"
+          }
+        },
+        {
+          "native_token": {
+            "denom": "inj"
+          }
+        }
+      ],
+      "contract_addr": "inj1v08ehtwmx06pdk78clmarvp8tpps9zlmrdp4mw",
+      "liquidity_token": "inj1zvdyttm55srndjcxxls9ze4sxe3w39xzl6n5qr",
+      "pair_type": {
+        "xyk": {}
+      }
+    },
+    {
+      "token0Meta": {
+        "denom": "inj1efjaf4yuz5ehncz0atjxvrmal7eeschauma26q",
+        "name": "Faith On Solana",
+        "symbol": "FAITH",
+        "decimals": 6,
+        "tokenType": "cw20",
+        "logo": "unknown.svg",
+        "coinGeckoId": "",
+        "tokenVerification": "internal",
+        "cw20": {
+          "decimals": 6,
+          "address": "inj1efjaf4yuz5ehncz0atjxvrmal7eeschauma26q",
+          "symbol": "FAITH",
+          "tokenType": "cw20"
+        }
+      },
+      "token1Meta": {
+        "denom": "inj",
+        "name": "Injective",
+        "symbol": "INJ",
+        "decimals": 18,
+        "tokenType": "native",
+        "logo": "injective-v3.svg",
+        "coinGeckoId": "injective-protocol",
+        "erc20": {
+          "decimals": 18,
+          "address": "0xe28b3B32B6c345A34Ff64674606124Dd5Aceca30",
+          "tokenType": "erc20"
+        },
+        "tokenVerification": "verified"
+      },
+      "astroportLink": "https://app.astroport.fi/swap?from=inj1efjaf4yuz5ehncz0atjxvrmal7eeschauma26q&to=inj",
+      "coinhallLink": "https://coinhall.org/injective/inj15awc050z8shzavnqcu52npsgqn2kte8n87qnnx",
+      "dexscreenerLink": "https://dexscreener.com/injective/inj15awc050z8shzavnqcu52npsgqn2kte8n87qnnx?maker=inj1sy2aad37tku3dz0353epczxd95hvuhzl0lhfqh",
+      "asset_infos": [
+        {
+          "token": {
+            "contract_addr": "inj1efjaf4yuz5ehncz0atjxvrmal7eeschauma26q"
+          }
+        },
+        {
+          "native_token": {
+            "denom": "inj"
+          }
+        }
+      ],
+      "contract_addr": "inj15awc050z8shzavnqcu52npsgqn2kte8n87qnnx",
+      "liquidity_token": "inj1ua6tx6s5kyfvfe9nczdaalt6y9cs2c53yea3r7",
+      "pair_type": {
+        "xyk": {}
+      }
+    },
+    {
+      "token0Meta": {
+        "denom": "inj1ghhdy9mejncsvhwxmvnk5hspkd5fchtrmhu3x2",
+        "name": "CAT WHO DRIVES",
+        "symbol": "DRIVING",
+        "decimals": 8,
+        "tokenType": "cw20",
+        "logo": "unknown.svg",
+        "coinGeckoId": "",
+        "tokenVerification": "internal",
+        "cw20": {
+          "decimals": 8,
+          "address": "inj1ghhdy9mejncsvhwxmvnk5hspkd5fchtrmhu3x2",
+          "symbol": "DRIVING",
+          "tokenType": "cw20"
+        }
+      },
+      "token1Meta": {
+        "denom": "inj",
+        "name": "Injective",
+        "symbol": "INJ",
+        "decimals": 18,
+        "tokenType": "native",
+        "logo": "injective-v3.svg",
+        "coinGeckoId": "injective-protocol",
+        "erc20": {
+          "decimals": 18,
+          "address": "0xe28b3B32B6c345A34Ff64674606124Dd5Aceca30",
+          "tokenType": "erc20"
+        },
+        "tokenVerification": "verified"
+      },
+      "astroportLink": "https://app.astroport.fi/swap?from=inj1ghhdy9mejncsvhwxmvnk5hspkd5fchtrmhu3x2&to=inj",
+      "coinhallLink": "https://coinhall.org/injective/inj1lfsmja7c9js28xd4wyraf783vwalkgfa4yya9m",
+      "dexscreenerLink": "https://dexscreener.com/injective/inj1lfsmja7c9js28xd4wyraf783vwalkgfa4yya9m?maker=inj1sy2aad37tku3dz0353epczxd95hvuhzl0lhfqh",
+      "asset_infos": [
+        {
+          "token": {
+            "contract_addr": "inj1ghhdy9mejncsvhwxmvnk5hspkd5fchtrmhu3x2"
+          }
+        },
+        {
+          "native_token": {
+            "denom": "inj"
+          }
+        }
+      ],
+      "contract_addr": "inj1lfsmja7c9js28xd4wyraf783vwalkgfa4yya9m",
+      "liquidity_token": "inj1jwhja5zcdfkf7zawam4lkm2ysvda4h0ceaksqf",
+      "pair_type": {
+        "xyk": {}
+      }
+    },
+    {
+      "token0Meta": {
+        "denom": "inj13mpkggs6t62kzt6pjd6guqfy6naljpp2jd3eue",
+        "name": "USD Coin",
+        "symbol": "devUSDC",
+        "decimals": 8,
+        "tokenType": "cw20",
+        "logo": "unknown.svg",
+        "coinGeckoId": "",
+        "tokenVerification": "internal",
+        "cw20": {
+          "decimals": 8,
+          "address": "inj13mpkggs6t62kzt6pjd6guqfy6naljpp2jd3eue",
+          "symbol": "devUSDC",
+          "tokenType": "cw20"
+        }
+      },
+      "token1Meta": {
+        "denom": "inj",
+        "name": "Injective",
+        "symbol": "INJ",
+        "decimals": 18,
+        "tokenType": "native",
+        "logo": "injective-v3.svg",
+        "coinGeckoId": "injective-protocol",
+        "erc20": {
+          "decimals": 18,
+          "address": "0xe28b3B32B6c345A34Ff64674606124Dd5Aceca30",
+          "tokenType": "erc20"
+        },
+        "tokenVerification": "verified"
+      },
+      "astroportLink": "https://app.astroport.fi/swap?from=inj13mpkggs6t62kzt6pjd6guqfy6naljpp2jd3eue&to=inj",
+      "coinhallLink": "https://coinhall.org/injective/inj1n8tz8def9z4s8hpv9z0ejggd6pvdxsegy07aaw",
+      "dexscreenerLink": "https://dexscreener.com/injective/inj1n8tz8def9z4s8hpv9z0ejggd6pvdxsegy07aaw?maker=inj1sy2aad37tku3dz0353epczxd95hvuhzl0lhfqh",
+      "asset_infos": [
+        {
+          "token": {
+            "contract_addr": "inj13mpkggs6t62kzt6pjd6guqfy6naljpp2jd3eue"
+          }
+        },
+        {
+          "native_token": {
+            "denom": "inj"
+          }
+        }
+      ],
+      "contract_addr": "inj1n8tz8def9z4s8hpv9z0ejggd6pvdxsegy07aaw",
+      "liquidity_token": "inj1pz56zljchhgyzp5ux5dpq9ddgw2rsaadxshruz",
+      "pair_type": {
+        "xyk": {}
+      }
+    },
+    {
+      "token0Meta": {
+        "denom": "inj12e5vzu6a8jqr5dnl4mh04hdskjnx9rw5n86exk",
+        "name": "CHAD",
+        "symbol": "CHAD",
+        "decimals": 6,
+        "tokenType": "cw20",
+        "logo": "unknown.svg",
+        "coinGeckoId": "",
+        "tokenVerification": "internal",
+        "cw20": {
+          "decimals": 6,
+          "address": "inj12e5vzu6a8jqr5dnl4mh04hdskjnx9rw5n86exk",
+          "symbol": "CHAD",
+          "tokenType": "cw20"
+        }
+      },
+      "token1Meta": {
+        "denom": "inj",
+        "name": "Injective",
+        "symbol": "INJ",
+        "decimals": 18,
+        "tokenType": "native",
+        "logo": "injective-v3.svg",
+        "coinGeckoId": "injective-protocol",
+        "erc20": {
+          "decimals": 18,
+          "address": "0xe28b3B32B6c345A34Ff64674606124Dd5Aceca30",
+          "tokenType": "erc20"
+        },
+        "tokenVerification": "verified"
+      },
+      "astroportLink": "https://app.astroport.fi/swap?from=inj12e5vzu6a8jqr5dnl4mh04hdskjnx9rw5n86exk&to=inj",
+      "coinhallLink": "https://coinhall.org/injective/inj1pv5cjcqvr2dlxncmk9rmxp6u079jqf4y3385md",
+      "dexscreenerLink": "https://dexscreener.com/injective/inj1pv5cjcqvr2dlxncmk9rmxp6u079jqf4y3385md?maker=inj1sy2aad37tku3dz0353epczxd95hvuhzl0lhfqh",
+      "asset_infos": [
+        {
+          "token": {
+            "contract_addr": "inj12e5vzu6a8jqr5dnl4mh04hdskjnx9rw5n86exk"
+          }
+        },
+        {
+          "native_token": {
+            "denom": "inj"
+          }
+        }
+      ],
+      "contract_addr": "inj1pv5cjcqvr2dlxncmk9rmxp6u079jqf4y3385md",
+      "liquidity_token": "inj1zhysllacntu42xcxapttm2qj04c4r2a4gdm43w",
+      "pair_type": {
+        "xyk": {}
+      },
+      "liquidity": 58.33742343264631,
+      "liquidityUpdate": "2023-12-29T21:15:34.425Z"
     }
   ],
   "positions": [
     {
-      "pair_contract": "inj17473t6q9qhucydjc4f6zm30u0c53ukhs2gmj45",
-      "balance": "267604834268",
-      "amount_in": 150000000000000000,
-      "token_denom": "factory/inj1ruwdh4vc29t75eryvxs7vwzt7trtrz885teuwa/injgen",
-      "profit": 0
-    },
-    {
-      "pair_contract": "inj12w09rlksf9wyae3h3yc4pxxrdhfcgd8tm96tpa",
-      "balance": "314437126244864",
-      "amount_in": 150000000000000000,
-      "token_denom": "factory/inj1ztugej2ytfwj9kxa8m5md85e5z3v8jvaxapz6n/skibidi",
-      "profit": 0
-    },
-    {
-      "pair_contract": "inj18lyzlqaee2fv4xm78jchdmp3hthz9w7x0jfm9d",
-      "balance": "1037443822492",
-      "amount_in": 150000000000000000,
-      "token_denom": "factory/inj1k2kcx5n03pe0z9rfzvs9lt764jja9xpvwrxk7c/INJDOGE",
-      "profit": 0
-    },
-    {
-      "pair_contract": "inj1kn45glfp303sc0zv4ye7ypd4ndvfsh5l7dcvas",
-      "balance": "87089545178293",
-      "amount_in": 150000000000000000,
-      "token_denom": "factory/inj1g8s4usdsy7gujf96qma3p8r2a7m02juzfm4neh/CHIKU",
-      "profit": 0
-    },
-    {
-      "pair_contract": "inj1rkq24wk7mqkgwz86plqjaandarjzw2h9eym6ak",
-      "balance": "512229041407",
-      "amount_in": 150000000000000000,
-      "token_denom": "factory/inj1zchn2chqyv0cqfva8asg4lx58pxxhmhhhgx3t5/NFT",
-      "profit": 0
-    },
-    {
       "pair_contract": "inj1zegsh5fkve8n50fvj80m9e9l445cxdt5gkg03c",
       "balance": "99549067677",
-      "amount_in": 150000000000000000,
+      "amount_in": 0,
       "token_denom": "factory/inj125hcdvz9dnhdqal2u8ctr7l0hd8xy9wdgzt8ld/binj",
-      "profit": 0
+      "profit": 0,
+      "is_moon_bag": true
     },
     {
       "pair_contract": "inj13nrydg5pxf8auuq2rx9p0f0uwwldr7jawemn92",
       "balance": "2729",
-      "amount_in": 150000000000000000,
+      "amount_in": 0,
       "token_denom": "factory/inj1tuwuzza5suj9hq4n8pwlfw2gfua8223jfaa6v7/SMILE",
-      "profit": 0
-    },
-    {
-      "pair_contract": "inj1spha7uethctwyyg6lg4etxxm68aukj664rqyea",
-      "balance": "21337031613",
-      "amount_in": 150000000000000000,
-      "token_denom": "factory/inj175fuhj3rlyttt255fsc6fwyteealzt67szpvan/ALIEN",
-      "profit": 0
+      "profit": 0,
+      "is_moon_bag": true
     },
     {
       "pair_contract": "inj1lkggy9ccjnuerr7cp5drnjdmutfcsc683f90aj",
       "balance": "6",
-      "amount_in": 150000000000000000,
+      "amount_in": 0,
       "token_denom": "factory/inj1hjfm3z53dj4ct5nxef5ghn8hul0y53u7ytv8st/babyhachi",
-      "profit": 0
-    },
-    {
-      "pair_contract": "inj18k5s4l693reewc3v98zwlsyth66r065790ykkj",
-      "balance": "2050520547",
-      "amount_in": 150000000000000000,
-      "token_denom": "factory/inj1g8yvnh0lzxc06qe2n4qux5cqlz8h6gnpvaxzus/analos",
-      "profit": 0
-    },
-    {
-      "pair_contract": "inj1llfdh2f5tff2gk2yye48u3ct7tydlnpfdxdeq9",
-      "balance": "88978778664490",
-      "amount_in": 150000000000000000,
-      "token_denom": "factory/inj1cxcjn04l2vxg4zwrlhpghh32fdel856xn3a3rr/BONK",
-      "profit": 0
-    },
-    {
-      "pair_contract": "inj1ycpdd7x8s34kddc3pec7q0crux2te3v0f6dwcw",
-      "balance": "1692381267134",
-      "amount_in": 150000000000000000,
-      "token_denom": "factory/inj12lv4gm863c4pj0utr7zgzp46d6p86krp8stqgp/BABYNINJA",
-      "profit": 0
+      "profit": 0,
+      "is_moon_bag": true
     },
     {
       "pair_contract": "inj1r8y0j8d045z4ln5fg5rtfv260jgcxuw2qx4jhj",
       "balance": "659568805735",
-      "amount_in": 150000000000000000,
+      "amount_in": 0,
       "token_denom": "factory/inj13wngn7gt8mt2k66x3ykp9tvfk5x89ajwd7yrtr/meow",
-      "profit": 0
-    },
-    {
-      "pair_contract": "inj1x98yqt2yupzgqu0fjlf683awfj4u9z6mx5qd6u",
-      "balance": "257008971481",
-      "amount_in": 150000000000000000,
-      "token_denom": "factory/inj1k7tuhcp7shy4qwkwrg6ckjteucg44qfm79rkmx/BNINJA",
-      "profit": 0
-    },
-    {
-      "pair_contract": "inj1jtjtucpzqrqc9vhejmcch5k6uqyu0qh5y7pu9a",
-      "balance": 3608618767846,
-      "amount_in": 0,
-      "token_denom": "factory/inj1sjmplasxl9zgj6yh45j3ndskgdhcfcss9djkdn/INJER",
-      "time_bought": "2023-12-22T22:13:56.257Z",
-      "profit": 21804714781428670,
-      "is_moon_bag": true
-    },
-    {
-      "pair_contract": "inj179vaaw6d507vkjz0ay0jc4lyzlmv6knffhp5jr",
-      "balance": 3030974354870,
-      "amount_in": 0,
-      "token_denom": "factory/inj13ze65lwstqrz4qy6vvxx3lglnkkuan436aw45e/HACHI",
-      "time_bought": "2023-12-22T22:20:52.915Z",
-      "profit": 26532320476803424,
-      "is_moon_bag": true
-    },
-    {
-      "pair_contract": "inj1wf8ssgtagtgw5t743qrj5ug6kxgnl9c5whp587",
-      "balance": 46536125945,
-      "amount_in": 0,
-      "token_denom": "factory/inj1vzmmdd2prja64hs4n2vk8n4dr8luk6522wdrgk/OMNI",
-      "time_bought": "2023-12-23T00:37:45.391Z",
-      "profit": 88910327896504450,
-      "is_moon_bag": true
-    },
-    {
-      "pair_contract": "inj1rvtmmd7p5hh4y4huna7guqfec4ctzaj2unyae4",
-      "balance": 1226606369414,
-      "amount_in": 0,
-      "token_denom": "factory/inj1wjtuzkprkc4gdf4r7dlh9gu96yyxml8qpzzy9p/elon",
-      "time_bought": "2023-12-23T03:15:28.317Z",
-      "profit": 61787753469328800,
+      "profit": 0,
       "is_moon_bag": true
     },
     {
       "pair_contract": "inj1g7luzs4yjs2kac4sk3h8jsktelqlfqu6jct5v8",
-      "balance": 378032225790,
+      "balance": "378032225790",
       "amount_in": 0,
       "token_denom": "factory/inj1qzxna8fqr56g83rvyyylxnyghpguzt2jx3dgr8/SNIPER",
-      "time_bought": "2023-12-23T09:22:21.103Z",
-      "profit": 162645079557518200,
+      "profit": 0,
       "is_moon_bag": true
-    },
-    {
-      "pair_contract": "inj1mrkasrdmylhznhv4r8fze47jsjz2kj3py0uzq4",
-      "balance": 1225053316749220,
-      "amount_in": 0,
-      "token_denom": "factory/inj12ygx3scssu2d9rymtppaf6nks8qg08z9w3tml9/BCAT",
-      "time_bought": "2023-12-23T10:36:04.147Z",
-      "profit": 429026036719439900,
-      "is_moon_bag": true
-    },
-    {
-      "pair_contract": "inj14gqlgtjtzaz9gvfa4208n67e7d7wdrp3ymftul",
-      "balance": 0,
-      "amount_in": 0,
-      "token_denom": "factory/inj1pe8rs2gfmem5ak8vtqkduzkgcyargk2fg6u4as/RUGAOI",
-      "time_bought": "2023-12-23T14:59:57.802Z",
-      "profit": 496835824674300160,
-      "is_moon_bag": false
-    },
-    {
-      "pair_contract": "inj1rgvdxjfpx9s43yfueutwx0frmatljpj39tvke8",
-      "balance": 0,
-      "amount_in": 0,
-      "token_denom": "factory/inj14epxlhe56lhk5s3nc8wzmetwh6rpehuufe89ak/NODEVNORUG",
-      "time_bought": "2023-12-23T15:43:55.711Z",
-      "profit": 290757166978149950,
-      "is_moon_bag": false
-    },
-    {
-      "pair_contract": "inj1385jqva9p0tgyhh4yf7mczzswzm0dysxwwfstp",
-      "balance": 0,
-      "amount_in": 0,
-      "token_denom": "factory/inj1ga982yy0wumrlt4nnj79wcgmw7mzvw6jcyecl0/NPEPE",
-      "time_bought": "2023-12-23T17:03:07.631Z",
-      "profit": 1032823205288517400,
-      "is_moon_bag": false
     },
     {
       "pair_contract": "inj1mj06ea9w2m08erllsddqagg6wwpvvpnhekwsvp",
-      "balance": 3525206391,
-      "amount_in": 700000000000000000,
+      "balance": "3525206391",
+      "amount_in": 0,
       "token_denom": "factory/inj16g5w38hqehsmye9yavag0g0tw7u8pjuzep0sys/FOOL",
-      "time_bought": "2023-12-23T18:31:42.173Z",
-      "profit": 0,
-      "is_moon_bag": false
-    },
-    {
-      "pair_contract": "inj19sy6ksx5cencq388fywmf30pxz50lg3p5hp5t2",
-      "balance": 0,
-      "amount_in": 0,
-      "token_denom": "factory/inj1ax459aj3gkph6z0sxaddk6htzlshqlp5mfwqvx/catinbin",
-      "time_bought": "2023-12-23T18:38:08.196Z",
-      "profit": 158719981801477120,
-      "is_moon_bag": false
-    },
-    {
-      "pair_contract": "inj1ssv0s0mxsy9xtxu4ek0g7ja6aage5llp807wpv",
-      "balance": 0,
-      "amount_in": 72799997600053380,
-      "token_denom": "factory/inj16g5w38hqehsmye9yavag0g0tw7u8pjuzep0sys/BASTARD",
-      "time_bought": "2023-12-23T18:47:22.564Z",
-      "profit": -72799997600053380,
-      "is_moon_bag": false
-    },
-    {
-      "pair_contract": "inj1hzy3zv2eas6df2jk52q6ypm66g0ruvs0xcvcva",
-      "balance": 0,
-      "amount_in": 699999871749519500,
-      "token_denom": "factory/inj16g5w38hqehsmye9yavag0g0tw7u8pjuzep0sys/MICE",
-      "time_bought": "2023-12-23T18:54:57.839Z",
-      "profit": -699999871749519500,
-      "is_moon_bag": false
-    },
-    {
-      "pair_contract": "inj1np9fvhm2aj6399j7kvp0azhatgmuc8ze6nvd8n",
-      "balance": 0,
-      "amount_in": 63623740703098460,
-      "token_denom": "factory/inj1sn34edy635nv4yhts3khgpy5qxw8uey6wvzq53/DUDE",
-      "time_bought": "2023-12-23T20:57:38.281Z",
-      "profit": -43209244355860930,
-      "is_moon_bag": false
-    },
-    {
-      "pair_contract": "inj1zvkxejz0348m6nk0aa8xn96q7g9kz2jwnzc0sr",
-      "balance": 0,
-      "amount_in": 34586206974226624,
-      "token_denom": "factory/inj1898t0vtmul3tcn3t0v8qe3pat47ca937jkpezv/karate",
-      "time_bought": "2023-12-23T21:06:54.448Z",
-      "profit": 823116299388997900,
-      "is_moon_bag": false
-    },
-    {
-      "pair_contract": "inj1esh4q75r08hpw2ylvfy7kc0q0tjjym6vph2rjz",
-      "balance": 0,
-      "amount_in": 24685391127885120,
-      "token_denom": "factory/inj1c7h6wnfdz0dpc5llsdxfq9yemmq9nwfpr0c59r/potter",
-      "time_bought": "2023-12-23T19:07:05.299Z",
-      "profit": -24685391127885120,
-      "is_moon_bag": false
-    },
-    {
-      "pair_contract": "inj17dmdjhqq5t3luqhurx2rghzuq6ckazzsw4t57s",
-      "balance": 0,
-      "amount_in": 6148326835557392,
-      "token_denom": "factory/inj16g5w38hqehsmye9yavag0g0tw7u8pjuzep0sys/KETCHUP",
-      "time_bought": "2023-12-23T19:19:53.358Z",
-      "profit": -6148326835557392,
-      "is_moon_bag": false
-    },
-    {
-      "pair_contract": "inj1ckar06ulzagap7l3chemqq23ykyxengptugfv8",
-      "balance": 0,
-      "amount_in": 33636945430654464,
-      "token_denom": "factory/inj13gc95nsrtv3da5x6ujmktekaljwhj5npl2nszl/ELON",
-      "time_bought": "2023-12-23T20:17:43.585Z",
-      "profit": 114732103368988670,
-      "is_moon_bag": false
-    },
-    {
-      "pair_contract": "inj19kfnc462j0u9ydvv9j3gwzm33vrek0cfxjpmr0",
-      "balance": 0,
-      "amount_in": 0,
-      "token_denom": "factory/inj1khr6lahyjz0wgnwzuu4dk5wz24mjrudz6vgd0z/bigchungus",
-      "time_bought": "2023-12-23T20:31:10.629Z",
-      "profit": 5416329955155784,
-      "is_moon_bag": false
-    },
-    {
-      "pair_contract": "inj1967xd6krmzm0hllgddmf55vtmtck5l7ur79gsx",
-      "balance": 0,
-      "amount_in": 0,
-      "token_denom": "factory/inj1uvfpvnmuqhx8jwg4786y59tkagmph827h38mst/WIZZ",
-      "profit": 254153619668472200,
-      "is_moon_bag": false
-    },
-    {
-      "pair_contract": "inj1dam8zhjwmxv49kvkxy0axt9zmf2qwtm6ee9vrw",
-      "balance": 0,
-      "amount_in": 134896804191773890,
-      "token_denom": "factory/inj1fpl63h7at2epr55yn5svmqkq4fkye32vmxq8ry/MILK",
-      "time_bought": "2023-12-24T04:40:04.951Z",
-      "profit": -134896804191773890,
-      "is_moon_bag": false
-    },
-    {
-      "pair_contract": "inj1tjlt97p76n8dn0dh0vfkhqqt6hsl3fpdqkaz9n",
-      "balance": 0,
-      "amount_in": 0,
-      "token_denom": "factory/inj1467q6d05yz02c2rp5qau95te3p74rqllda4ql7/husky",
-      "time_bought": "2023-12-24T13:01:01.342Z",
-      "profit": 138435504695151520,
-      "is_moon_bag": false
-    },
-    {
-      "pair_contract": "inj14gus8a0zuhm30mwsxz2puu868n8ke7gvtcylvn",
-      "balance": 0,
-      "amount_in": 0,
-      "token_denom": "factory/inj1h4usvhhva6dgmun9rk4haeh8lynln7yhk6ym00/PIKA",
-      "time_bought": "2023-12-24T15:43:06.026Z",
-      "profit": 1535732524525919200,
-      "is_moon_bag": false
-    },
-    {
-      "pair_contract": "inj1ltk6hnc74k9lk0fcx4c65q4j3x64649fa775pw",
-      "balance": 2733749827822,
-      "amount_in": 0,
-      "token_denom": "factory/inj14epxlhe56lhk5s3nc8wzmetwh6rpehuufe89ak/SUSHI",
-      "time_bought": "2023-12-24T20:15:21.505Z",
-      "profit": 201076901050844160,
-      "is_moon_bag": true
-    },
-    {
-      "pair_contract": "inj10pdj6gd3j3rqu54x7key89h4wskpzu3grj3k7s",
-      "balance": 18224998852150,
-      "amount_in": 600000000000000000,
-      "token_denom": "factory/inj14epxlhe56lhk5s3nc8wzmetwh6rpehuufe89ak/UNI",
-      "time_bought": "2023-12-24T20:20:49.538Z",
-      "profit": 0,
-      "is_moon_bag": false
-    },
-    {
-      "pair_contract": "inj1c95v0zr7ah777qn05sqwfnd03le4f40rucs0dp",
-      "balance": "89",
-      "amount_in": 0,
-      "token_denom": "peggy0xdAC17F958D2ee523a2206206994597C13D831ec7",
       "profit": 0,
       "is_moon_bag": true
     },
     {
       "pair_contract": "inj1km669tcs59gncld69pj8kvjtn5698cw4gnfdd5",
-      "balance": 751916892,
+      "balance": "1144368779",
       "amount_in": 0,
       "token_denom": "factory/inj1lqv3a2hxggzall4jekg7lpe6lwqsjevnm9ztnf/doomer",
-      "time_bought": "2023-12-25T14:06:33.648Z",
-      "profit": 68933660895910210,
+      "profit": 0,
       "is_moon_bag": true
     },
     {
-      "pair_contract": "inj1h3e69mew0a2vum2p0fl83e9lpe7v8w0tqmfhp0",
-      "balance": 1648652752,
+      "pair_contract": "inj1cartcl4s8uze4s8f6uavhpqk07k0hfgfm7pra5",
+      "balance": "116785498303",
       "amount_in": 0,
-      "token_denom": "factory/inj13m5k0v69lrrng4y3h5895dlkr6zcp272jmhrve/Ninjutsu",
-      "time_bought": "2023-12-26T00:19:50.759Z",
-      "profit": 19703168677962350,
+      "token_denom": "factory/inj13yzzxz90naqer4utnp03zlj5rguhu7v0hd2jzl/SHIBINJ",
+      "profit": 0,
+      "is_moon_bag": true
+    },
+    {
+      "pair_contract": "inj1y7e6r2dxsyrfdjpef6c5ghztks0wzfx6ld20sc",
+      "balance": "1347304921",
+      "amount_in": 0,
+      "token_denom": "factory/inj1j7zt6g03vpmg9p7g7qngvylfxqeuds73utsjnk/INJECT",
+      "profit": 0,
       "is_moon_bag": true
     }
   ],
@@ -6687,6 +7343,24 @@
     "inj169qvw83up9xqer5qxagnh2c0nr8hx6eydaram7",
     "inj1zeapuglys08nkm8aytr69yf2twjwkh77hxyztr",
     "inj1j98pstwkpkmvwsr3jqt66u0yhmv2khld0gutkj",
-    "inj17y6zf5ryz8hhr8ad699p0vx3p0y9v4wx5ekpg4"
+    "inj17y6zf5ryz8hhr8ad699p0vx3p0y9v4wx5ekpg4",
+    "inj13at493n54hm2mpg2vk32t6vdj3lwue9glkxuha",
+    "inj1w800rj45h5sc3tzssgu4u76qet25xpvp75hxwq",
+    "inj1xaf5562n3jtds98cun8u0vmcehcywahf2ajgrp",
+    "inj1v9cnxlrcr4klwlk3850nxky68mcd4h0zaejxn6",
+    "inj1cay4su8lfaktcra38zr9rz0g2rnmxyr370sxd4",
+    "inj1qp3tz0uhnkl5qqpyz7ud69uvtajtve6d2pukhc",
+    "inj1zuplc0f69dxut85279yxql2k0avcnydzy8p6ee",
+    "inj13xafwkc5awsv8pz8g2vfuqatk2pl70r2zsw26w",
+    "inj1pvsj2zfh2ve0wlrxp6um8fvckge5h9y3njdr57",
+    "inj1049kktyq9c46pzkra7s8kmqvxp39c6nyjpw0sk",
+    "inj155a5n5tl9w7j90lyd7kx0ks2punmu88qd287nq",
+    "inj1z9ndlwsm7s7h96upk8rlw77mf4hpl89j6rssqp",
+    "inj1ru3ajm3spqg85n0w4ewv2kqvjwjh23lt8e9wkn",
+    "inj1nvtfxeclr4dtcj6n0cm9q5ktwpy3pdtengqyvw",
+    "inj190w67mvdeletpmuvgd6rmnul9wd3n2avw3ax42",
+    "inj1eac9lx3adrl73l7y2mj4ya8affqtpgken4ztfu",
+    "inj1vgg65plql6vdzy39pc5ffpm4ylslnzx836x22j",
+    "inj14e6krtq70qvsjst2j74acevmeyardgrs5a3p2n"
   ]
 }

@@ -10,7 +10,7 @@ const CONFIG = {
     tokenTypes: ['native', 'tokenFactory', 'cw20'],
     pairType: '{"xyk":{}}',
     maxSpread: 0.49,
-    snipeAmount: 0.5, // INJ
+    snipeAmount: 0.7, // INJ
     profitGoalPercent: 35, // %
     stopLoss: 50, // %
     tradeTimeLimit: 600, // mins
@@ -35,7 +35,7 @@ const main = async () => {
     console.log(`Number of pairs: ${astroportSniper.allPairs.size}`);
 
     astroportSniper.setMonitorNewPairs(true)
-    // astroportSniper.startMonitorPairForLiq("inj1pz784h9acgdgk96kgjg5vzjyud2hhupy6r7kvk")
+    // astroportSniper.startMonitorPairForLiq("inj1fc2a2zkhccau2sugmgt6cvyf4g04t45ghhzeex")
 };
 
 main();
