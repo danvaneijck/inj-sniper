@@ -10,7 +10,7 @@ const CONFIG = {
     tokenTypes: ['native', 'tokenFactory', 'cw20'],
     pairType: '{"xyk":{}}',
     maxSpread: 0.49,
-    snipeAmount: 0.7, // INJ
+    snipeAmount: 0.4, // INJ
     profitGoalPercent: 35, // %
     stopLoss: 50, // %
     tradeTimeLimit: 600, // mins

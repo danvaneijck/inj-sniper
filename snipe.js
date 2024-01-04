@@ -1321,6 +1321,10 @@ class AstroportSniper {
             transactions.transactions.map(async (tx) => {
                 const txHash = tx.txHash;
                 let txInfo = await this.getTxByHash(txHash);
+                if (!txInfo || !txInfo.logs) {
+                    console.log(txInfo)
+                    return
+                }
                 await Promise.all(
                     txInfo.messages.map(async (msg) => {
                         let message;
@@ -1333,6 +1337,7 @@ class AstroportSniper {
                             const firstKey = Object.keys(message)[0];
                             if (firstKey == "create_pair") {
                                 const blockTimestamp = txInfo['blockTimestamp'];
+
                                 const pairAddress = txInfo.logs[0].events[txInfo.logs[0].events.length - 1].attributes.find((attr) => attr.key === "pair_contract_addr").value;
 
                                 if (!this.allPairs.has(pairAddress) && !this.ignoredPairs.has(pairAddress)) {
@@ -1408,7 +1413,6 @@ class AstroportSniper {
                 allTransactions.push(...currentTransactions);
 
                 if (currentTransactions.length == 0) {
-                    console.log("no more tx, breaking", pairName)
                     break
                 }
 
@@ -1472,7 +1476,7 @@ class AstroportSniper {
                                 this.stopMonitorPairForLiq(pairContract);
                                 console.log("small amount of liquidity added")
                                 this.sendMessageToDiscord(`:eyes: ${pairName} - Small liquidity Added: $${liquidity}\n${pair.astroportLink}\n${pair.dexscreenerLink}\n<@352761566401265664>`)
-                                await this.buyMemeToken(pair, this.snipeAmount / 10);
+                                // await this.buyMemeToken(pair, this.snipeAmount / 10);
                                 return;
                             }
 
