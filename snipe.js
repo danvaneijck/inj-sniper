@@ -14,6 +14,8 @@ const { SlashCommandBuilder } = require('@discordjs/builders');
 const moment = require('moment');
 const fs = require('fs/promises');
 const TransactionManager = require("./transactions")
+var colors = require("colors");
+colors.enable();
 require('dotenv').config();
 
 class AstroportSniper {
@@ -21,7 +23,7 @@ class AstroportSniper {
         this.RPC = config.gRpc
         this.live = config.live
 
-        console.log("Init on ", this.RPC)
+        console.log(`Init on ${this.RPC}`.bgGreen)
 
         this.chainGrpcWasmApi = new ChainGrpcWasmApi(this.RPC);
         this.astroFactory = process.env.FACTORY_CONTRACT;
@@ -41,6 +43,9 @@ class AstroportSniper {
         this.indexerRestExplorerApi = new IndexerRestExplorerApi(
             `${getNetworkEndpoints(Network.Mainnet).explorer}/api/explorer/v1`,
         )
+        this.indexerRestExplorerApi.fetchTransactions({
+
+        })
 
         this.monitorNewPairs = false
 
@@ -48,7 +53,7 @@ class AstroportSniper {
         this.publicKey = this.privateKey.toAddress()
 
         this.walletAddress = this.privateKey.toAddress().toBech32()
-        console.log(`Loaded wallet from private key ${this.walletAddress}`)
+        console.log(`Loaded wallet from private key ${this.walletAddress}`.bgGreen)
 
         this.txManager = new TransactionManager(this.privateKey)
 
@@ -57,6 +62,7 @@ class AstroportSniper {
         this.baseAsset = null
         this.stableAsset = null
         this.baseAssetPrice = 0;
+        this.moonBagPercent = config.moonBagPercent
 
         this.tokenTypes = ['native', 'tokenFactory'];
         this.pairType = '{"xyk":{}}';
@@ -88,35 +94,7 @@ class AstroportSniper {
         this.discordChannelId = process.env.DISCORD_CHANNEL;
 
         this.discordClient = new Client({ intents: [GatewayIntentBits.Guilds] });
-        this.discordClient.login(this.discordToken);
-
         this.discordTag = `<@352761566401265664>`
-        this.discordClient.on('ready', () => {
-            console.log(`Logged in as ${this.discordClient.user.tag}!`);
-            this.discordClient.guilds.cache.forEach(guild => {
-                guild.commands.create(new SlashCommandBuilder()
-                    .setName('get_positions')
-                    .setDescription('Get portfolio positions for a wallet address')
-                );
-                guild.commands.create(new SlashCommandBuilder()
-                    .setName('buy_token')
-                    .addStringOption(option => option.setName('pair').setDescription('The pair to buy').setRequired(true))
-                    .addNumberOption(option => option.setName('amount').setDescription('The amount to buy').setRequired(true))
-                    .setDescription('Buy a token using the pair address')
-                );
-                guild.commands.create(new SlashCommandBuilder()
-                    .setName('sell_token')
-                    .addStringOption(option => option.setName('pair').setDescription('The pair to sell').setRequired(true))
-                    .setDescription('Sell a token using the pair address')
-                );
-                guild.commands.create(new SlashCommandBuilder()
-                    .setName('monitor_to_sell')
-                    .addStringOption(option => option.setName('pair').setDescription('The pair to monitor').setRequired(true))
-                    .setDescription('Monitor a pair for opportunity to sell')
-                );
-            });
-            console.log("set up discord slash commands")
-        });
 
         this.allPairsQuery = {
             pairs: {
@@ -127,16 +105,90 @@ class AstroportSniper {
     }
 
     async initialize(pairType, tokenTypes, backfill = false) {
-        this.pairType = pairType
-        this.tokenTypes = tokenTypes
-        this.setupDiscordCommands()
-        if (backfill) {
-            this.live = false
-        }
         try {
-            await this.loadFromFile('data.json');
-            await this.updateBaseAssetPrice()
-            // await this.getPairs(pairType, tokenTypes, backfill);
+            this.pairType = pairType
+            this.tokenTypes = tokenTypes
+
+            if (backfill) {
+                this.live = false
+            }
+            try {
+                await this.loadFromFile('data.json');
+                await this.updateBaseAssetPrice()
+                this.setupDiscordCommands()
+            } catch (error) {
+                console.error('Error during initialization:', error);
+            }
+
+            this.discordClient.on('ready', async () => {
+                console.log(`Logged in as ${this.discordClient.user.tag}!`.gray);
+                await this.sendMessageToDiscord(
+                    `:arrows_clockwise: Start up INJ Sniper on RPC: ${this.RPC}\n` +
+                    `:chart_with_upwards_trend: Trading mode: ${this.live ? ':exclamation: LIVE :exclamation:' : 'TEST'}\n` +
+                    `:gun: Snipe amount: ${this.snipeAmount} ${this.baseAssetName} ($${((this.baseAssetPrice / Math.pow(10, this.stableAsset.decimals)) * this.snipeAmount).toFixed(2)}), ` +
+                    `profit goal: ${(this.profitGoalPercent).toFixed(2)}%, stop loss: ${(this.stopLoss).toFixed(2)}%,` +
+                    ` targeting pairs between $${this.lowLiquidityThreshold} and $${this.highLiquidityThreshold} in liquidity`
+                )
+                this.discordClient.guilds.cache.forEach(guild => {
+                    guild.commands.create(new SlashCommandBuilder()
+                        .setName('get_positions')
+                        .setDescription('Get portfolio positions for a wallet address')
+                    );
+                    guild.commands.create(new SlashCommandBuilder()
+                        .setName('buy_token')
+                        .addStringOption(option => option.setName('pair').setDescription('The pair to buy').setRequired(true))
+                        .addNumberOption(option => option.setName('amount').setDescription('The amount to buy').setRequired(true))
+                        .setDescription('Buy a token using the pair address')
+                    );
+                    guild.commands.create(new SlashCommandBuilder()
+                        .setName('sell_token')
+                        .addStringOption(option => option.setName('pair').setDescription('The pair to sell').setRequired(true))
+                        .setDescription('Sell a token using the pair address')
+                    );
+                    guild.commands.create(new SlashCommandBuilder()
+                        .setName('monitor_to_sell')
+                        .addStringOption(option => option.setName('pair').setDescription('The pair to monitor').setRequired(true))
+                        .setDescription('Monitor a pair for opportunity to sell')
+                    );
+                    guild.commands.create(new SlashCommandBuilder()
+                        .setName('set_live_trading')
+                        .addBooleanOption(option => option.setName('live').setDescription('Is trading live?').setRequired(true))
+                        .setDescription('Set live trading mode on or off')
+                    );
+                    guild.commands.create(new SlashCommandBuilder()
+                        .setName('set_monitor_new_pairs')
+                        .addBooleanOption(option => option.setName('monitor_pairs').setDescription('Monitor for new pairs?').setRequired(true))
+                        .setDescription('Set monitoring for new pairs on or off')
+                    );
+                    guild.commands.create(new SlashCommandBuilder()
+                        .setName('start_monitor_pair_for_liquidity')
+                        .addStringOption(option => option.setName('pair').setDescription('The pair to monitor').setRequired(true))
+                        .setDescription('Monitor a pair for added liquidity')
+                    );
+                    guild.commands.create(new SlashCommandBuilder()
+                        .setName('stop_monitor_pair_for_liquidity')
+                        .addStringOption(option => option.setName('pair').setDescription('The pair to stop monitoring').setRequired(true))
+                        .setDescription('Stop monitoring a pair for added liquidity')
+                    );
+                    guild.commands.create(new SlashCommandBuilder()
+                        .setName('set_config')
+                        .addNumberOption(option => option.setName('snipe_amount').setDescription('The snipe amount').setRequired(true))
+                        .addNumberOption(option => option.setName('stop_loss').setDescription('The stop loss % 1 - 100').setRequired(true))
+                        .addNumberOption(option => option.setName('profit_goal').setDescription('The profit goal % 1 - 100').setRequired(true))
+                        .addNumberOption(option => option.setName('moon_bag').setDescription('The moon bag % 0.0 - 1.0').setRequired(true))
+                        .addNumberOption(option => option.setName('low_liq_threshold').setDescription('The low liquidity threshold $').setRequired(true))
+                        .addNumberOption(option => option.setName('high_liq_threshold').setDescription('The high liquidity threshold $').setRequired(true))
+                        .addNumberOption(option => option.setName('trade_time_limit').setDescription('The trade time limit in minutes').setRequired(true))
+                        .setDescription('Set the trading parameters')
+                    );
+                    guild.commands.create(new SlashCommandBuilder()
+                        .setName('get_status')
+                        .setDescription('Get the current bot status')
+                    );
+                });
+                console.log("set up discord slash commands".gray)
+            });
+            this.discordClient.login(this.discordToken);
         } catch (error) {
             console.error('Error during initialization:', error);
         }
@@ -172,6 +224,76 @@ class AstroportSniper {
                 await interaction.reply("Monitoring token to sell");
                 const pairContract = interaction.options.getString('pair');
                 await this.executeMonitorToSellCommand(pairContract);
+            }
+            if (commandName === 'set_live_trading') {
+                const live = interaction.options.getBoolean('live');
+                this.live = live
+                await interaction.reply(`Set live trading to ${live}`);
+            }
+            if (commandName === 'set_monitor_new_pairs') {
+                const monitor_pairs = interaction.options.getBoolean('monitor_pairs');
+                this.setMonitorNewPairs(monitor_pairs)
+                await interaction.reply(`Set monitor new pairs to ${monitor_pairs}`);
+            }
+            if (commandName === 'start_monitor_pair_for_liquidity') {
+                const pairContract = interaction.options.getString('pair');
+                this.startMonitorPairForLiq(pairContract)
+                let pair = await this.getPairInfo(pairContract)
+                const pairName = `${pair.token0Meta.symbol}, ${pair.token1Meta.symbol}`;
+                await interaction.reply(`:arrow_forward: Began monitoring ${pairName} for liquidity`);
+            }
+            if (commandName === 'stop_monitor_pair_for_liquidity') {
+                const pairContract = interaction.options.getString('pair');
+                this.stopMonitorPairForLiq(pairContract)
+                let pair = await this.getPairInfo(pairContract)
+                const pairName = `${pair.token0Meta.symbol}, ${pair.token1Meta.symbol}`;
+                await interaction.reply(`:stop_button: Stopped monitoring ${pairName} for liquidity`);
+            }
+            if (commandName === 'set_config') {
+                const snipeAmount = interaction.options.getNumber('snipe_amount');
+                const profitGoal = interaction.options.getNumber('stop_loss');
+                const stopLoss = interaction.options.getNumber('profit_goal');
+                const moonBagPercent = interaction.options.getNumber('moon_bag');
+                const lowLiq = interaction.options.getNumber('low_liq_threshold');
+                const highLiq = interaction.options.getNumber('high_liq_threshold');
+                const timeLimit = interaction.options.getNumber('trade_time_limit');
+
+                this.snipeAmount = snipeAmount
+                this.profitGoalPercent = profitGoal
+                this.stopLoss = stopLoss
+                this.moonBagPercent = moonBagPercent
+                this.lowLiquidityThreshold = lowLiq
+                this.highLiquidityThreshold = highLiq
+                this.tradeTimeLimit = timeLimit
+
+                let message =
+                    `:gun: Snipe amount: ${this.snipeAmount} ${this.baseAssetName} ($${((this.baseAssetPrice / Math.pow(10, this.stableAsset.decimals)) * this.snipeAmount).toFixed(2)})\n` +
+                    `:moneybag: Profit goal: ${this.profitGoalPercent}% :octagonal_sign: Stop loss: ${this.stopLoss}% :crescent_moon: Moon bag: ${this.moonBagPercent}\n` +
+                    `:arrow_down_small: Low liquidity threshold: $${this.lowLiquidityThreshold} :arrow_up_small: High liquidity threshold: $${this.highLiquidityThreshold}\n` +
+                    `:alarm_clock: Time limit: ${this.tradeTimeLimit} mins\n\n` +
+                    `Trading live: ${this.live ? ":white_check_mark:" : ":x:"}\n` +
+                    `Monitoring new pairs: ${this.monitorNewPairs ? ":white_check_mark:" : ":x:"}\n`
+
+                await interaction.reply(message);
+            }
+            if (commandName === 'get_status') {
+                let liqMonitor = ""
+                for (const pair of this.lowLiqPairsToMonitor.values()) {
+                    let pairInfo = await this.getPairInfo(pair)
+                    let pairName = `${pairInfo.token0Meta.symbol}, ${pairInfo.token1Meta.symbol}`;
+                    liqMonitor += `${pairName} (${pair}), `
+                }
+
+                let message =
+                    `:gun: Snipe amount: ${this.snipeAmount} ${this.baseAssetName} ($${((this.baseAssetPrice / Math.pow(10, this.stableAsset.decimals)) * this.snipeAmount).toFixed(2)})\n` +
+                    `:moneybag: Profit goal: ${this.profitGoalPercent}% :octagonal_sign: Stop loss: ${this.stopLoss}% :crescent_moon: Moon bag: ${this.moonBagPercent}\n` +
+                    `:arrow_down_small: Low liquidity threshold: $${this.lowLiquidityThreshold} :arrow_up_small: High liquidity threshold: $${this.highLiquidityThreshold}\n` +
+                    `:alarm_clock: Time limit: ${this.tradeTimeLimit} mins\n\n` +
+                    `Trading live: ${this.live ? ":white_check_mark:" : ":x:"}\n` +
+                    `Monitoring new pairs: ${this.monitorNewPairs ? ":white_check_mark:" : ":x:"}\n` +
+                    `Monitoring pairs for liquidity: ${liqMonitor.length > 0 ? liqMonitor : "none"}\n`
+
+                await interaction.reply(message);
             }
         });
     }
@@ -253,15 +375,15 @@ class AstroportSniper {
             const jsonData = JSON.parse(data);
             if (jsonData.allPairs) {
                 this.allPairs = new Map(jsonData.allPairs.map(pair => [pair.contract_addr, pair]));
-                console.log('Loaded allPairs from file');
+                console.log('Loaded allPairs from file'.gray);
             }
             if (jsonData.positions) {
                 this.positions = new Map(jsonData.positions.map(position => [position.pair_contract, position]));
-                console.log('Loaded positions from file');
+                console.log('Loaded positions from file'.gray);
             }
             if (jsonData.ignoredPairs) {
                 this.ignoredPairs = new Set(jsonData.ignoredPairs);
-                console.log('Loaded ignoredPairs from file');
+                console.log('Loaded ignoredPairs from file'.gray);
             }
         } catch (error) {
             console.error('Error loading data from file:', error);
@@ -311,14 +433,14 @@ class AstroportSniper {
 
         const currentPrice = quote['return_amount'] / Math.pow(10, this.stableAsset.decimals)
         if (this.discordClient && this.discordClient.user) {
-            const activityText = `${this.baseAssetName}: $${currentPrice}`;
+            const activityText = `${this.baseAssetName}: $${currentPrice.toFixed(2)}`;
             this.discordClient.user.setActivity(activityText, { type: ActivityType.Watching });
         }
         await this.saveToFile('data.json')
     }
 
     startMonitoringBasePair(intervalInSeconds) {
-        console.log('Base Asset monitoring started.');
+        console.log('Base Asset monitoring started.'.gray);
         this.monitoringBasePairIntervalId = setInterval(async () => {
             await this.updateBaseAssetPrice();
         }, intervalInSeconds * 1000);
@@ -519,7 +641,11 @@ class AstroportSniper {
         }
 
         const pairName = `${pair.token0Meta.symbol}, ${pair.token1Meta.symbol}`;
-        const askAssetIndex = pair.asset_infos.findIndex(assetInfo => assetInfo.native_token.denom !== this.baseDenom);
+        const askAssetIndex = pair.asset_infos.findIndex(assetInfo => {
+            const isNativeToken = assetInfo.native_token && assetInfo.native_token.denom !== this.baseDenom;
+            const isCW20Token = assetInfo.token && assetInfo.token.contract_addr !== this.baseTokenContractAddr;
+            return isNativeToken || isCW20Token;
+        });
         if (askAssetIndex === -1) {
             console.error(`Error finding ask asset for ${pairName}`);
             return;
@@ -699,36 +825,43 @@ class AstroportSniper {
 
                 await this.calculateLiquidity(pair)
 
-                if (Math.abs(priceChangeToHighest) > priceChangeThreshold) {
-                    let message = `:small_red_triangle_down: ${pairName} Price is down ${parseFloat(priceChangeToHighest).toFixed(2)}% in the last ` +
-                        `${trackingDurationMinutes} minutes. current: $${parseFloat(currentPrice).toFixed(10)}, ` +
-                        `high: $${newHighestPrice.toFixed(10)}, liquidity: $${Math.round(pair.liquidity)}\n` +
-                        `${pair.coinhallLink}\n${pair.astroportLink}`
+                if (pair.liquidity < 1) {
+                    let message = `:small_red_triangle_down: ${pairName} rugged!`
                     this.sendMessageToDiscord(message);
-                    this.lastPrices.delete(pair.contract_addr);
-                    lastPrices = [];
+                }
+                else {
+                    if (Math.abs(priceChangeToHighest) > priceChangeThreshold) {
+                        let message = `:small_red_triangle_down: ${pairName} Price is down ${parseFloat(priceChangeToHighest).toFixed(2)}% in the last ` +
+                            `${trackingDurationMinutes} minutes. current: $${parseFloat(currentPrice).toFixed(10)}, ` +
+                            `high: $${newHighestPrice.toFixed(10)}, liquidity: $${Math.round(pair.liquidity)}\n` +
+                            `${pair.coinhallLink}\n${pair.astroportLink}`
+                        this.sendMessageToDiscord(message);
+                        this.lastPrices.delete(pair.contract_addr);
+                        lastPrices = [];
+                    }
+
+                    if (priceChangeToLowest > priceChangeThreshold) {
+                        let message = `:green_circle: ${pairName} price is up ${parseFloat(priceChangeToLowest).toFixed(2)}% in the last ` +
+                            `${trackingDurationMinutes} minutes. current: $${parseFloat(currentPrice).toFixed(10)}, ` +
+                            `low: $${newLowestPrice.toFixed(10)}, liquidity: $${Math.round(pair.liquidity)}\n` +
+                            `${pair.coinhallLink}\n${pair.astroportLink}`;
+                        this.sendMessageToDiscord(message);
+                        this.lastPrices.delete(pair.contract_addr);
+                        lastPrices = [];
+                    }
                 }
 
-                if (priceChangeToLowest > priceChangeThreshold) {
-                    let message = `:green_circle: ${pairName} price is up ${parseFloat(priceChangeToLowest).toFixed(2)}% in the last ` +
-                        `${trackingDurationMinutes} minutes. current: $${parseFloat(currentPrice).toFixed(10)}, ` +
-                        `low: $${newLowestPrice.toFixed(10)}, liquidity: $${Math.round(pair.liquidity)}\n` +
-                        `${pair.coinhallLink}\n${pair.astroportLink}`;
-                    this.sendMessageToDiscord(message);
-                    this.lastPrices.delete(pair.contract_addr);
-                    lastPrices = [];
-                }
 
-                console.log(`${pairName} price ${parseFloat(currentPrice).toFixed(10)}, liquidity: $${Math.round(pair.liquidity)}`)
+                console.log(`${pairName} price ${parseFloat(currentPrice).toFixed(10)}, liquidity: $${Math.round(pair.liquidity)}`.yellow)
 
-                if (currentPrice == Infinity) {
+                if (currentPrice == Infinity || pair.liquidity < 1) {
                     this.stopMonitoringPairForPriceChange(pair)
                 }
             }, intervalInSeconds * 1000);
 
             this.pairPriceMonitoringIntervals.set(pair.contract_addr, monitoringIntervalId);
 
-            console.log(`Price - Monitoring started for ${pairName}.`);
+            console.log(`Price - Monitoring started for ${pairName}.`.bgCyan);
         } catch (error) {
             console.error('Error monitoring pair:', error);
         }
@@ -740,7 +873,7 @@ class AstroportSniper {
             clearInterval(this.pairPriceMonitoringIntervals.get(pair.contract_addr));
             this.pairPriceMonitoringIntervals.delete(pair.contract_addr);
 
-            console.log(`Monitoring stopped for ${pairName}.`);
+            console.log(`Monitoring stopped for ${pairName}.`.bgYellow);
         } else {
             console.log(`Pair ${pairName} is not being monitored.`);
         }
@@ -758,7 +891,7 @@ class AstroportSniper {
                 if (!updatedPair) return
                 this.allPairs.set(pair.contract_addr, updatedPair)
                 const currentLiquidity = await this.calculateLiquidity(updatedPair);
-                console.log(`${pairName} liquidity: ${currentLiquidity}`)
+                console.log(`${pairName} liquidity: ${currentLiquidity}`.gray)
                 if (currentLiquidity && currentLiquidity > liquidityThreshold) {
                     this.stopMonitoringLowLiquidityPair(pair)
                     console.log(`Monitoring ${pairName} - Liquidity Added: $${currentLiquidity}`);
@@ -767,7 +900,7 @@ class AstroportSniper {
                 }
             }, intervalInSeconds * 1000);
             this.lowLiquidityPairMonitoringIntervals.set(pair.contract_addr, monitoringIntervalId);
-            console.log(`Low Liquidity - Monitoring started for ${pairName}`);
+            console.log(`Low Liquidity - Monitoring started for ${pairName}`.bgCyan);
 
         } catch (error) {
             console.error('Error monitoring low liquidity pair:', error);
@@ -781,14 +914,13 @@ class AstroportSniper {
         if (monitoringIntervalId) {
             clearInterval(monitoringIntervalId);
             this.lowLiquidityPairMonitoringIntervals.delete(pair.contract_addr);
-            console.log(`Monitoring stopped for ${pairName} - Low Liquidity.`);
+            console.log(`Monitoring stopped for ${pairName} - Low Liquidity.`.bgYellow);
         } else {
             console.log(`Pair ${pairName} is not currently being monitored for low liquidity.`);
         }
     }
 
     async getPortfolio() {
-        console.log("fetching portfolio")
         try {
             const endpoints = getNetworkEndpoints(Network.Mainnet);
             const indexerGrpcAccountPortfolioApi = new IndexerGrpcAccountPortfolioApi(
@@ -813,6 +945,7 @@ class AstroportSniper {
                     if (!pair) continue;
 
                     const pairInfo = await this.getPairInfo(pair.contract_addr);
+                    await this.calculateLiquidity(pairInfo)
                     if (pairInfo) {
                         this.allPairs.set(pair.contract_addr, pairInfo)
                         const pairName = `${pair.token0Meta.symbol}, ${pair.token1Meta.symbol}`;
@@ -841,7 +974,7 @@ class AstroportSniper {
                                     });
                             }
 
-                            console.log(`found balance for ${pairName}: ${(balance.amount / Math.pow(10, tokenDenom.decimals)).toFixed(2)} ${tokenDenom.symbol} (${amountBack} ${this.baseAssetName} $${usdValue.toFixed(2)})`)
+                            console.log(`found balance for ${pairName}: ${(balance.amount / Math.pow(10, tokenDenom.decimals)).toFixed(2)} ${tokenDenom.symbol} (${amountBack} ${this.baseAssetName} $${usdValue.toFixed(2)})`.yellow)
 
                         }
                     }
@@ -856,7 +989,7 @@ class AstroportSniper {
     }
 
     async updateLiquidityAllPairs() {
-        console.log("update liquidity for all pairs")
+        console.log("update liquidity for all pairs".bgCyan)
         for (const pair of this.allPairs.values()) {
             await this.calculateLiquidity(pair);
             if (pair.liquidity < 10 && pair.liquidity > 0 && !this.positions.has(pair.contract_addr)) {
@@ -1104,7 +1237,13 @@ class AstroportSniper {
         let formattedMessage = '';
 
         for (const balance of portfolio.bankBalancesList) {
-            if (balance.denom === this.baseDenom || balance.amount <= 0) continue;
+            if (Number(balance.amount) <= 0 || !balance.amount) continue;
+
+            if (balance.denom === this.baseDenom) {
+                let usdValue = (this.baseAssetPrice / Math.pow(10, this.stableAsset.decimals)) * (balance.amount / Math.pow(10, this.baseAsset.decimals))
+                formattedMessage += `${this.baseAssetName}: ${(balance.amount / Math.pow(10, this.baseAsset.decimals)).toFixed(2)} :dollar: $${usdValue.toFixed(2)}\n`
+                continue
+            }
 
             const pair = Array.from(this.allPairs.values()).find(pair => {
                 return (
@@ -1114,7 +1253,6 @@ class AstroportSniper {
             });
 
             if (pair) {
-                const pairName = `${pair.token0Meta.symbol}, ${pair.token1Meta.symbol}`;
                 const tokenDenom = pair.asset_infos[0].native_token.denom === balance.denom
                     ? pair.token0Meta
                     : pair.token1Meta;
@@ -1128,9 +1266,10 @@ class AstroportSniper {
 
                     const usdValue = (convertedQuote * baseAssetPriceConverted)
 
-                    if (usdValue > 0.1) {
-                        formattedMessage += `${pairName}: ${(balance.amount / Math.pow(10, tokenDenom.decimals)).toFixed(2)} ` +
-                            `${tokenDenom.symbol} (${amountBack} ${this.baseAssetName} $${usdValue.toFixed(2)})\n${pair.dexscreenerLink}\n`;
+                    if (usdValue.toFixed(2) > 0) {
+                        formattedMessage += `${(balance.amount / Math.pow(10, tokenDenom.decimals)).toFixed(2)} ` +
+                            `${tokenDenom.symbol} (${amountBack} ${this.baseAssetName} :dollar: $${usdValue.toFixed(2)}) ` +
+                            `liquidity: $${pair.liquidity.toFixed(2)} ${pair.dexscreenerLink}\n`;
                     }
                 }
             }
@@ -1208,7 +1347,7 @@ class AstroportSniper {
                             result = await this.sellMemeToken(pair, Number(position.balance) * 0.6)
                         }
                         else {
-                            result = await this.sellMemeToken(pair, Number(position.balance) * 0.85)
+                            result = await this.sellMemeToken(pair, Number(position.balance) * (1 - this.moonBagPercent))
                         }
                         return result
                     }
@@ -1285,8 +1424,10 @@ class AstroportSniper {
             indexerGrpcExplorerStream,
         )
 
-        const callback = (transactions) => {
-            console.log(transactions)
+        const callback = async (transaction) => {
+            console.log(transaction)
+
+
         }
 
         const streamFnArgs = {
@@ -1472,18 +1613,37 @@ class AstroportSniper {
                                 return
                             }
 
-                            if (liquidity > 20 && liquidity < 200 && txTime > moment().subtract(1, 'minute')) {
+                            if (
+                                liquidity > 1 && liquidity < this.lowLiquidityThreshold &&
+                                txTime > moment().subtract(1, 'minute')
+                            ) {
                                 this.stopMonitorPairForLiq(pairContract);
                                 console.log("small amount of liquidity added")
-                                this.sendMessageToDiscord(`:eyes: ${pairName} - Small liquidity Added: $${liquidity}\n${pair.astroportLink}\n${pair.dexscreenerLink}\n<@352761566401265664>`)
-                                // await this.buyMemeToken(pair, this.snipeAmount / 10);
+                                this.sendMessageToDiscord(`:eyes: ${pairName} - Small liquidity Added: $${liquidity}\n` +
+                                    `<t:${txTime.unix()}:R>\n` +
+                                    `${pair.astroportLink}\n${pair.dexscreenerLink}\n<@352761566401265664>`)
+                                await this.monitorPairForPriceChange(pair, 5, 5, 5)
                                 return;
                             }
 
-                            if (liquidity > this.lowLiquidityThreshold && txTime > moment().subtract(1, 'minute')) {
+                            if (
+                                liquidity > this.lowLiquidityThreshold &&
+                                liquidity < this.highLiquidityThreshold &&
+                                txTime > moment().subtract(1, 'minute')
+                            ) {
                                 this.stopMonitorPairForLiq(pairContract);
-                                this.sendMessageToDiscord(`:eyes: ${pairName} - Liquidity Added from tx: $${liquidity}\n${pair.astroportLink}\n${pair.dexscreenerLink}\n<@352761566401265664>`)
-                                await this.buyMemeToken(pair, this.snipeAmount);
+                                this.sendMessageToDiscord(`:eyes: ${pairName} - Liquidity Added from tx: $${liquidity}\n` +
+                                    `<t:${txTime.unix()}:R>\n` +
+                                    `${pair.astroportLink}\n${pair.dexscreenerLink}\n<@352761566401265664>`)
+
+
+                                if (this.live) {
+                                    await this.buyMemeToken(pair, this.snipeAmount);
+                                }
+                                else {
+                                    this.monitorPairForPriceChange(pair, 10, 10, 5)
+                                }
+
                                 return;
                             }
                         }
@@ -1494,7 +1654,7 @@ class AstroportSniper {
 
         const endTime = new Date().getTime();
         const executionTime = endTime - startTime;
-        // console.log(`Finished check for liq for pair ${pairName} in ${executionTime} milliseconds`);
+        console.log(`Finished check for liq for pair ${pairName} in ${executionTime} milliseconds`);
     }
 
     startMonitorPairForLiq(pair) {
@@ -1521,14 +1681,17 @@ class AstroportSniper {
 
     setMonitorNewPairs(monitor) {
         this.monitorNewPairs = monitor
+        console.log(`new pairs loop: ${this.monitorNewPairs}`.bgCyan)
         if (monitor) {
-            this.sendMessageToDiscord('Monitoring for new pairs')
+            this.sendMessageToDiscord(':dart: Begin monitoring for new Astroport pairs')
             this.newPairsLoop()
+        }
+        else {
+            this.sendMessageToDiscord(':pause_button: Stop monitoring for new Astroport pairs')
         }
     }
 
     async newPairsLoop() {
-        console.log(`new pairs loop: ${this.monitorNewPairs}`)
         while (this.monitorNewPairs) {
             await this.checkFactoryForNewPairs();
             await new Promise(resolve => setTimeout(resolve, 100));

@@ -2,7 +2,7 @@ const AstroportSniper = require("./snipe")
 
 const BACKFILL_PAIRS = false
 
-const LIVE_TRADING = true
+const LIVE_TRADING = false
 
 const CONFIG = {
     live: LIVE_TRADING,
@@ -10,13 +10,13 @@ const CONFIG = {
     tokenTypes: ['native', 'tokenFactory', 'cw20'],
     pairType: '{"xyk":{}}',
     maxSpread: 0.49,
-    snipeAmount: 0.4, // INJ
-    profitGoalPercent: 35, // %
-    stopLoss: 50, // %
-    tradeTimeLimit: 600, // mins
-    lowLiquidityThreshold: 500, // USD
-    highLiquidityThreshold: 100000, // USD
-    blackList: ['inj16g5w38hqehsmye9yavag0g0tw7u8pjuzep0sys'] // LP holders to not trust
+    snipeAmount: 0.4,                   // INJ
+    profitGoalPercent: 40,              // %
+    stopLoss: 80,                       // %
+    moonBagPercent: 0.20,               // %
+    tradeTimeLimit: 15,                 // mins
+    lowLiquidityThreshold: 10000,       // USD
+    highLiquidityThreshold: 100000,     // USD
 }
 
 const main = async () => {
@@ -30,12 +30,9 @@ const main = async () => {
         BACKFILL_PAIRS
     );
     await astroportSniper.getPortfolio()
-    // await astroportSniper.updateLiquidityAllPairs()
-
-    console.log(`Number of pairs: ${astroportSniper.allPairs.size}`);
 
     astroportSniper.setMonitorNewPairs(true)
-    // astroportSniper.startMonitorPairForLiq("inj1fc2a2zkhccau2sugmgt6cvyf4g04t45ghhzeex")
+
 };
 
 main();
