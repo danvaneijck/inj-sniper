@@ -1,7 +1,7 @@
-# astro-sniper
-inj-astro-sniper
+# injective-sniper
+inj-sniper
 
-discord bot to monitor for new pools on astroport injective mainnet
+discord bot to monitor for new pools on injective mainnet. astroport and dojoswap
 
 `nvm use 20`
-`node ./snipe.js`
+`node ./main.js`

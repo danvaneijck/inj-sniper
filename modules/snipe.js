@@ -14,11 +14,12 @@ const { SlashCommandBuilder } = require('@discordjs/builders');
 const moment = require('moment');
 const fs = require('fs/promises');
 const TransactionManager = require("./transactions")
+const path = require('path')
 var colors = require("colors");
 colors.enable();
 require('dotenv').config();
 
-class AstroportSniper {
+class InjectiveSniper {
     constructor(config) {
         this.RPC = config.gRpc
         this.live = config.live
@@ -26,9 +27,14 @@ class AstroportSniper {
         console.log(`Init on ${this.RPC}`.bgGreen)
 
         this.chainGrpcWasmApi = new ChainGrpcWasmApi(this.RPC);
+
         this.astroFactory = process.env.FACTORY_CONTRACT;
         this.astroRouter = process.env.ROUTER_CONTRACT;
         this.pricePair = process.env.PRICE_PAIR_CONTRACT; // INJ / USDT
+
+        this.dojoSwapFactory = "inj1pc2vxcmnyzawnwkf03n2ggvt997avtuwagqngk"
+        this.dojoSwapRouter = "inj1t6g03pmc0qcgr7z44qjzaen804f924xke6menl"
+        this.dojoSwapPricePair = "inj1h0mpv48ctcsmydymh2hnkal7hla5gl4gftemqv"
 
         this.denomClient = new DenomClientAsync(Network.Mainnet, {
             endpoints: {
@@ -43,9 +49,6 @@ class AstroportSniper {
         this.indexerRestExplorerApi = new IndexerRestExplorerApi(
             `${getNetworkEndpoints(Network.Mainnet).explorer}/api/explorer/v1`,
         )
-        this.indexerRestExplorerApi.fetchTransactions({
-
-        })
 
         this.monitorNewPairs = false
 
@@ -64,8 +67,8 @@ class AstroportSniper {
         this.baseAssetPrice = 0;
         this.moonBagPercent = config.moonBagPercent
 
-        this.tokenTypes = ['native', 'tokenFactory'];
-        this.pairType = '{"xyk":{}}';
+        this.pairType = config.pairType
+        this.tokenTypes = config.tokenTypes
 
         this.lowLiquidityThreshold = config.lowLiquidityThreshold
         this.highLiquidityThreshold = config.highLiquidityThreshold
@@ -104,16 +107,10 @@ class AstroportSniper {
         };
     }
 
-    async initialize(pairType, tokenTypes, backfill = false) {
+    async initialize() {
         try {
-            this.pairType = pairType
-            this.tokenTypes = tokenTypes
-
-            if (backfill) {
-                this.live = false
-            }
             try {
-                await this.loadFromFile('data.json');
+                await this.loadFromFile();
                 await this.updateBaseAssetPrice()
                 this.setupDiscordCommands()
             } catch (error) {
@@ -369,37 +366,56 @@ class AstroportSniper {
         }
     }
 
-    async loadFromFile(filename) {
+    async loadFromFile() {
         try {
-            const data = await fs.readFile(filename, 'utf-8');
-            const jsonData = JSON.parse(data);
-            if (jsonData.allPairs) {
-                this.allPairs = new Map(jsonData.allPairs.map(pair => [pair.contract_addr, pair]));
-                console.log('Loaded allPairs from file'.gray);
-            }
-            if (jsonData.positions) {
-                this.positions = new Map(jsonData.positions.map(position => [position.pair_contract, position]));
-                console.log('Loaded positions from file'.gray);
-            }
-            if (jsonData.ignoredPairs) {
-                this.ignoredPairs = new Set(jsonData.ignoredPairs);
-                console.log('Loaded ignoredPairs from file'.gray);
-            }
+            this.allPairs = await this.loadMapFromFile('allPairs.json', 'contract_addr');
+            this.positions = await this.loadMapFromFile('positions.json', 'pair_contract');
+            this.ignoredPairs = await this.loadSetFromFile('ignoredPairs.json');
+
+            console.log('Loaded data from files'.gray);
         } catch (error) {
-            console.error('Error loading data from file:', error);
+            console.error('Error loading data from files:', error);
         }
     }
 
-    async saveToFile(filename) {
+    async loadMapFromFile(filename, keyProperty) {
+        const pairs = await this.readDataFromFile(filename);
+        return new Map(pairs.map(item => [item[keyProperty], item]));
+    }
+
+    async loadSetFromFile(filename) {
+        const items = await this.readDataFromFile(filename);
+        return new Set(items);
+    }
+
+    async saveToFile() {
         try {
-            const dataToSave = {
-                allPairs: Array.from(this.allPairs.values()),
-                positions: Array.from(this.positions.values()),
-                ignoredPairs: Array.from(this.ignoredPairs),
-            };
-            await fs.writeFile(filename, JSON.stringify(dataToSave, null, 2), 'utf-8');
+            await this.saveDataToFile('allPairs.json', Array.from(this.allPairs.values()));
+            await this.saveDataToFile('positions.json', Array.from(this.positions.values()));
+            await this.saveDataToFile('ignoredPairs.json', Array.from(this.ignoredPairs));
+
         } catch (error) {
-            console.error('Error saving data to file:', error);
+            console.error('Error saving data to files:', error);
+        }
+    }
+
+    async readDataFromFile(filename) {
+        const filePath = path.resolve(__dirname, '..', 'data', filename);
+        try {
+            const data = await fs.readFile(filePath, 'utf-8');
+            return JSON.parse(data);
+        } catch (error) {
+            return filename === 'positions.json' || filename === 'allPairs.json' ? new Map() : new Set();
+        }
+    }
+
+    async saveDataToFile(filename, data) {
+        const filePath = path.resolve(__dirname, '..', 'data', filename);
+
+        try {
+            await fs.writeFile(filePath, JSON.stringify(data, null, 2), 'utf-8');
+        } catch (error) {
+            console.error(`Error saving ${filename} to file:`, error);
         }
     }
 
@@ -436,7 +452,7 @@ class AstroportSniper {
             const activityText = `${this.baseAssetName}: $${currentPrice.toFixed(2)}`;
             this.discordClient.user.setActivity(activityText, { type: ActivityType.Watching });
         }
-        await this.saveToFile('data.json')
+        await this.saveToFile()
     }
 
     startMonitoringBasePair(intervalInSeconds) {
@@ -451,97 +467,23 @@ class AstroportSniper {
         console.log('Base Asset monitoring stopped.');
     }
 
-    async getPairs(pairType, tokenTypes, backfill = false) {
-        try {
-            const startTime = new Date().getTime();
-            let previousPairs = null;
-
-            while (true) {
-                const queryObject = Buffer.from(JSON.stringify(this.allPairsQuery)).toString('base64');
-
-                const contractState = await this.chainGrpcWasmApi.fetchSmartContractState(
-                    this.astroFactory,
-                    queryObject
-                );
-
-                const decodedJson = JSON.parse(new TextDecoder().decode(contractState.data));
-
-                if (previousPairs && JSON.stringify(decodedJson.pairs) === JSON.stringify(previousPairs)) {
-                    console.log("Previous list matches returned list, returning", decodedJson);
-                    break;
-                }
-
-                if (!decodedJson.pairs || decodedJson.pairs.length === 0) {
-                    break;
-                }
-
-                for (const pair of decodedJson.pairs) {
-                    const contractAddr = pair.contract_addr;
-                    if (!this.allPairs.has(contractAddr) && !this.ignoredPairs.has(contractAddr)) {
-
-                        console.log("get pair info for", contractAddr);
-                        let pairInfo = await this.getPairInfo(contractAddr);
-
-                        if (
-                            pairInfo &&
-                            pairInfo.token0Meta &&
-                            pairInfo.token1Meta &&
-                            tokenTypes.includes(pairInfo.token0Meta.tokenType) &&
-                            tokenTypes.includes(pairInfo.token1Meta.tokenType) &&
-                            pairType === JSON.stringify(pairInfo.pair_type) &&
-                            (pairInfo.token0Meta.denom === this.baseDenom ||
-                                pairInfo.token1Meta.denom === this.baseDenom)
-                        ) {
-                            this.allPairs.set(pair.contract_addr, { ...pair, ...pairInfo });
-                            const message = `:new: New pair found: ${pairInfo.token0Meta.symbol}, ` +
-                                `${pairInfo.token1Meta.symbol}: \n${pairInfo.astroportLink}\n` +
-                                `${pairInfo.dexscreenerLink}\n <@352761566401265664>`;
-
-                            console.log(message);
-
-                            if (!backfill) {
-                                this.sendMessageToDiscord(message);
-                                await this.calculateLiquidity({ ...pair, ...pairInfo });
-                                console.log(`${contractAddr} liquidity: ${pair.liquidity}`)
-
-                                if (pair.liquidity > this.lowLiquidityThreshold &&
-                                    pair.liquidity < this.highLiquidityThreshold) {
-                                    await this.buyMemeToken(pair, this.snipeAmount);
-                                } else {
-                                    await this.monitorLowLiquidityPair({ ...pair, ...pairInfo }, 2, this.lowLiquidityThreshold);
-                                }
-                            }
-
-                        } else {
-                            console.log(`Ignored pair ${contractAddr}, ${JSON.stringify(pairInfo, null, 2)}`);
-                            if (!backfill) {
-                                this.sendMessageToDiscord(`Ignored new pair https://dexscreener.com/injective/${contractAddr}`);
-                            }
-                            this.ignoredPairs.add(contractAddr);
-                        }
-                    }
-                }
-                const lastPair = decodedJson.pairs[decodedJson.pairs.length - 1];
-                this.allPairsQuery.pairs.start_after = lastPair.asset_infos;
-                previousPairs = decodedJson.pairs;
-            }
-
-            const endTime = new Date().getTime(); // Record the end time
-            const executionTime = endTime - startTime;
-            // console.log(`Finished check for new pairs in ${executionTime} milliseconds`);
-            await this.saveToFile('data.json');
-            return this.allPairs;
-        } catch (error) {
-            console.error('Error fetching all astro port pairs:', error.originalMessage ?? error);
-        }
-    }
-
-    async getTokenInfo(denom) {
+    async getDenomMetadata(denom) {
         try {
             const token = await this.denomClient.getDenomToken(denom)
             return token;
         } catch (error) {
             console.error('Error fetching token info:', error);
+            return {}
+        }
+    }
+
+    async getTokenInfo(denom) {
+        try {
+            let query = Buffer.from(JSON.stringify({ token_info: {} })).toString('base64')
+            const token = await this.chainGrpcWasmApi.fetchSmartContractState(denom, query)
+            return JSON.parse(new TextDecoder().decode(token.data));
+        } catch (error) {
+            console.error('Error fetching token info:', denom, error.message || error);
             return {}
         }
     }
@@ -568,17 +510,32 @@ class AstroportSniper {
                 const tokenInfos = [];
 
                 for (const assetInfo of assetInfos) {
-                    const contract = assetInfo['native_token']
+                    const denom = assetInfo['native_token']
                         ? assetInfo['native_token']['denom']
                         : assetInfo['token']['contract_addr'];
 
-                    const tokenInfo = await this.getTokenInfo(contract);
+                    let tokenInfo = undefined
+                    if (denom.includes("ibc")) {
+                        continue
+                    }
+                    if (denom === this.baseDenom || denom.includes("factory") || denom.includes("peggy")) {
+                        tokenInfo = await this.getDenomMetadata(denom)
+                        if (denom.includes("factory")) {
+                            let name = denom.split("/")[2]
+                            tokenInfo['name'] = name
+                            tokenInfo['symbol'] = name
+                        }
+
+                    }
+                    else {
+                        tokenInfo = await this.getTokenInfo(denom);
+                    }
                     tokenInfos.push({
-                        denom: contract,
+                        denom: denom,
                         name: 'n/a',
                         symbol: 'n/a',
                         decimals: 6, // guess the token decimals
-                        tokenType: "tokenFactory",
+                        tokenType: denom.includes("factory") ? "tokenFactory" : "cw20",
                         ...tokenInfo,
                     });
                 }
@@ -590,11 +547,13 @@ class AstroportSniper {
                     astroportLink: `https://app.astroport.fi/swap?from=${token0Info.denom}&to=${token1Info.denom}`,
                     coinhallLink: `https://coinhall.org/injective/${pairContract}`,
                     dexscreenerLink: `https://dexscreener.com/injective/${pairContract}?maker=${this.walletAddress}`,
+                    dojoSwapLink: `https://dojo.trading/swap?type=swap&from=${token0Info.denom}&to=${token1Info.denom}`,
                     ...infoDecoded
                 };
 
             } catch (error) {
                 if (error.name == "GrpcUnaryRequestException") {
+                    console.log(error)
                     console.error(`Error fetching pair ${pairContract} info. Retrying... (Retry count: ${retryCount + 1})`);
                     retryCount++;
                 } else {
@@ -738,29 +697,6 @@ class AstroportSniper {
                 console.log(`quote for ${pairName}: ${this.baseAssetPrice / decodedData['return_amount']}`)
             }
         })
-    }
-
-    startMonitoringNewPairsOld(intervalInSeconds) {
-        if (!this.monitoringNewPairIntervalId) {
-            this.sendMessageToDiscord(`Monitoring for new pairs started. Checking every ${intervalInSeconds} seconds.`);
-
-            this.monitoringNewPairIntervalId = setInterval(async () => {
-                this.allPairsQuery.pairs.start_after = []
-                await this.getPairs(this.pairType, this.tokenTypes);
-            }, intervalInSeconds * 1000);
-        } else {
-            console.log('Monitoring is already in progress.');
-        }
-    }
-
-    stopMonitoringNewPairs() {
-        if (this.monitoringNewPairIntervalId) {
-            console.log('Monitoring stopped.');
-            clearInterval(this.monitoringNewPairIntervalId);
-            this.monitoringNewPairIntervalId = null;
-        } else {
-            console.log('No active monitoring to stop.');
-        }
     }
 
     async calculateLiquidity(pair) {
@@ -937,14 +873,15 @@ class AstroportSniper {
 
                     const pair = Array.from(this.allPairs.values()).find(pair => {
                         return (
-                            pair.token0Meta.denom === balance.denom ||
-                            pair.token1Meta.denom === balance.denom
+                            (pair && pair.token0Meta.denom === balance.denom) ||
+                            (pair && pair.token1Meta.denom === balance.denom)
                         );
                     });
 
                     if (!pair) continue;
 
                     const pairInfo = await this.getPairInfo(pair.contract_addr);
+                    if (!pairInfo) continue
                     await this.calculateLiquidity(pairInfo)
                     if (pairInfo) {
                         this.allPairs.set(pair.contract_addr, pairInfo)
@@ -997,7 +934,7 @@ class AstroportSniper {
                 this.ignoredPairs.add(pair.contract_addr)
             }
         }
-        await this.saveToFile('data.json')
+        await this.saveToFile()
     }
 
     async buyMemeToken(pair, amount, retries = 5) {
@@ -1438,12 +1375,18 @@ class AstroportSniper {
     }
 
     async getTxByHash(txHash) {
-        const txsHash = txHash
-        const transaction = await this.indexerRestExplorerApi.fetchTransaction(txsHash)
-        return transaction
+        try {
+            const txsHash = txHash
+            const transaction = await this.indexerRestExplorerApi.fetchTransaction(txsHash)
+            return transaction
+        }
+        catch (e) {
+            console.log(`Error fetching tx by hash: ${e}`)
+        }
+        return null
     }
 
-    async checkFactoryForNewPairs() {
+    async checkAstroFactoryForNewPairs() {
         const startTime = new Date().getTime();
 
         const contractAddress = this.astroFactory;
@@ -1477,7 +1420,7 @@ class AstroportSniper {
                         if (typeof message === 'object') {
                             const firstKey = Object.keys(message)[0];
                             if (firstKey == "create_pair") {
-                                const blockTimestamp = txInfo['blockTimestamp'];
+                                const txTime = moment(txInfo['blockTimestamp'], 'YYYY-MM-DD HH:mm:ss.SSS Z');
 
                                 const pairAddress = txInfo.logs[0].events[txInfo.logs[0].events.length - 1].attributes.find((attr) => attr.key === "pair_contract_addr").value;
 
@@ -1497,6 +1440,7 @@ class AstroportSniper {
                                     ) {
                                         this.allPairs.set(pairAddress, { ...pairInfo });
                                         const message = `:new: New pair found from tx: ${pairInfo.token0Meta.symbol}, ` +
+                                            `<t:${txTime.unix()}:R>\n` +
                                             `${pairInfo.token1Meta.symbol}: \n${pairInfo.astroportLink}\n` +
                                             `${pairInfo.dexscreenerLink}\n <@352761566401265664>`;
 
@@ -1526,7 +1470,100 @@ class AstroportSniper {
 
         const endTime = new Date().getTime();
         const executionTime = endTime - startTime;
-        // console.log(`Finished check for new pairs in ${executionTime} milliseconds`);
+        console.log(`Finished check for new pairs on Astroport in ${executionTime} milliseconds`.gray);
+    }
+
+    async checkDojoFactoryForNewPairs() {
+        const startTime = new Date().getTime();
+
+        const contractAddress = this.dojoSwapFactory;
+        const limit = 10;
+        const skip = 0;
+
+        const transactions = await this.indexerRestExplorerApi.fetchContractTransactions({
+            contractAddress,
+            params: {
+                limit,
+                skip,
+            },
+        });
+
+        await Promise.all(
+            transactions.transactions.map(async (tx) => {
+                const txHash = tx.txHash;
+                let txInfo = await this.getTxByHash(txHash);
+                if (!txInfo) {
+                    console.log(`failed to get txInfo`)
+                    return
+                }
+                if (txInfo['errorLog'].length > 0) {
+                    // console.log(`tx error: ${txInfo['errorLog']}`.gray)
+                    return
+                }
+                await Promise.all(
+                    txInfo.messages.map(async (msg) => {
+                        let message;
+                        try {
+                            message = JSON.parse(msg.message.msg);
+                        } catch (error) {
+                            message = msg.message.msg;
+                        }
+                        if (typeof message === 'object') {
+                            const firstKey = Object.keys(message)[0];
+                            if (firstKey == "create_pair") {
+                                const txTime = moment(txInfo['blockTimestamp'], 'YYYY-MM-DD HH:mm:ss.SSS Z');
+
+                                const pairAddress = txInfo.logs[0].events[txInfo.logs[0].events.length - 1].attributes.find((attr) => attr.key === "pair_contract_addr").value;
+
+                                if (!this.allPairs.has(pairAddress) && !this.ignoredPairs.has(pairAddress)) {
+                                    let pairInfo = await this.getPairInfo(pairAddress);
+
+                                    if (
+                                        pairInfo &&
+                                        pairInfo.token0Meta &&
+                                        pairInfo.token1Meta &&
+                                        this.tokenTypes.includes(pairInfo.token0Meta.tokenType) &&
+                                        this.tokenTypes.includes(pairInfo.token1Meta.tokenType) &&
+                                        (pairInfo.token0Meta.denom === this.baseDenom ||
+                                            pairInfo.token1Meta.denom === this.baseDenom)
+                                    ) {
+                                        this.allPairs.set(pairAddress, { ...pairInfo });
+                                        const message = `:new: New pair found on DojoSwap: ${pairInfo.token0Meta.symbol}, ` +
+                                            `<t:${txTime.unix()}:R>\n` +
+                                            `${pairInfo.token1Meta.symbol}: \n${pairInfo.dojoSwapLink}\n` +
+                                            `${pairInfo.coinhallLink}\n <@352761566401265664>`;
+
+                                        this.sendMessageToDiscord(message);
+                                        await this.calculateLiquidity(pairInfo);
+                                        console.log(`${pairAddress} liquidity: ${pairInfo.liquidity}`)
+
+                                        if (
+                                            pairInfo.liquidity > this.lowLiquidityThreshold &&
+                                            pairInfo.liquidity < this.highLiquidityThreshold &&
+                                            txTime > moment().subtract(1, 'minute')
+                                        ) {
+                                            await this.buyMemeToken(pairInfo, this.snipeAmount);
+                                        } else {
+                                            this.startMonitorPairForLiq(pairAddress);
+                                        }
+
+                                    } else {
+                                        console.log(`Ignored pair ${pairAddress}, ${JSON.stringify(pairInfo, null, 2)}`);
+                                        this.sendMessageToDiscord(`Ignored new pair https://dexscreener.com/injective/${pairAddress}`);
+
+                                        this.ignoredPairs.add(pairAddress);
+                                    }
+                                }
+                            }
+                        }
+                    })
+                );
+            })
+        );
+
+        const endTime = new Date().getTime();
+        const executionTime = endTime - startTime;
+        console.log(`Finished check for new pairs on DojoSwap in ${executionTime} milliseconds`.gray);
     }
 
     async checkPairForProvideLiquidity(pairContract) {
@@ -1683,21 +1720,22 @@ class AstroportSniper {
         this.monitorNewPairs = monitor
         console.log(`new pairs loop: ${this.monitorNewPairs}`.bgCyan)
         if (monitor) {
-            this.sendMessageToDiscord(':dart: Begin monitoring for new Astroport pairs')
+            this.sendMessageToDiscord(':dart: Begin monitoring for new pairs on Astroport and DojoSwap')
             this.newPairsLoop()
         }
         else {
-            this.sendMessageToDiscord(':pause_button: Stop monitoring for new Astroport pairs')
+            this.sendMessageToDiscord(':pause_button: Stop monitoring for new pairs')
         }
     }
 
     async newPairsLoop() {
         while (this.monitorNewPairs) {
-            await this.checkFactoryForNewPairs();
-            await new Promise(resolve => setTimeout(resolve, 100));
+            await this.checkAstroFactoryForNewPairs();
+            await this.checkDojoFactoryForNewPairs();
+            await new Promise(resolve => setTimeout(resolve, 1000));
         }
     }
 
 }
 
-module.exports = AstroportSniper;
+module.exports = InjectiveSniper;

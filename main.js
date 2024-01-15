@@ -1,6 +1,4 @@
-const AstroportSniper = require("./snipe")
-
-const BACKFILL_PAIRS = false
+const InjectiveSniper = require("./modules/snipe")
 
 const LIVE_TRADING = false
 
@@ -21,17 +19,13 @@ const CONFIG = {
 
 const main = async () => {
 
-    const astroportSniper = new AstroportSniper(CONFIG);
-    astroportSniper.startMonitoringBasePair(15);
+    const injectiveSniper = new InjectiveSniper(CONFIG);
+    injectiveSniper.startMonitoringBasePair(15);
 
-    await astroportSniper.initialize(
-        CONFIG.pairType,
-        CONFIG.tokenTypes,
-        BACKFILL_PAIRS
-    );
-    await astroportSniper.getPortfolio()
+    await injectiveSniper.initialize();
+    await injectiveSniper.getPortfolio()
 
-    astroportSniper.setMonitorNewPairs(true)
+    injectiveSniper.setMonitorNewPairs(true)
 
 };
 
