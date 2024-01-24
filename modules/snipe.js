@@ -4,8 +4,10 @@ const {
     PrivateKey,
     ChainGrpcBankApi,
     MsgExecuteContractCompat,
+    MsgExecuteContract,
     IndexerGrpcExplorerStream,
-    IndexerRestExplorerApi
+    IndexerRestExplorerApi,
+    MsgSend
 } = require('@injectivelabs/sdk-ts');
 const { getNetworkEndpoints, Network } = require('@injectivelabs/networks');
 const { DenomClientAsync } = require('@injectivelabs/sdk-ui-ts');
@@ -16,6 +18,8 @@ const fs = require('fs/promises');
 const TransactionManager = require("./transactions")
 const path = require('path')
 var colors = require("colors");
+const Astroport = require('./astroport');
+const DojoSwap = require('./dojoswap');
 colors.enable();
 require('dotenv').config();
 
@@ -28,13 +32,13 @@ class InjectiveSniper {
 
         this.chainGrpcWasmApi = new ChainGrpcWasmApi(this.RPC);
 
-        this.astroFactory = process.env.FACTORY_CONTRACT;
-        this.astroRouter = process.env.ROUTER_CONTRACT;
-        this.pricePair = process.env.PRICE_PAIR_CONTRACT; // INJ / USDT
+        this.astroFactory = process.env.ASTRO_FACTORY_CONTRACT;
+        this.astroRouter = process.env.ASTRO_ROUTER_CONTRACT;
+        this.astroPricePair = process.env.ASTRO_PRICE_PAIR_CONTRACT; // INJ / USDT
 
-        this.dojoSwapFactory = "inj1pc2vxcmnyzawnwkf03n2ggvt997avtuwagqngk"
-        this.dojoSwapRouter = "inj1t6g03pmc0qcgr7z44qjzaen804f924xke6menl"
-        this.dojoSwapPricePair = "inj1h0mpv48ctcsmydymh2hnkal7hla5gl4gftemqv"
+        this.dojoSwapFactory = process.env.DOJO_FACTORY_CONTRACT;
+        this.dojoSwapRouter = process.env.DOJO_ROUTER_CONTRACT;
+        this.dojoSwapPricePair = process.env.DOJO_PRICE_PAIR_CONTRACT;
 
         this.denomClient = new DenomClientAsync(Network.Mainnet, {
             endpoints: {
@@ -112,6 +116,10 @@ class InjectiveSniper {
             try {
                 await this.loadFromFile();
                 await this.updateBaseAssetPrice()
+
+                this.astroport = new Astroport(this.chainGrpcWasmApi, this.indexerRestExplorerApi, this.baseAsset)
+                this.dojoSwap = new DojoSwap(this.chainGrpcWasmApi, this.indexerRestExplorerApi, this.baseAsset)
+
                 this.setupDiscordCommands()
             } catch (error) {
                 console.error('Error during initialization:', error);
@@ -198,6 +206,20 @@ class InjectiveSniper {
         })
     }
 
+    async queryTokenForBalance(tokenAddress) {
+        try {
+            const query = Buffer.from(JSON.stringify({ balance: { address: this.walletAddress } })).toString('base64');
+            const info = await this.chainGrpcWasmApi.fetchSmartContractState(tokenAddress, query);
+            const decoded = JSON.parse(new TextDecoder().decode(info.data));
+            console.log(decoded)
+            return decoded
+        }
+        catch (e) {
+            console.log(`Error checking factory for pair: ${e}`.red)
+        }
+        return null
+    }
+
     setupDiscordCommands() {
         this.discordClient.on('interactionCreate', async interaction => {
             if (!interaction.isCommand()) return;
@@ -233,11 +255,12 @@ class InjectiveSniper {
                 await interaction.reply(`Set monitor new pairs to ${monitor_pairs}`);
             }
             if (commandName === 'start_monitor_pair_for_liquidity') {
+                await interaction.reply(`OK`);
                 const pairContract = interaction.options.getString('pair');
                 this.startMonitorPairForLiq(pairContract)
                 let pair = await this.getPairInfo(pairContract)
                 const pairName = `${pair.token0Meta.symbol}, ${pair.token1Meta.symbol}`;
-                await interaction.reply(`:arrow_forward: Began monitoring ${pairName} for liquidity`);
+                // await interaction.reply(`:arrow_forward: Began monitoring ${pairName} for liquidity`);
             }
             if (commandName === 'stop_monitor_pair_for_liquidity') {
                 const pairContract = interaction.options.getString('pair');
@@ -334,12 +357,26 @@ class InjectiveSniper {
     async executeSellCommand(pairContract) {
         try {
             let pair = await this.getPairInfo(pairContract)
+
             const memeTokenMeta = pair.token0Meta.denom === this.baseDenom
                 ? pair.token1Meta
                 : pair.token0Meta;
+
             let balance = await this.getBalanceOfToken(memeTokenMeta.denom);
+            console.log(balance)
+
+            if (!balance || Number(balance.amount) <= 0) {
+                balance = await this.queryTokenForBalance(memeTokenMeta.denom)
+                if (balance) {
+                    balance = balance.balance
+                }
+            }
+            else {
+                balance = balance.amount
+            }
+
             if (balance) {
-                let result = await this.sellMemeToken(pair, balance.amount)
+                let result = await this.sellMemeToken(pair, balance)
                 if (result && !this.allPairs.has(pairContract)) {
                     this.allPairs.set(pairContract, pair);
                     this.ignoredPairs.delete(pairContract);
@@ -439,19 +476,23 @@ class InjectiveSniper {
     }
 
     async updateBaseAssetPrice() {
-        let baseAssetPair = await this.getPairInfo(this.pricePair)
-        this.allPairs.set(this.pricePair, baseAssetPair)
+        let baseAssetPair = await this.getPairInfo(this.dojoSwapPricePair)
+
+        this.allPairs.set(this.dojoSwapPricePair, baseAssetPair)
         let quote = await this.getQuote(baseAssetPair, 1)
         if (!quote) return
-        this.baseAssetPrice = quote['return_amount']
-        this.stableAsset = baseAssetPair.token0Meta
-        this.baseAsset = baseAssetPair.token1Meta
+
+        this.baseAssetPrice = Number(quote['return_amount'])
+        this.stableAsset = baseAssetPair.token1Meta
+        this.baseAsset = baseAssetPair.token0Meta
 
         const currentPrice = quote['return_amount'] / Math.pow(10, this.stableAsset.decimals)
+
         if (this.discordClient && this.discordClient.user) {
             const activityText = `${this.baseAssetName}: $${currentPrice.toFixed(2)}`;
             this.discordClient.user.setActivity(activityText, { type: ActivityType.Watching });
         }
+
         await this.saveToFile()
     }
 
@@ -498,10 +539,24 @@ class InjectiveSniper {
         })
     }
 
+    async checkHasPair(factory, assetInfos) {
+        try {
+
+            const factoryQuery = Buffer.from(JSON.stringify({ pair: { asset_infos: assetInfos } })).toString('base64');
+            const factoryInfo = await this.chainGrpcWasmApi.fetchSmartContractState(factory, factoryQuery);
+            const factoryDecoded = JSON.parse(new TextDecoder().decode(factoryInfo.data));
+            return factoryDecoded
+        }
+        catch (e) {
+            console.log(`Error checking factory for pair: ${e}`.red)
+        }
+        return null
+    }
+
     async getPairInfo(pairContract) {
         let retryCount = 0;
 
-        while (retryCount < 1) {
+        while (retryCount < 2) {
             try {
                 const pairQuery = Buffer.from(JSON.stringify({ pair: {} })).toString('base64');
                 const pairInfo = await this.chainGrpcWasmApi.fetchSmartContractState(pairContract, pairQuery);
@@ -509,16 +564,36 @@ class InjectiveSniper {
                 const assetInfos = infoDecoded['asset_infos'];
                 const tokenInfos = [];
 
+                let factory
+                try {
+                    let p = await this.checkHasPair(this.astroFactory, assetInfos)
+                    if (p !== null) factory = this.astroFactory
+
+                    p = await this.checkHasPair(this.dojoSwapFactory, assetInfos)
+                    if (p !== null) factory = this.dojoSwapFactory
+
+                }
+                catch (e) {
+                    console.log(e)
+                    console.log(`could not query pair config, setting to astro factory`.gray)
+                    factory = this.astroFactory
+                }
+
                 for (const assetInfo of assetInfos) {
                     const denom = assetInfo['native_token']
                         ? assetInfo['native_token']['denom']
                         : assetInfo['token']['contract_addr'];
 
                     let tokenInfo = undefined
-                    if (denom.includes("ibc")) {
-                        continue
-                    }
-                    if (denom === this.baseDenom || denom.includes("factory") || denom.includes("peggy")) {
+                    // if (denom.includes("ibc")) {
+                    //     continue
+                    // }
+                    if (
+                        denom === this.baseDenom
+                        || denom.includes("factory")
+                        || denom.includes("peggy")
+                        || denom.includes("ibc")
+                    ) {
                         tokenInfo = await this.getDenomMetadata(denom)
                         if (denom.includes("factory")) {
                             let name = denom.split("/")[2]
@@ -539,6 +614,7 @@ class InjectiveSniper {
                         ...tokenInfo,
                     });
                 }
+                if (tokenInfos.length !== 2) return null
                 const [token0Info, token1Info] = tokenInfos;
 
                 return {
@@ -548,6 +624,7 @@ class InjectiveSniper {
                     coinhallLink: `https://coinhall.org/injective/${pairContract}`,
                     dexscreenerLink: `https://dexscreener.com/injective/${pairContract}?maker=${this.walletAddress}`,
                     dojoSwapLink: `https://dojo.trading/swap?type=swap&from=${token0Info.denom}&to=${token1Info.denom}`,
+                    factory: factory,
                     ...infoDecoded
                 };
 
@@ -594,98 +671,24 @@ class InjectiveSniper {
     }
 
     async getQuoteFromRouter(pair, amount) {
-        if (!pair || !pair.asset_infos || !Array.isArray(pair.asset_infos)) {
-            console.error(`Invalid pair or asset_infos for getQuoteFromRouter:`, pair);
-            return;
+        if (!pair.factory) {
+            console.error(`pair has no factory`.red)
+            return
         }
-
-        const pairName = `${pair.token0Meta.symbol}, ${pair.token1Meta.symbol}`;
-        const askAssetIndex = pair.asset_infos.findIndex(assetInfo => {
-            const isNativeToken = assetInfo.native_token && assetInfo.native_token.denom !== this.baseDenom;
-            const isCW20Token = assetInfo.token && assetInfo.token.contract_addr !== this.baseTokenContractAddr;
-            return isNativeToken || isCW20Token;
-        });
-        if (askAssetIndex === -1) {
-            console.error(`Error finding ask asset for ${pairName}`);
-            return;
+        if (pair.factory === this.astroFactory) {
+            return await this.astroport.getQuoteFromRouter(pair, amount)
         }
-
-        const askAssetInfo = pair.asset_infos[askAssetIndex];
-        const offerAmount = amount * Math.pow(10, this.baseAsset.decimals);
-
-        const simulationQuery = {
-            simulate_swap_operations: {
-                offer_amount: offerAmount.toString(),
-                operations: [
-                    {
-                        astro_swap: {
-                            offer_asset_info: {
-                                native_token: {
-                                    denom: this.baseDenom
-                                }
-                            },
-                            ask_asset_info: askAssetInfo
-                        }
-                    }
-                ]
-            }
-        };
-
-        try {
-            const query = Buffer.from(JSON.stringify(simulationQuery)).toString('base64');
-            const sim = await this.chainGrpcWasmApi.fetchSmartContractState(this.astroRouter, query);
-
-            const decodedData = JSON.parse(new TextDecoder().decode(sim.data));
-            return decodedData;
-        } catch (error) {
-            console.error(`Error getting quote for ${pairName}: ${error}`);
+        if (pair.factory === this.dojoSwapFactory) {
+            return await this.dojoSwap.getQuoteFromRouter(pair, amount)
         }
     }
 
     async getSellQuoteFromRouter(pair, amount) {
-        const pairName = `${pair.token0Meta.symbol}, ${pair.token1Meta.symbol}`;
-
-        try {
-            if (!pair || !pair.asset_infos || !Array.isArray(pair.asset_infos)) {
-                throw new Error(`Invalid pair or asset_infos for getSellQuoteFromRouter: ${pair}`);
-            }
-
-            const assetToSell = pair.asset_infos.findIndex(assetInfo => {
-                const isNativeToken = assetInfo.native_token && assetInfo.native_token.denom !== this.baseDenom;
-                const isCW20Token = assetInfo.token && assetInfo.token.contract_addr !== this.baseTokenContractAddr;
-                return isNativeToken || isCW20Token;
-            });
-
-            if (assetToSell === -1) {
-                throw new Error(`Error finding ask asset for ${pairName}`);
-            }
-            const assetInfo = pair.asset_infos[assetToSell];
-
-            const simulationQuery = {
-                simulate_swap_operations: {
-                    offer_amount: amount.toString(),
-                    operations: [
-                        {
-                            astro_swap: {
-                                offer_asset_info: assetInfo,
-                                ask_asset_info: {
-                                    native_token: {
-                                        denom: this.baseDenom
-                                    }
-                                }
-                            }
-                        }
-                    ]
-                }
-            };
-
-            const query = Buffer.from(JSON.stringify(simulationQuery)).toString('base64');
-            const sim = await this.chainGrpcWasmApi.fetchSmartContractState(this.astroRouter, query);
-            const decodedData = JSON.parse(new TextDecoder().decode(sim.data));
-            return decodedData;
-        } catch (error) {
-            console.error(`Error getting sell quote for ${pairName}: ${error}`);
-            return null;
+        if (pair.factory === this.astroFactory) {
+            return await this.astroport.getSellQuoteFromRouter(pair, amount)
+        }
+        if (pair.factory === this.dojoSwapFactory) {
+            return await this.dojoSwap.getSellQuoteFromRouter(pair, amount)
         }
     }
 
@@ -742,13 +745,15 @@ class InjectiveSniper {
             let lastPrices = this.lastPrices.get(pair.contract_addr) || [];
 
             const monitoringIntervalId = setInterval(async () => {
-                const updatedPair = await this.getPairInfo(pair.contract_addr);
-                if (!updatedPair) return
-                this.allPairs.set(pair.contract_addr, updatedPair)
-
-                const quote = await this.getQuoteFromRouter(updatedPair, 1);
+                const quote = await this.getQuoteFromRouter(pair, 1);
                 if (!quote) return
-                const currentPrice = this.baseAssetPrice / quote['amount'];
+
+                const decimals = pair.token0Meta.denom == this.baseDenom ? pair.token1Meta.decimals : pair.token0Meta.decimals
+
+                let baseAssetPriceAdjusted = this.baseAssetPrice / Math.pow(10, this.stableAsset.decimals)
+                let quoteAdjusted = Number(quote['amount']) / Math.pow(10, decimals)
+
+                const currentPrice = baseAssetPriceAdjusted / quoteAdjusted
 
                 lastPrices.push(currentPrice);
                 lastPrices = lastPrices.slice(-trackingDurationMinutes * 60 / intervalInSeconds);
@@ -983,7 +988,7 @@ class InjectiveSniper {
 
                     const returnAmount = this.parseReturnAmountFromEvents(result.rawLog);
                     if (returnAmount !== undefined) {
-                        this.handleSuccessfulSwap(pair, returnAmount, adjustedAmount, memeTokenMeta);
+                        this.handleSuccessfulSwap(pair, returnAmount, adjustedAmount, memeTokenMeta, result.txHash);
                         await this.monitorPairToSell(pair, 10);
                     } else {
                         console.error("Return amount not found in events.");
@@ -1003,16 +1008,19 @@ class InjectiveSniper {
     parseReturnAmountFromEvents(rawLog) {
         const events = JSON.parse(rawLog)[0]?.events;
         if (!events) return undefined;
-
-        const wasmEvent = events.find((event) => event.type === "wasm");
-        if (!wasmEvent) return undefined;
-
-        const returnAmountAttribute = wasmEvent.attributes.find((attr) => attr.key === "return_amount");
-        console.log(`return amount ${returnAmountAttribute.value}`)
-        return returnAmountAttribute ? returnAmountAttribute.value : undefined;
+        const wasmEvents = events.filter((event) => event.type === "wasm");
+        if (wasmEvents.length < 1) return undefined;
+        for (const i in wasmEvents) {
+            let wasmEvent = wasmEvents[i]
+            const returnAmountAttribute = wasmEvent.attributes.find((attr) => attr.key === "return_amount");
+            if (returnAmountAttribute) {
+                return returnAmountAttribute.value
+            }
+        }
+        return undefined
     }
 
-    handleSuccessfulSwap(pair, returnAmount, adjustedAmount, memeTokenMeta) {
+    handleSuccessfulSwap(pair, returnAmount, adjustedAmount, memeTokenMeta, txHash) {
         const balance = this.positions.get(pair.contract_addr)?.balance || 0;
         const profit = this.positions.get(pair.contract_addr)?.profit || 0;
         const amountIn = this.positions.get(pair.contract_addr)?.amount_in || 0;
@@ -1033,9 +1041,20 @@ class InjectiveSniper {
 
         console.log(this.positions.get(pair.contract_addr))
 
-        this.sendMessageToDiscord(`:gun: Sniped token ${memeTokenMeta.symbol}! ` +
+        let dex = ""
+        if (pair.factory == this.astroFactory) {
+            dex = "Astroport"
+        }
+        if (pair.factory == this.dojoSwapFactory) {
+            dex = "DojoSwap"
+        }
+
+        this.sendMessageToDiscord(
+            `:gun: Sniped token ${memeTokenMeta.symbol} from ${dex}! ` +
             `Balance: ${(updatedBalance / 10 ** memeTokenMeta.decimals).toFixed(3)} ` +
-            `<@352761566401265664>\n${pair.dexscreenerLink}`);
+            `<@352761566401265664>\n${pair.coinhallLink}` +
+            `\ntx: https://explorer.injective.network/transaction/${txHash}`
+        );
     }
 
     async sellMemeToken(pair, amount = null, maxRetries = 3) {
@@ -1052,6 +1071,10 @@ class InjectiveSniper {
         const memeTokenMeta = pair.token0Meta.denom === this.baseDenom
             ? pair.token1Meta
             : pair.token0Meta;
+
+        const memeAssetInfo = pair.token0Meta.denom === this.baseDenom
+            ? pair.asset_infos[1]
+            : pair.asset_infos[0]
 
         let position = this.positions.get(pair.contract_addr);
 
@@ -1070,32 +1093,26 @@ class InjectiveSniper {
             return
         }
 
-        amount = Math.round(amount)
+        if (amount.toString().includes('.')) {
+            amount = Math.round(Number(amount))
+        }
 
         let spread = this.maxSpread
-        // if (memeTokenMeta.symbol == "n/a") {
-        //     amount = amount / Math.pow(10, memeTokenMeta.decimals)
-        // }
+
         let retryCount = 0;
         while (retryCount < maxRetries) {
-            // if (memeTokenMeta.symbol == "n/a") {
-            //     const decimalPrecision = [6, 8, 18][retryCount];
-            // }
-            const swapOperations = {
+
+            let swapOperations = {
                 swap: {
                     offer_asset: {
-                        info: {
-                            native_token: {
-                                denom: memeTokenMeta.denom,
-                            },
-                        },
+                        info: memeAssetInfo,
                         amount: amount.toString(),
                     },
                     max_spread: spread.toString(),
                 },
             };
 
-            const msg = MsgExecuteContractCompat.fromJSON({
+            let msg = MsgExecuteContractCompat.fromJSON({
                 contractAddress: pair.contract_addr,
                 sender: this.walletAddress,
                 msg: swapOperations,
@@ -1104,6 +1121,21 @@ class InjectiveSniper {
                     amount: amount.toString(),
                 },
             });
+
+            if (pair.factory == this.dojoSwapFactory) {
+                swapOperations = {
+                    send: {
+                        contract: pair.contract_addr,
+                        amount: amount.toString(),
+                        msg: Buffer.from(JSON.stringify({ swap: {} })).toString('base64')
+                    },
+                };
+                msg = MsgExecuteContractCompat.fromJSON({
+                    contractAddress: memeTokenMeta.denom,
+                    sender: this.walletAddress,
+                    msg: swapOperations,
+                });
+            }
 
             try {
                 let result = await this.txManager.enqueue(msg);
@@ -1151,10 +1183,19 @@ class InjectiveSniper {
                     const baseAssetPriceConverted = this.baseAssetPrice / Math.pow(10, this.stableAsset.decimals)
                     const usdValue = (profit * baseAssetPriceConverted)
 
+                    let dex = ""
+                    if (pair.factory == this.astroFactory) {
+                        dex = "Astroport"
+                    }
+                    if (pair.factory == this.dojoSwapFactory) {
+                        dex = "DojoSwap"
+                    }
+
                     this.sendMessageToDiscord(
                         `${profit > 0 ? ':dollar:' : ':small_red_triangle_down:'} ` +
-                        `Sold token ${memeTokenMeta.symbol} for ${returnAmountAdjusted.toFixed(4)} ${this.baseAssetName}. ` +
-                        `PnL: ${profit > 0 ? '+' : ''}${profit.toFixed(4)} ${this.baseAssetName} ($${usdValue.toFixed(2)}) <@352761566401265664>\n${pair.dexscreenerLink}`
+                        `Sold token ${memeTokenMeta.symbol} on ${dex} for ${returnAmountAdjusted.toFixed(4)} ${this.baseAssetName}. ` +
+                        `PnL: ${profit > 0 ? '+' : ''}${profit.toFixed(4)} ${this.baseAssetName} ($${usdValue.toFixed(2)}) <@352761566401265664>\n${pair.coinhallLink}` +
+                        `\ntx: https://explorer.injective.network/transaction/${result.txHash}`
                     );
                     return result;
                 }
@@ -1165,7 +1206,7 @@ class InjectiveSniper {
             }
         }
         console.error(`Exceeded maximum retry attempts (${maxRetries}). Sell operation failed.`);
-        this.sendMessageToDiscord(`Failed to sell token ${memeTokenMeta.symbol} ${pair.dexscreenerLink} ${this.discordTag}`)
+        this.sendMessageToDiscord(`Failed to sell token ${memeTokenMeta.symbol} ${pair.coinhallLink} ${this.discordTag}`)
 
         return null
     }
@@ -1206,7 +1247,7 @@ class InjectiveSniper {
                     if (usdValue.toFixed(2) > 0) {
                         formattedMessage += `${(balance.amount / Math.pow(10, tokenDenom.decimals)).toFixed(2)} ` +
                             `${tokenDenom.symbol} (${amountBack} ${this.baseAssetName} :dollar: $${usdValue.toFixed(2)}) ` +
-                            `liquidity: $${pair.liquidity.toFixed(2)} ${pair.dexscreenerLink}\n`;
+                            `liquidity: $${pair.liquidity.toFixed(2)} ${pair.coinhallLink}\n`;
                     }
                 }
             }
@@ -1386,188 +1427,12 @@ class InjectiveSniper {
         return null
     }
 
-    async checkAstroFactoryForNewPairs() {
-        const startTime = new Date().getTime();
-
-        const contractAddress = this.astroFactory;
-        const limit = 5;
-        const skip = 0;
-
-        const transactions = await this.indexerRestExplorerApi.fetchContractTransactions({
-            contractAddress,
-            params: {
-                limit,
-                skip,
-            },
-        });
-
-        await Promise.all(
-            transactions.transactions.map(async (tx) => {
-                const txHash = tx.txHash;
-                let txInfo = await this.getTxByHash(txHash);
-                if (!txInfo || !txInfo.logs) {
-                    console.log(txInfo)
-                    return
-                }
-                await Promise.all(
-                    txInfo.messages.map(async (msg) => {
-                        let message;
-                        try {
-                            message = JSON.parse(msg.message.msg);
-                        } catch (error) {
-                            message = msg.message.msg;
-                        }
-                        if (typeof message === 'object') {
-                            const firstKey = Object.keys(message)[0];
-                            if (firstKey == "create_pair") {
-                                const txTime = moment(txInfo['blockTimestamp'], 'YYYY-MM-DD HH:mm:ss.SSS Z');
-
-                                const pairAddress = txInfo.logs[0].events[txInfo.logs[0].events.length - 1].attributes.find((attr) => attr.key === "pair_contract_addr").value;
-
-                                if (!this.allPairs.has(pairAddress) && !this.ignoredPairs.has(pairAddress)) {
-                                    console.log("get pair info for", pairAddress);
-                                    let pairInfo = await this.getPairInfo(pairAddress);
-
-                                    if (
-                                        pairInfo &&
-                                        pairInfo.token0Meta &&
-                                        pairInfo.token1Meta &&
-                                        this.tokenTypes.includes(pairInfo.token0Meta.tokenType) &&
-                                        this.tokenTypes.includes(pairInfo.token1Meta.tokenType) &&
-                                        this.pairType === JSON.stringify(pairInfo.pair_type) &&
-                                        (pairInfo.token0Meta.denom === this.baseDenom ||
-                                            pairInfo.token1Meta.denom === this.baseDenom)
-                                    ) {
-                                        this.allPairs.set(pairAddress, { ...pairInfo });
-                                        const message = `:new: New pair found from tx: ${pairInfo.token0Meta.symbol}, ` +
-                                            `<t:${txTime.unix()}:R>\n` +
-                                            `${pairInfo.token1Meta.symbol}: \n${pairInfo.astroportLink}\n` +
-                                            `${pairInfo.dexscreenerLink}\n <@352761566401265664>`;
-
-                                        this.sendMessageToDiscord(message);
-                                        await this.calculateLiquidity(pairInfo);
-                                        console.log(`${pairAddress} liquidity: ${pairInfo.liquidity}`)
-
-                                        if (pairInfo.liquidity > this.lowLiquidityThreshold &&
-                                            pairInfo.liquidity < this.highLiquidityThreshold) {
-                                            await this.buyMemeToken(pairInfo, this.snipeAmount);
-                                        } else {
-                                            this.startMonitorPairForLiq(pairAddress);
-                                        }
-                                    } else {
-                                        console.log(`Ignored pair ${pairAddress}, ${JSON.stringify(pairInfo, null, 2)}`);
-                                        this.sendMessageToDiscord(`Ignored new pair https://dexscreener.com/injective/${pairAddress}`);
-
-                                        this.ignoredPairs.add(pairAddress);
-                                    }
-                                }
-                            }
-                        }
-                    })
-                );
-            })
-        );
-
-        const endTime = new Date().getTime();
-        const executionTime = endTime - startTime;
-        console.log(`Finished check for new pairs on Astroport in ${executionTime} milliseconds`.gray);
-    }
-
-    async checkDojoFactoryForNewPairs() {
-        const startTime = new Date().getTime();
-
-        const contractAddress = this.dojoSwapFactory;
-        const limit = 10;
-        const skip = 0;
-
-        const transactions = await this.indexerRestExplorerApi.fetchContractTransactions({
-            contractAddress,
-            params: {
-                limit,
-                skip,
-            },
-        });
-
-        await Promise.all(
-            transactions.transactions.map(async (tx) => {
-                const txHash = tx.txHash;
-                let txInfo = await this.getTxByHash(txHash);
-                if (!txInfo) {
-                    console.log(`failed to get txInfo`)
-                    return
-                }
-                if (txInfo['errorLog'].length > 0) {
-                    // console.log(`tx error: ${txInfo['errorLog']}`.gray)
-                    return
-                }
-                await Promise.all(
-                    txInfo.messages.map(async (msg) => {
-                        let message;
-                        try {
-                            message = JSON.parse(msg.message.msg);
-                        } catch (error) {
-                            message = msg.message.msg;
-                        }
-                        if (typeof message === 'object') {
-                            const firstKey = Object.keys(message)[0];
-                            if (firstKey == "create_pair") {
-                                const txTime = moment(txInfo['blockTimestamp'], 'YYYY-MM-DD HH:mm:ss.SSS Z');
-
-                                const pairAddress = txInfo.logs[0].events[txInfo.logs[0].events.length - 1].attributes.find((attr) => attr.key === "pair_contract_addr").value;
-
-                                if (!this.allPairs.has(pairAddress) && !this.ignoredPairs.has(pairAddress)) {
-                                    let pairInfo = await this.getPairInfo(pairAddress);
-
-                                    if (
-                                        pairInfo &&
-                                        pairInfo.token0Meta &&
-                                        pairInfo.token1Meta &&
-                                        this.tokenTypes.includes(pairInfo.token0Meta.tokenType) &&
-                                        this.tokenTypes.includes(pairInfo.token1Meta.tokenType) &&
-                                        (pairInfo.token0Meta.denom === this.baseDenom ||
-                                            pairInfo.token1Meta.denom === this.baseDenom)
-                                    ) {
-                                        this.allPairs.set(pairAddress, { ...pairInfo });
-                                        const message = `:new: New pair found on DojoSwap: ${pairInfo.token0Meta.symbol}, ` +
-                                            `<t:${txTime.unix()}:R>\n` +
-                                            `${pairInfo.token1Meta.symbol}: \n${pairInfo.dojoSwapLink}\n` +
-                                            `${pairInfo.coinhallLink}\n <@352761566401265664>`;
-
-                                        this.sendMessageToDiscord(message);
-                                        await this.calculateLiquidity(pairInfo);
-                                        console.log(`${pairAddress} liquidity: ${pairInfo.liquidity}`)
-
-                                        if (
-                                            pairInfo.liquidity > this.lowLiquidityThreshold &&
-                                            pairInfo.liquidity < this.highLiquidityThreshold &&
-                                            txTime > moment().subtract(1, 'minute')
-                                        ) {
-                                            await this.buyMemeToken(pairInfo, this.snipeAmount);
-                                        } else {
-                                            this.startMonitorPairForLiq(pairAddress);
-                                        }
-
-                                    } else {
-                                        console.log(`Ignored pair ${pairAddress}, ${JSON.stringify(pairInfo, null, 2)}`);
-                                        this.sendMessageToDiscord(`Ignored new pair https://dexscreener.com/injective/${pairAddress}`);
-
-                                        this.ignoredPairs.add(pairAddress);
-                                    }
-                                }
-                            }
-                        }
-                    })
-                );
-            })
-        );
-
-        const endTime = new Date().getTime();
-        const executionTime = endTime - startTime;
-        console.log(`Finished check for new pairs on DojoSwap in ${executionTime} milliseconds`.gray);
-    }
-
     async checkPairForProvideLiquidity(pairContract) {
-        let pair = await this.getPairInfo(pairContract)
+        let pair;
+        pair = this.allPairs.get(pairContract)
+        if (!pair) {
+            pair = await this.getPairInfo(pairContract)
+        }
         const pairName = `${pair.token0Meta.symbol}, ${pair.token1Meta.symbol}`;
 
         const startTime = new Date().getTime();
@@ -1611,6 +1476,8 @@ class InjectiveSniper {
             // console.log(transactions);
         }
 
+        let baseAssetDecimals = this.baseAsset.decimals
+
         await Promise.all(
             allTransactions.map(async (tx) => {
                 const txHash = tx.txHash;
@@ -1623,23 +1490,24 @@ class InjectiveSniper {
                         } catch (error) {
                             message = msg.message.msg;
                         }
-
                         if (typeof message === 'object' && message.provide_liquidity) {
-                            let baseAssetAmount;
+                            let baseAssetAmount = 0;
 
-                            if (message.provide_liquidity && message.provide_liquidity.pair_msg && message.provide_liquidity.pair_msg.provide_liquidity) {
-                                const info = message.provide_liquidity.pair_msg.provide_liquidity;
-                                baseAssetAmount = info.assets[0].info.native_token.denom === this.baseDenom ?
-                                    info.assets[0].amount : info.assets[1].amount;
-                            } else if (message.provide_liquidity && message.provide_liquidity.assets) {
-                                const info = message.provide_liquidity;
-                                baseAssetAmount = info.assets[0].info.native_token.denom === this.baseDenom ?
-                                    info.assets[0].amount : info.assets[1].amount;
-                            } else {
-                                baseAssetAmount = 0;
+                            if (message.provide_liquidity) {
+                                const info = message.provide_liquidity.pair_msg?.provide_liquidity || message.provide_liquidity;
+                                if (info.assets) {
+                                    const assetInfo = (info.assets[0].info?.token?.contract_addr) || info.assets[0].info?.native_token.denom;
+                                    baseAssetAmount = assetInfo === this.baseDenom ? info.assets[0].amount : info.assets[1].amount;
+                                    console.log(JSON.stringify(info.assets, null, 2))
+                                    console.log(pair.asset_decimals)
+                                    if (pair.asset_decimals) {
+                                        baseAssetDecimals = assetInfo === this.baseDenom ? pair.asset_decimals[0] : pair.asset_decimals[1]
+                                    }
+
+                                }
                             }
-
-                            const numericBaseAssetAmount = Number(baseAssetAmount) / 10 ** (this.baseAsset.decimals || 0);
+                            console.log(`https://explorer.injective.network/transaction/${txHash}`)
+                            const numericBaseAssetAmount = Number(baseAssetAmount) / 10 ** (baseAssetDecimals || 0);
                             const liquidity = (numericBaseAssetAmount * this.baseAssetPrice * 2) / 10 ** this.stableAsset.decimals;
                             const txTime = moment(txInfo['blockTimestamp'], 'YYYY-MM-DD HH:mm:ss.SSS Z');
                             console.log(`${pairName} liquidity added: $${liquidity} ${txTime.fromNow()}`);
@@ -1651,14 +1519,15 @@ class InjectiveSniper {
                             }
 
                             if (
-                                liquidity > 1 && liquidity < this.lowLiquidityThreshold &&
+                                liquidity > 0 && liquidity < this.lowLiquidityThreshold &&
                                 txTime > moment().subtract(1, 'minute')
                             ) {
                                 this.stopMonitorPairForLiq(pairContract);
                                 console.log("small amount of liquidity added")
                                 this.sendMessageToDiscord(`:eyes: ${pairName} - Small liquidity Added: $${liquidity}\n` +
                                     `<t:${txTime.unix()}:R>\n` +
-                                    `${pair.astroportLink}\n${pair.dexscreenerLink}\n<@352761566401265664>`)
+                                    `add liq tx: https://explorer.injective.network/transaction/${txHash}` +
+                                    `\n<@352761566401265664>`)
                                 await this.monitorPairForPriceChange(pair, 5, 5, 5)
                                 return;
                             }
@@ -1671,7 +1540,8 @@ class InjectiveSniper {
                                 this.stopMonitorPairForLiq(pairContract);
                                 this.sendMessageToDiscord(`:eyes: ${pairName} - Liquidity Added from tx: $${liquidity}\n` +
                                     `<t:${txTime.unix()}:R>\n` +
-                                    `${pair.astroportLink}\n${pair.dexscreenerLink}\n<@352761566401265664>`)
+                                    `add liq tx: https://explorer.injective.network/transaction/${txHash}` +
+                                    `\n<@352761566401265664>`)
 
 
                                 if (this.live) {
@@ -1691,7 +1561,60 @@ class InjectiveSniper {
 
         const endTime = new Date().getTime();
         const executionTime = endTime - startTime;
-        console.log(`Finished check for liq for pair ${pairName} in ${executionTime} milliseconds`);
+        // console.log(`Finished check for liq for pair ${pairName} in ${executionTime} milliseconds`.gray);
+    }
+
+    async handleNewPair(pair) {
+        let pairInfo = await this.getPairInfo(pair.address);
+        let dex = ""
+        if (pair.factory == this.astroFactory) {
+            dex = "Astroport"
+        }
+        if (pair.factory == this.dojoSwapFactory) {
+            dex = "DojoSwap"
+        }
+
+        const txTime = moment(pair.tx['blockTimestamp'], 'YYYY-MM-DD HH:mm:ss.SSS Z');
+
+        console.log(JSON.stringify(pairInfo, null, 2))
+
+        if (
+            pairInfo &&
+            pairInfo.token0Meta &&
+            pairInfo.token1Meta &&
+            this.tokenTypes.includes(pairInfo.token0Meta.tokenType) &&
+            this.tokenTypes.includes(pairInfo.token1Meta.tokenType) &&
+            (pairInfo.token0Meta.denom === this.baseDenom ||
+                pairInfo.token1Meta.denom === this.baseDenom)
+        ) {
+            this.allPairs.set(pair.address, { ...pairInfo, "factory": pair.factory });
+            const message = `:new: New pair found on ${dex}: ${pairInfo.token0Meta.symbol}, ` +
+                `${pairInfo.token1Meta.symbol}: \n` +
+                `<t:${txTime.unix()}:R>\n` +
+                `${dex == "DojoSwap" ? pairInfo.dojoSwapLink : pairInfo.astroportLink}\n` +
+                `${pairInfo.coinhallLink}\n` +
+                `create pair tx: https://explorer.injective.network/transaction/${pair.txHash}\n<@352761566401265664>`;
+
+            this.sendMessageToDiscord(message);
+            await this.calculateLiquidity(pairInfo);
+            console.log(`${pair.address} liquidity: ${pairInfo.liquidity}`)
+
+            if (
+                pairInfo.liquidity > this.lowLiquidityThreshold &&
+                pairInfo.liquidity < this.highLiquidityThreshold &&
+                txTime > moment().subtract(1, 'minute')
+            ) {
+                await this.buyMemeToken(pairInfo, this.snipeAmount);
+            } else {
+                this.startMonitorPairForLiq(pair.address);
+            }
+
+        } else {
+            console.log(`Ignored pair ${pair.address}, ${JSON.stringify(pairInfo, null, 2)}`);
+            this.sendMessageToDiscord(`Ignored new pair on ${dex} https://dexscreener.com/injective/${pair.address}`);
+
+            this.ignoredPairs.add(pair.address);
+        }
     }
 
     startMonitorPairForLiq(pair) {
@@ -1712,7 +1635,7 @@ class InjectiveSniper {
             for (const pair of this.lowLiqPairsToMonitor.values()) {
                 await this.checkPairForProvideLiquidity(pair);
             }
-            await new Promise(resolve => setTimeout(resolve, 100));
+            await new Promise(resolve => setTimeout(resolve, 1000));
         }
     }
 
@@ -1730,8 +1653,16 @@ class InjectiveSniper {
 
     async newPairsLoop() {
         while (this.monitorNewPairs) {
-            await this.checkAstroFactoryForNewPairs();
-            await this.checkDojoFactoryForNewPairs();
+            let newAstroPairs = await this.astroport.checkForNewPairs(this.allPairs, this.ignoredPairs);
+            let newDojoPairs = await this.dojoSwap.checkForNewPairs(this.allPairs, this.ignoredPairs);
+
+            for (const pair of newAstroPairs) {
+                await this.handleNewPair(pair)
+            }
+            for (const pair of newDojoPairs) {
+                await this.handleNewPair(pair)
+            }
+
             await new Promise(resolve => setTimeout(resolve, 1000));
         }
     }

@@ -1,1 +1,29 @@
-[]
+[
+  {
+    "pair_contract": "inj1grtkdl7552kjsrkqn5wqpk4fp8m3m4y0tzqfqr",
+    "balance": 0,
+    "amount_in": 59909998179220,
+    "token_denom": "inj1zdj9kqnknztl2xclm5ssv25yre09f8908d4923",
+    "time_bought": "2024-01-24T08:04:08.664Z",
+    "profit": -59909998179220,
+    "is_moon_bag": false
+  },
+  {
+    "pair_contract": "inj1dkfpt70kq48tm4emtj6l92gddq0z70jn8cn03g",
+    "balance": 0,
+    "amount_in": 88462561741308,
+    "token_denom": "factory/inj14lf8xm6fcvlggpa7guxzjqwjmtr24gnvf56hvz/autism",
+    "time_bought": "2024-01-24T08:07:42.848Z",
+    "profit": -88462561741308,
+    "is_moon_bag": false
+  },
+  {
+    "pair_contract": "inj1apnwjz58gn96ypw9amkph2s9z0ux8df484yp04",
+    "balance": 0,
+    "amount_in": 119819995251632,
+    "token_denom": "inj134wfjutywny9qnyux2xgdmm0hfj7mwpl39r3r9",
+    "time_bought": "2024-01-24T08:18:20.555Z",
+    "profit": -179729992877448,
+    "is_moon_bag": false
+  }
+]
