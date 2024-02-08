@@ -13,7 +13,7 @@ const CONFIG = {
     stopLoss: 80,                       // %
     moonBagPercent: 0.20,               // %
     tradeTimeLimit: 15,                 // mins
-    lowLiquidityThreshold: 2000,        // USD
+    lowLiquidityThreshold: 500,         // USD
     highLiquidityThreshold: 100000,     // USD
 }
 

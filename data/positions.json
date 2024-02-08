@@ -25,5 +25,230 @@
     "time_bought": "2024-01-24T08:18:20.555Z",
     "profit": -179729992877448,
     "is_moon_bag": false
+  },
+  {
+    "pair_contract": "inj1g27nrl0j8u9zejq5pxagnwhexmp869yplgnhqe",
+    "balance": 192840044219605100000,
+    "amount_in": 10000000000000000,
+    "token_denom": "inj108rxfpdh8q0pyrnnp286ftj6jctwtajjeur773",
+    "time_bought": "2024-01-25T04:19:38.527Z",
+    "profit": 0,
+    "is_moon_bag": false
+  },
+  {
+    "pair_contract": "inj1mcmtlnttumh4xnjlkqw9ng8s3zz72h80q6zw9d",
+    "balance": 0,
+    "amount_in": 0,
+    "token_denom": "inj1xtrzl67q5rkdrgcauljpwzwpt7pgs3jm32zcaz",
+    "time_bought": "2024-01-25T08:54:19.514Z",
+    "profit": 10608911169311616,
+    "is_moon_bag": false
+  },
+  {
+    "pair_contract": "inj1csw8gz4a7e0xx37mwnrgk2dcmn3nr30ecprg6d",
+    "balance": 3.9721115537848605e+24,
+    "amount_in": 100000000000000000,
+    "token_denom": "inj14y8f4jc0qmmwzcyj9k7dxnlq6tgjq9ql6n2kdn",
+    "time_bought": "2024-01-25T13:53:57.199Z",
+    "profit": 0,
+    "is_moon_bag": false
+  },
+  {
+    "pair_contract": "inj140ee85cqu09yk3mzru8rht8nuaxua9fu0zewh9",
+    "balance": 3.9721115537848605e+24,
+    "amount_in": 100000000000000000,
+    "token_denom": "inj1nlcg7dgufuytaa2sfxam5hm0l38dyv3uk47kdf",
+    "time_bought": "2024-01-25T14:38:02.237Z",
+    "profit": 0,
+    "is_moon_bag": false
+  },
+  {
+    "pair_contract": "inj1pp4a7js625u4dgwn5e9z783mg9p4ceqgl945pd",
+    "balance": 3.9721115537848605e+24,
+    "amount_in": 100000000000000000,
+    "token_denom": "inj1h8l2xcn4h9v0m67qem8x7rmf2akjwc34tjmm7a",
+    "time_bought": "2024-01-25T14:43:06.973Z",
+    "profit": 0,
+    "is_moon_bag": false
+  },
+  {
+    "pair_contract": "inj1gjylxzg9ujjwgh4w3cde0qjzuugdhqhxnt9saz",
+    "balance": 3.9721115537848607e+27,
+    "amount_in": 100000000000000000,
+    "token_denom": "inj1qt32en8rjd0x486tganvc6u7q25xlr5wqr68xn",
+    "time_bought": "2024-01-25T14:48:13.960Z",
+    "profit": 0,
+    "is_moon_bag": false
+  },
+  {
+    "pair_contract": "inj1nsktqwjtpxudupu5rldpp9uhm6tzh68lxe5whn",
+    "balance": 3.9721115537848606e+26,
+    "amount_in": 100000000000000000,
+    "token_denom": "inj1kjfeuqtp56newrdye4d5rczfkwe4dg3llc0kc9",
+    "time_bought": "2024-01-25T14:49:46.497Z",
+    "profit": 0,
+    "is_moon_bag": false
+  },
+  {
+    "pair_contract": "inj1elzhfm3s4y7206rgag8sny27rur5r3jgzwa0gh",
+    "balance": 3.97211155378486e+25,
+    "amount_in": 100000000000000000,
+    "token_denom": "inj1e9nezwf7wvjj4rzfkjfad7teqjfa7r0838f6cs",
+    "time_bought": "2024-01-25T14:51:22.765Z",
+    "profit": 0,
+    "is_moon_bag": false
+  },
+  {
+    "pair_contract": "inj1d7255fadty3sxe3tx2w2fstj7yr9jqjhrdtusj",
+    "balance": 3.9721115537848605e+23,
+    "amount_in": 100000000000000000,
+    "token_denom": "inj12d6gr7ky3nfwmsw8y455aryxc95f37dj9hnpuq",
+    "time_bought": "2024-01-25T14:52:55.962Z",
+    "profit": 0,
+    "is_moon_bag": false
+  },
+  {
+    "pair_contract": "inj1nuptexxrdpg5nynutqdvjr28vx4s7dmh6crk5y",
+    "balance": 3.9721115537848605e+24,
+    "amount_in": 100000000000000000,
+    "token_denom": "inj1dkpmkm7j8t2dh5zqp04xnjlhljmejss3edz3wp",
+    "time_bought": "2024-01-25T14:54:23.971Z",
+    "profit": 0,
+    "is_moon_bag": false
+  },
+  {
+    "pair_contract": "inj17ug29rvmy9nfnju8xzwyt6z656qwz65jqzxxxx",
+    "balance": 3.9721115537848605e+24,
+    "amount_in": 100000000000000000,
+    "token_denom": "inj12xn584cdkhnz2nn08xz4yrwxscxa8tr2fuxwam",
+    "time_bought": "2024-01-25T14:55:47.959Z",
+    "profit": 0,
+    "is_moon_bag": false
+  },
+  {
+    "pair_contract": "inj1jqynrtreg84gt003ychtq5hkpj4qrusl3zeelz",
+    "balance": 3.97211155378486e+29,
+    "amount_in": 100000000000000000,
+    "token_denom": "inj15m47mfu8qjh9uc7cr04txp9udea635vkuwduck",
+    "time_bought": "2024-01-25T14:57:49.369Z",
+    "profit": 0,
+    "is_moon_bag": false
+  },
+  {
+    "pair_contract": "inj18skse35ad72nsdnlhv70dzjquv4hr0empy73yu",
+    "balance": 3.9721115537848606e+26,
+    "amount_in": 100000000000000000,
+    "token_denom": "inj1w2w4n4mjzlx5snwf65l54a2gh4x0kmpvzm43fy",
+    "time_bought": "2024-01-25T14:59:24.294Z",
+    "profit": 0,
+    "is_moon_bag": false
+  },
+  {
+    "pair_contract": "inj17rjkpqgx0kq939lk0nswk5eukej65nsztyuqg5",
+    "balance": 3.9721115537848605e+24,
+    "amount_in": 100000000000000000,
+    "token_denom": "inj10e64r6exkrm52w9maa2e99nse2zh5w4zajzv7e",
+    "time_bought": "2024-01-25T15:01:25.663Z",
+    "profit": 0,
+    "is_moon_bag": false
+  },
+  {
+    "pair_contract": "inj1du8hdafcn8j386rqs820f2xnzh5davqd2szzar",
+    "balance": 3.97211155378486e+28,
+    "amount_in": 100000000000000000,
+    "token_denom": "inj1gqp2upvl8ftj28amxt90dut76prdpefx3qvpck",
+    "time_bought": "2024-01-25T15:03:06.754Z",
+    "profit": 0,
+    "is_moon_bag": false
+  },
+  {
+    "pair_contract": "inj1dgcpk4p6mmjflhxp8hgrezqgrnjuc5gny0eu4v",
+    "balance": 3.9721115537848605e+24,
+    "amount_in": 100000000000000000,
+    "token_denom": "inj15xz5537eujskaayp600gkke7qu82p5sa76lg50",
+    "time_bought": "2024-01-25T15:04:39.313Z",
+    "profit": 0,
+    "is_moon_bag": false
+  },
+  {
+    "pair_contract": "inj1lfe204gjmzq0wslv7smsux69et2jcuceuufu3m",
+    "balance": 3.97211155378486e+25,
+    "amount_in": 100000000000000000,
+    "token_denom": "inj1hgh3dqc2kxl464qg9rnt3kctzplmsnqzycdtt7",
+    "time_bought": "2024-01-25T15:07:45.492Z",
+    "profit": 0,
+    "is_moon_bag": false
+  },
+  {
+    "pair_contract": "inj1gugf967d06emrdjayzv4ttzyw2kll2e5lt6y70",
+    "balance": 3.9721115537848605e+24,
+    "amount_in": 100000000000000000,
+    "token_denom": "inj1vwhkr9qmntsfe9vzegh7xevvfaj4lnx9t783nf",
+    "time_bought": "2024-01-25T15:09:28.041Z",
+    "profit": 0,
+    "is_moon_bag": false
+  },
+  {
+    "pair_contract": "inj12kwp2j54gphfsacztda4c07tjj5ud0c3cexkwy",
+    "balance": 3.9721115537848605e+24,
+    "amount_in": 100000000000000000,
+    "token_denom": "inj17k4lmkjl963pcugn389d070rh0n70f5mtrzrvv",
+    "time_bought": "2024-01-25T15:11:10.227Z",
+    "profit": 0,
+    "is_moon_bag": false
+  },
+  {
+    "pair_contract": "inj1j6ed3alg8z6juaqhjv0jxayk3ps78ryv7jj0rz",
+    "balance": 3.97211155378486e+28,
+    "amount_in": 100000000000000000,
+    "token_denom": "inj10wuysemk8ptnnt2n4my8qsalgkmw6yxe8wthu2",
+    "time_bought": "2024-01-25T15:12:38.532Z",
+    "profit": 0,
+    "is_moon_bag": false
+  },
+  {
+    "pair_contract": "inj1sv0lnnu8g5m7wd4ttnr8vq2tzv2c3ujcwsz0xz",
+    "balance": 3.97211155378486e+25,
+    "amount_in": 100000000000000000,
+    "token_denom": "inj1wu086fnygcr0sgytmt6pk8lsnqr9uev3dj700v",
+    "time_bought": "2024-01-25T15:13:59.584Z",
+    "profit": 0,
+    "is_moon_bag": false
+  },
+  {
+    "pair_contract": "inj1mk6y6lyw8rxe50hqp6dumgc9ntgejv7c47r8s9",
+    "balance": 3.9721115537848607e+27,
+    "amount_in": 100000000000000000,
+    "token_denom": "inj19fza325yjfnx9zxvtvawn0rrjwl73g4nkzmm2w",
+    "time_bought": "2024-01-25T15:15:33.063Z",
+    "profit": 0,
+    "is_moon_bag": false
+  },
+  {
+    "pair_contract": "inj15z7q0qdquw9thmuanqc7cyvfker3qrmlztxc6r",
+    "balance": 3.9721115537848606e+30,
+    "amount_in": 100000000000000000,
+    "token_denom": "inj1qqfhg6l8d7punj4z597t0p3wwwxdcpfew4fz7a",
+    "time_bought": "2024-01-25T15:17:01.133Z",
+    "profit": 0,
+    "is_moon_bag": false
+  },
+  {
+    "pair_contract": "inj1yvyhpu9qf4n4d3ptzsp52a8cxhvf672z8hr49n",
+    "balance": 3.9721115537848606e+26,
+    "amount_in": 100000000000000000,
+    "token_denom": "inj1clfx8jgq3636249d0tr3yu26hsp3yqct6lpvcy",
+    "time_bought": "2024-01-25T15:18:15.262Z",
+    "profit": 0,
+    "is_moon_bag": false
+  },
+  {
+    "pair_contract": "inj1p6eg47mjnwcfe6xfye9qdsp02rw3rrwz8chsdz",
+    "balance": 3.97211155378486e+25,
+    "amount_in": 100000000000000000,
+    "token_denom": "inj1wltxzzuvl9tz8jrawcw756wcawcjt4l4cmsjru",
+    "time_bought": "2024-01-25T15:19:30.176Z",
+    "profit": 0,
+    "is_moon_bag": false
   }
 ]

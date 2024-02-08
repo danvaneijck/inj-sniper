@@ -338,11 +338,11 @@ class InjectiveSniper {
                 return
             }
             await this.calculateLiquidity(pair)
-            if (pair.liquidity < this.lowLiquidityThreshold) {
-                this.monitorLowLiquidityPair(pair, 5, this.lowLiquidityThreshold)
-                await this.sendMessageToDiscord(`:eyes: Monitoring token for liquidity change`)
-                return
-            }
+            // if (pair.liquidity < this.lowLiquidityThreshold) {
+            //     this.monitorLowLiquidityPair(pair, 5, this.lowLiquidityThreshold)
+            //     await this.sendMessageToDiscord(`:eyes: Monitoring token for liquidity change`)
+            //     return
+            // }
             let result = await this.buyMemeToken(pair, amount)
             if (result && !this.allPairs.has(pairContract)) {
                 this.allPairs.set(pairContract, pair);

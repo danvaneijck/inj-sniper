@@ -75,7 +75,7 @@ class TransactionManager {
 
             const GAS = {
                 ...DEFAULT_STD_FEE,
-                gas: '500000'
+                gas: '700000'
             }
 
 
