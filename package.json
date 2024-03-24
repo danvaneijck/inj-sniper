@@ -1,9 +1,9 @@
 {
   "dependencies": {
-    "@injectivelabs/networks": "1.14.6",
-    "@injectivelabs/sdk-ts": "1.14.7",
-    "@injectivelabs/sdk-ui-ts": "1.14.7",
-    "@injectivelabs/utils": "1.14.6",
+    "@injectivelabs/networks": "1.14.3-dev.0",
+    "@injectivelabs/sdk-ts": "1.14.3-dev.0",
+    "@injectivelabs/sdk-ui-ts": "1.14.3-dev.0",
+    "@injectivelabs/utils": "1.14.3-dev.0",
     "colors": "^1.4.0",
     "discord.js": "^14.14.1",
     "dotenv": "^16.3.1",
