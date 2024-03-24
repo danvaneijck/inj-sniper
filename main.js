@@ -1,6 +1,6 @@
 const InjectiveSniper = require("./modules/snipe")
 
-const LIVE_TRADING = true
+const LIVE_TRADING = false
 
 const CONFIG = {
     live: LIVE_TRADING,
@@ -8,29 +8,43 @@ const CONFIG = {
     tokenTypes: ['native', 'tokenFactory', 'cw20'],
     pairType: '{"xyk":{}}',
     maxSpread: 0.49,
-    snipeAmount: 0.1,                   // INJ
-    profitGoalPercent: 40,              // %
-    stopLoss: 80,                       // %
+    snipeAmount: 5,                     // INJ
+    profitGoalPercent: 500,             // %
+    stopLoss: 95,                       // %
     moonBagPercent: 0.20,               // %
-    tradeTimeLimit: 15,                 // mins
-    lowLiquidityThreshold: 500,         // USD
+    tradeTimeLimit: 1000,               // mins
+    lowLiquidityThreshold: 10000,       // USD
     highLiquidityThreshold: 100000,     // USD
 }
 
 const main = async () => {
+    try {
+        const injectiveSniper = new InjectiveSniper(CONFIG);
+        injectiveSniper.startMonitoringBasePair(10);
 
-    const injectiveSniper = new InjectiveSniper(CONFIG);
-    injectiveSniper.startMonitoringBasePair(10);
+        await injectiveSniper.initialize();
+        await injectiveSniper.getPortfolio()
 
-    await injectiveSniper.initialize();
-    await injectiveSniper.getPortfolio()
+        await injectiveSniper.setMonitorNewPairs(true)
 
-    injectiveSniper.setMonitorNewPairs(true)
-
-    // let pair = await injectiveSniper.getPairInfo("inj194zp3wnyd48cvlpa2nudq4w349a2cwsk2rug7p")
-    // console.log(JSON.stringify(pair, null, 2))
-    // injectiveSniper.monitorPairForPriceChange(pair, 5, 5, 5)
-
+    } catch (error) {
+        console.error("An error occurred:", error);
+    }
 };
 
-main();
+const start = async () => {
+    let shouldRestart = true;
+
+    while (shouldRestart) {
+        try {
+            await main();
+            shouldRestart = false;
+        } catch (error) {
+            console.error("An error occurred:", error);
+            console.log("RESTART".bgRed)
+            shouldRestart = true;
+        }
+    }
+};
+
+start();

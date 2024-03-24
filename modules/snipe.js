@@ -49,6 +49,8 @@ class InjectiveSniper {
             }
         })
 
+        console.log(getNetworkEndpoints(Network.Mainnet))
+
         this.chainGrpcBankApi = new ChainGrpcBankApi(this.RPC)
         this.indexerRestExplorerApi = new IndexerRestExplorerApi(
             `${getNetworkEndpoints(Network.Mainnet).explorer}/api/explorer/v1`,
@@ -215,7 +217,7 @@ class InjectiveSniper {
             return decoded
         }
         catch (e) {
-            console.log(`Error checking factory for pair: ${e}`.red)
+            console.log(`Error queryTokenForBalance: ${tokenAddress} ${e}`.red)
         }
         return null
     }
@@ -541,14 +543,13 @@ class InjectiveSniper {
 
     async checkHasPair(factory, assetInfos) {
         try {
-
             const factoryQuery = Buffer.from(JSON.stringify({ pair: { asset_infos: assetInfos } })).toString('base64');
             const factoryInfo = await this.chainGrpcWasmApi.fetchSmartContractState(factory, factoryQuery);
             const factoryDecoded = JSON.parse(new TextDecoder().decode(factoryInfo.data));
             return factoryDecoded
         }
         catch (e) {
-            console.log(`Error checking factory for pair: ${e}`.red)
+            console.log(`Error checking factory for pair: ${assetInfos} ${e}`.red)
         }
         return null
     }
@@ -833,7 +834,7 @@ class InjectiveSniper {
                 this.allPairs.set(pair.contract_addr, updatedPair)
                 const currentLiquidity = await this.calculateLiquidity(updatedPair);
                 console.log(`${pairName} liquidity: ${currentLiquidity}`.gray)
-                if (currentLiquidity && currentLiquidity > liquidityThreshold) {
+                if (currentLiquidity && currentLiquidity > liquidityThreshold && this.live) {
                     this.stopMonitoringLowLiquidityPair(pair)
                     console.log(`Monitoring ${pairName} - Liquidity Added: $${currentLiquidity}`);
                     this.sendMessageToDiscord(`:eyes: ${pairName} - Liquidity Added: $${currentLiquidity}\n${pair.astroportLink}\n${pair.dexscreenerLink}\n<@352761566401265664>`)
@@ -862,6 +863,7 @@ class InjectiveSniper {
     }
 
     async getPortfolio() {
+
         try {
             const endpoints = getNetworkEndpoints(Network.Mainnet);
             const indexerGrpcAccountPortfolioApi = new IndexerGrpcAccountPortfolioApi(
@@ -871,7 +873,6 @@ class InjectiveSniper {
             const portfolio = await indexerGrpcAccountPortfolioApi.fetchAccountPortfolio(
                 this.walletAddress,
             );
-
             for (const balance of portfolio.bankBalancesList) {
                 try {
                     if (balance.denom === this.baseDenom || balance.amount <= 0) continue;
@@ -943,8 +944,8 @@ class InjectiveSniper {
     }
 
     async buyMemeToken(pair, amount, retries = 5) {
-        if (!pair || !this.live) {
-            console.error("Invalid pair or live trading not enabled");
+        if (!pair) {
+            console.error("Invalid pair");
             return;
         }
 
@@ -1003,6 +1004,7 @@ class InjectiveSniper {
         }
 
         console.error(`Failed to execute swap after ${retries} attempts.`);
+        this.sendMessageToDiscord(`Failed to execute swap after ${retries} attempts.`)
     }
 
     parseReturnAmountFromEvents(rawLog) {
@@ -1063,10 +1065,10 @@ class InjectiveSniper {
             return;
         }
 
-        if (!this.live) {
-            console.error("Live trading not enabled");
-            return;
-        }
+        // if (!this.live) {
+        //     console.error("Live trading not enabled");
+        //     return;
+        // }
 
         const memeTokenMeta = pair.token0Meta.denom === this.baseDenom
             ? pair.token1Meta
@@ -1144,11 +1146,15 @@ class InjectiveSniper {
                     console.log("Sell failed");
                     retryCount += 1;
                     spread += 0.2
+
                     if (!amount) {
                         console.log("refreshing balance, attempting sell again")
                         amount = await this.getBalanceOfToken(memeTokenMeta.denom).amount;
                         amount = Math.round(amount)
                     }
+
+                    amount = Math.round(Number(amount - (amount * 0.1)))
+                    console.log(`change amount to ${amount}`.bgCyan)
                 }
                 else {
                     this.stopMonitoringPairToSell(pair)
@@ -1450,7 +1456,7 @@ class InjectiveSniper {
         });
 
         try {
-            // console.log(`total tx for ${pairName} : ${transactions.paging.total}`);
+            console.log(`total tx for ${pairName} : ${transactions.paging.total}`);
             do {
                 const currentTransactions = transactions.transactions || [];
                 allTransactions.push(...currentTransactions);
@@ -1478,10 +1484,13 @@ class InjectiveSniper {
 
         let baseAssetDecimals = this.baseAsset.decimals
 
+        console.log(`got tx ${allTransactions.length}`)
+
         await Promise.all(
             allTransactions.map(async (tx) => {
                 const txHash = tx.txHash;
                 const txInfo = await this.getTxByHash(txHash);
+                if (!txInfo) return
                 await Promise.all(
                     txInfo.messages.map(async (msg) => {
                         let message;
@@ -1493,10 +1502,13 @@ class InjectiveSniper {
                         if (typeof message === 'object' && message.provide_liquidity) {
                             let baseAssetAmount = 0;
 
+                            let memeAddress = ""
+
                             if (message.provide_liquidity) {
                                 const info = message.provide_liquidity.pair_msg?.provide_liquidity || message.provide_liquidity;
                                 if (info.assets) {
                                     const assetInfo = (info.assets[0].info?.token?.contract_addr) || info.assets[0].info?.native_token.denom;
+                                    memeAddress = assetInfo
                                     baseAssetAmount = assetInfo === this.baseDenom ? info.assets[0].amount : info.assets[1].amount;
                                     console.log(JSON.stringify(info.assets, null, 2))
                                     console.log(pair.asset_decimals)
@@ -1602,7 +1614,7 @@ class InjectiveSniper {
             if (
                 pairInfo.liquidity > this.lowLiquidityThreshold &&
                 pairInfo.liquidity < this.highLiquidityThreshold &&
-                txTime > moment().subtract(1, 'minute')
+                txTime > moment().subtract(1, 'minute') && this.live
             ) {
                 await this.buyMemeToken(pairInfo, this.snipeAmount);
             } else {
@@ -1639,12 +1651,12 @@ class InjectiveSniper {
         }
     }
 
-    setMonitorNewPairs(monitor) {
+    async setMonitorNewPairs(monitor) {
         this.monitorNewPairs = monitor
         console.log(`new pairs loop: ${this.monitorNewPairs}`.bgCyan)
         if (monitor) {
             this.sendMessageToDiscord(':dart: Begin monitoring for new pairs on Astroport and DojoSwap')
-            this.newPairsLoop()
+            await this.newPairsLoop()
         }
         else {
             this.sendMessageToDiscord(':pause_button: Stop monitoring for new pairs')
@@ -1653,15 +1665,27 @@ class InjectiveSniper {
 
     async newPairsLoop() {
         while (this.monitorNewPairs) {
-            let newAstroPairs = await this.astroport.checkForNewPairs(this.allPairs, this.ignoredPairs);
-            let newDojoPairs = await this.dojoSwap.checkForNewPairs(this.allPairs, this.ignoredPairs);
+            try {
+                let newAstroPairs = await this.astroport.checkForNewPairs(this.allPairs, this.ignoredPairs);
+                for (const pair of newAstroPairs) {
+                    await this.handleNewPair(pair)
+                }
+            }
+            catch (e) {
+                console.log("error getting new astro pairs", e.originalMessage ? e.originalMessage : e)
+            }
 
-            for (const pair of newAstroPairs) {
-                await this.handleNewPair(pair)
+
+            try {
+                let newDojoPairs = await this.dojoSwap.checkForNewPairs(this.allPairs, this.ignoredPairs);
+                for (const pair of newDojoPairs) {
+                    await this.handleNewPair(pair)
+                }
             }
-            for (const pair of newDojoPairs) {
-                await this.handleNewPair(pair)
+            catch (e) {
+                console.log("error getting new dojo pairs", e.originalMessage ? e.originalMessage : e)
             }
+
 
             await new Promise(resolve => setTimeout(resolve, 1000));
         }

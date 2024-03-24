@@ -75,9 +75,11 @@ class TransactionManager {
 
             const GAS = {
                 ...DEFAULT_STD_FEE,
-                gas: '700000'
+                gas: '300000'
             }
 
+            console.log(JSON.stringify(GAS))
+            console.log(JSON.stringify(msg))
 
             const { signBytes, txRaw } = createTransaction({
                 message: msg,
