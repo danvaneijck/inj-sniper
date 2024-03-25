@@ -1,14 +1,9 @@
 const {
     ChainGrpcWasmApi,
-    IndexerGrpcAccountPortfolioApi,
     PrivateKey,
     ChainGrpcBankApi,
-    MsgExecuteContractCompat,
-    MsgExecuteContract,
-    IndexerGrpcExplorerStream,
     IndexerRestExplorerApi,
-    IndexerGrpcExplorerApi,
-    MsgSend
+    IndexerGrpcExplorerApi
 } = require('@injectivelabs/sdk-ts');
 const { getNetworkEndpoints, Network } = require('@injectivelabs/networks');
 const { DenomClientAsync } = require('@injectivelabs/sdk-ui-ts');
@@ -35,7 +30,6 @@ class InjectiveTokenTools {
 
         const endpoints = getNetworkEndpoints(Network.Mainnet)
         this.indexerGrpcExplorerApi = new IndexerGrpcExplorerApi(endpoints.explorer)
-
 
         this.privateKey = PrivateKey.fromMnemonic(process.env.MNEMONIC)
         this.publicKey = this.privateKey.toAddress()
@@ -173,27 +167,44 @@ class InjectiveTokenTools {
         })
     }
 
-    async getPreSaleAmounts(address, startTime, endTime, max, maxPerWallet) {
+    async getPreSaleAmounts(address, startTime, endTime, max, minPerWallet, maxPerWallet) {
         let allTransactions = this.txMap.get(address)
-        console.log(allTransactions.txs.length)
+        console.log("total tx to scan: ", allTransactions.txs.length)
+
+        // console.log("start", startTime.format())
+        // console.log("end", endTime.format())
+        console.log(`min contribution: ${minPerWallet} INJ`)
+        console.log(`max contribution: ${maxPerWallet} INJ`)
+
+        console.log("max cap", max, "INJ")
 
         let maxCap = max * Math.pow(10, 18)
-        let amountRaised = 0
-        let toRefund = 0
+        let minContribution = minPerWallet * Math.pow(10, 18)
+        let maxContribution = maxPerWallet * Math.pow(10, 18)
 
+        let totalAmountReceived = 0
+        let totalValidContributions = 0
+        let totalToRefund = 0
+
+        let maxCapHit = false
+        let maxCapBlock = null
+
+        allTransactions.txs.sort((a, b) => {
+            return a.blockNumber - b.blockNumber;
+        });
 
         allTransactions.txs.forEach(async (tx) => {
             let messageError = tx.errorLog.length > 1
             if (messageError) {
-                console.log("tx error")
                 return
             }
 
             let blockNumber = tx.blockNumber
-            let blockTimestamp = moment(tx.blockTimestamp)
+            let blockTimestamp = moment(tx.blockTimestamp, "YYYY-MM-DD HH:mm:ss.SSS Z")
 
             tx.messages.forEach(async (message) => {
                 let sender, recipient, amount = null
+
                 if (
                     message.message.msg !== undefined &&
                     message.message.msg !== null
@@ -232,31 +243,75 @@ class InjectiveTokenTools {
                     console.log("no amount")
                 }
 
-                let inTimeFrame = blockTimestamp.isAfter(startTime) && blockTimestamp.isBefore(endTime)
-                let withinMaxCap = amountRaised + Number(amount) < maxCap
-
-                if (inTimeFrame && withinMaxCap && recipient == address) {
-                    amountRaised += Number(amount)
+                if (recipient == address) {
+                    totalAmountReceived += Number(amount)
                 }
-                else {
-                    toRefund += Number(amount)
+
+                if (Number(amount < minContribution || Number(amount) > maxContribution)) {
+                    // console.log("amount outside of min max", amount / Math.pow(10, 18), message)
+                    let totalSent = Number(amount)
+                    let toRefund = Number(amount)
+                    let entry = this.preSaleAmounts.get(sender)
+
+                    if (entry) {
+                        totalSent += Number(entry.amountSent ?? 0)
+                        toRefund += Number(entry.toRefund ?? 0)
+                    }
+
+                    this.preSaleAmounts.set(sender, {
+                        ...entry,
+                        address: sender,
+                        amountSent: totalSent,
+                        contribution: Number(totalSent) - Number(toRefund),
+                        toRefund: toRefund,
+                    })
+                    totalValidContributions += Number(totalSent) - Number(toRefund)
+
+                    return
+                }
+
+                let inTimeFrame = blockTimestamp.isAfter(startTime) && blockTimestamp.isBefore(endTime)
+
+                let withinMaxCap = Number(totalValidContributions) + Number(amount) <= maxCap
+                let room = maxCap - Number(totalValidContributions)
+
+                if (!withinMaxCap && maxCapHit == false && (room / Math.pow(10, 18)) > 1) {
+                    console.log(`transfer of ${amount / Math.pow(10, 18)} INJ puts sale over max of ${max}. space left: ${(room / Math.pow(10, 18)).toFixed(2)} INJ`)
+                    let totalSent = Number(amount)
+                    let toRefund = Number(amount)
+                    let entry = this.preSaleAmounts.get(sender)
+
+                    if (entry) {
+                        totalSent += Number(entry.amountSent ?? 0)
+                        toRefund += Number(entry.toRefund ?? 0)
+                    }
+
+                    this.preSaleAmounts.set(sender, {
+                        ...entry,
+                        address: sender,
+                        amountSent: totalSent,
+                        contribution: Number(totalSent) - Number(toRefund),
+                        toRefund: toRefund,
+                    })
+                    totalValidContributions += Number(totalSent) - Number(toRefund)
+                    return
+                }
+
+                if (!withinMaxCap && maxCapHit == false && room < 5) {
+                    maxCapHit = blockTimestamp
+                    maxCapBlock = blockNumber
+                    console.log("max cap hit")
                 }
 
                 if (sender && recipient && amount) {
                     if (sender == address) {
+                        // potentially doing a refund
                         let participant = recipient
                         if (this.preSaleAmounts.has(participant)) {
                             let entry = this.preSaleAmounts.get(participant)
                             this.preSaleAmounts.set(participant, {
                                 ...entry,
                                 address: participant,
-                                amountRefunded: Number(amount) + Number(entry.amountRefunded ?? 0)
-                            })
-                        }
-                        else {
-                            this.preSaleAmounts.set(participant, {
-                                address: participant,
-                                amountRefunded: Number(amount)
                             })
                         }
                     }
@@ -264,42 +319,71 @@ class InjectiveTokenTools {
                         // received funds for presale 
                         if (this.preSaleAmounts.has(sender)) {
                             let entry = this.preSaleAmounts.get(sender)
-
                             let totalSent = Number(amount) + Number(entry.amountSent ?? 0)
-                            let toRefund = 0
-                            if (!withinMaxCap || !inTimeFrame) {
-                                toRefund = Number(amount)
+                            let toRefund = 0 + Number(entry.toRefund ?? 0)
+
+                            if (!withinMaxCap) {
+                                toRefund += Number(amount)
                             }
 
                             this.preSaleAmounts.set(sender, {
                                 ...entry,
                                 address: sender,
+                                amountSent: totalSent,
+                                contribution: Number(totalSent) - Number(toRefund),
                                 toRefund: toRefund,
-                                amountSent: totalSent
                             })
+                            totalValidContributions += Number(totalSent) - Number(toRefund)
                         }
                         else {
                             let toRefund = 0
-                            if (!withinMaxCap || !inTimeFrame) {
-                                toRefund = Number(amount)
+                            if (!withinMaxCap) {
+                                toRefund += Number(amount)
                             }
                             this.preSaleAmounts.set(sender, {
                                 address: sender,
+                                timeSent: blockTimestamp.format(),
                                 amountSent: Number(amount),
-                                toRefund: toRefund
+                                contribution: Number(amount) - Number(toRefund),
+                                toRefund: toRefund,
                             })
+                            totalValidContributions += Number(amount) - Number(toRefund)
                         }
                     }
                 }
             })
         })
 
-        console.log("amount raised: ", amountRaised / Math.pow(10, 18))
-        console.log("to refund: ", toRefund / Math.pow(10, 18))
+        console.log("total amount received: ", (totalAmountReceived / Math.pow(10, 18)).toFixed(2), "INJ")
 
-        let myAddress = this.preSaleAmounts.get("inj1lq9wn94d49tt7gc834cxkm0j5kwlwu4gm65lhe")
-        console.log(myAddress)
         this.saveDataToFile("presaleAmounts.json", Array.from(this.preSaleAmounts.values()))
+
+        // sanity check
+        let totalRefunded = 0
+        let totalContribution = 0
+
+        Array.from(this.preSaleAmounts.values()).forEach((entry) => {
+            totalRefunded += entry.amountRefunded ?? 0
+            totalContribution += entry.contribution ?? 0
+            totalToRefund += entry.toRefund ?? 0
+            if (entry.amountSent - entry.toRefund - entry.contribution != 0) {
+                console.log(entry)
+            }
+        })
+
+        console.log("to refund: ", (totalToRefund / Math.pow(10, 18)).toFixed(2), "INJ")
+        console.log("total contributions: ", (totalContribution / Math.pow(10, 18)).toFixed(2), "INJ")
+
+        console.log("max cap hit: ", maxCapHit && maxCapHit.format(), "block number: ", maxCapBlock)
+
+        let totalR = Number((totalAmountReceived / Math.pow(10, 18)).toFixed(2))
+        let totalC = Number((totalContribution / Math.pow(10, 18)).toFixed(2))
+        let totalRef = Number((totalToRefund / Math.pow(10, 18)).toFixed(2))
+
+        let leftOver = totalR - totalC - totalRef
+
+        console.log(`${totalR} - ${totalC} - ${totalRef} = ${leftOver}`)
+
     }
 
 

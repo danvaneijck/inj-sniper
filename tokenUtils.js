@@ -14,18 +14,20 @@ const main = async () => {
 
         const preSaleAddress = "inj1um7dsq0u2thulf8cxtn63fmugu864ekjtt7gd5"
 
-        await tools.getTxFromAddress(address);
+        // await tools.getTxFromAddress(preSaleAddress);
 
-        let preSaleStart = moment("2024-03-24T05:30:00+13:00")
-        let preSaleEnd = moment("2024-03-24T05:31:00+13:00")
-        let maxCap = 1000 // INJ
-        let maxPerWallet = 10 // INJ
+        let preSaleStart = moment("2024-03-24T05:29:00+13:00")
+        let preSaleEnd = moment("2024-03-24T05:35:00+13:00")
+        let maxCap = Number(2800) // INJ
+        let minPerWallet = Number(0.2) // INJ
+        let maxPerWallet = Number(100) // INJ
 
         tools.getPreSaleAmounts(
             preSaleAddress,
             preSaleStart,
             preSaleEnd,
             maxCap,
+            minPerWallet,
             maxPerWallet
         )
 
