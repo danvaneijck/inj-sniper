@@ -3,7 +3,7 @@ const {
     PrivateKey,
     ChainGrpcBankApi,
     IndexerRestExplorerApi,
-    IndexerGrpcExplorerApi
+    IndexerGrpcExplorerApi, MsgSend
 } = require('@injectivelabs/sdk-ts');
 const { getNetworkEndpoints, Network } = require('@injectivelabs/networks');
 const { DenomClientAsync } = require('@injectivelabs/sdk-ui-ts');
@@ -14,6 +14,8 @@ var colors = require("colors");
 colors.enable();
 require('dotenv').config();
 const moment = require('moment');
+const csv = require('csv-parser');
+
 
 class InjectiveTokenTools {
 
@@ -23,13 +25,10 @@ class InjectiveTokenTools {
         console.log(`Init tools on ${this.RPC}`.bgGreen)
 
         this.chainGrpcWasmApi = new ChainGrpcWasmApi(this.RPC);
-        this.chainGrpcBankApi = new ChainGrpcBankApi(this.RPC)
-        this.indexerRestExplorerApi = new IndexerRestExplorerApi(
-            `https://sentry.explorer.grpc-web.injective.network/api/explorer/v1`,
-        )
+        this.chainGrpcBankApi = new ChainGrpcBankApi(this.RPC);
 
-        const endpoints = getNetworkEndpoints(Network.Mainnet)
-        this.indexerGrpcExplorerApi = new IndexerGrpcExplorerApi(endpoints.explorer)
+        this.indexerRestExplorerApi = new IndexerRestExplorerApi(config.explorerAPI)
+        this.indexerGrpcExplorerApi = new IndexerGrpcExplorerApi(config.endpoints.explorer)
 
         this.privateKey = PrivateKey.fromMnemonic(process.env.MNEMONIC)
         this.publicKey = this.privateKey.toAddress()
@@ -47,6 +46,11 @@ class InjectiveTokenTools {
     async init() {
         this.txMap = await this.loadMapFromFile("txMap.json", "address")
         // this.preSaleAmounts = await this.loadMapFromFile("presaleAmounts.json", "address")
+        console.log("finish init")
+    }
+
+    async createNewWallet() {
+
     }
 
     async getTxByHash(txHash) {
@@ -87,14 +91,12 @@ class InjectiveTokenTools {
     }
 
     async getTxFromAddress(address) {
-        console.log("get presale")
-
+        console.log("get presale tx from address", address)
 
         let allTransactions = [];
         let transactionHashes = new Set(); // Set to store transaction hashes
 
         try {
-
 
             let transactions =
                 await this.indexerRestExplorerApi.fetchAccountTransactions({
@@ -107,9 +109,6 @@ class InjectiveTokenTools {
                 })
 
             let totalTx = transactions.paging.total
-
-            console.log(transactions.paging.total)
-            console.log(transactions.transactions.length)
 
             let currentTransactions = transactions.transactions || [];
             for (const tx of currentTransactions) {
@@ -154,17 +153,9 @@ class InjectiveTokenTools {
 
         if (allTransactions.length > 0) {
             this.txMap.set(address, { address: address, txs: allTransactions })
-            this.saveDataToFile("txMap.json", Array.from(this.txMap.values()))
-            console.log(this.txMap.get(address))
+            await this.saveDataToFile("txMap.json", Array.from(this.txMap.values()))
         }
 
-    }
-
-    async getTxFromAddress(address) {
-        const account = await this.indexerGrpcExplorerApi.fetchAccountTx({
-            address: address,
-            type: ""
-        })
     }
 
     async getPreSaleAmounts(address, startTime, endTime, max, minPerWallet, maxPerWallet) {
@@ -382,10 +373,100 @@ class InjectiveTokenTools {
 
         let leftOver = totalR - totalC - totalRef
 
-        console.log(`${totalR} - ${totalC} - ${totalRef} = ${leftOver}`)
+        // console.log(`${totalR} - ${totalC} - ${totalRef} = ${leftOver}`)
+        return totalC
 
     }
 
+    async generateRefundList() {
+        let csvData = ""
+
+        this.preSaleAmounts.forEach((entry, address) => {
+            if (entry.toRefund > 0) csvData += `${address},${entry.toRefund}\n`;
+        });
+
+        await fs.writeFile("data/refunds.csv", csvData);
+
+        console.log("\nsaved refund amounts csv")
+    }
+
+    async generateAirdropCSV(totalContribution, totalSupply, decimals, percentToAirdrop, outputFile) {
+        console.log(`\ntotal supply: ${totalSupply}`)
+
+        let amountToDrop = (totalSupply * Math.pow(10, decimals)) * percentToAirdrop
+        console.log(`number of tokens to airdrop: ${amountToDrop / Math.pow(10, decimals)}`)
+
+        console.log(`total raised INJ: ${totalContribution}`)
+
+        let price = (totalContribution * Math.pow(10, 18)) / amountToDrop
+        console.log(`LP starting price: ${price.toFixed(8)} INJ`)
+
+        let dropAmounts = new Map()
+
+        let tracking = 0
+
+        Array.from(this.preSaleAmounts.values()).forEach((entry) => {
+            if (entry.contribution <= 0) return
+
+            if (entry.contribution > 100 * Math.pow(10, 18)) {
+                console.log(`over max: ${entry}`)
+            }
+
+            let sender = entry.address
+            let percentOfSupply = Number(entry.contribution) / Number(totalContribution * Math.pow(10, 18))
+
+            let numberForUser = amountToDrop * percentOfSupply
+            dropAmounts.set(sender, numberForUser);
+            tracking += numberForUser / Math.pow(10, 18)
+        })
+
+        console.log(`total to send ${tracking} to ${dropAmounts.size} participants`)
+
+        // Write data to CSV file
+        let csvData = "";
+        dropAmounts.forEach((amount, sender) => {
+            csvData += `${sender},${amount}\n`;
+        });
+
+        await fs.writeFile(outputFile, csvData, (err) => {
+            if (err) {
+                console.error("Error writing CSV file:", err);
+            } else {
+                console.log(`airdrop CSV file "${outputFile}" saved successfully.`);
+            }
+        });
+
+        console.log("\nsaved airdrop amounts csv\n")
+    }
+
+    async sendRefunds(fromAddress) {
+        console.log("\nsend refunds")
+        const map = new Map();
+
+        try {
+            const file = await fs.readFile('data/refunds.csv', { encoding: "utf8" })
+            file
+                .split('\n')
+                .forEach(line => {
+                    if (line.trim() !== '') {
+                        const row = line.split(',');
+                        map.set(row[0], row[1])
+                    }
+                });
+        } catch (error) {
+            console.error('Error reading CSV file:', error);
+        }
+
+        map.forEach(async (amount, address) => {
+            const msg = MsgSend.fromJSON({
+                amount,
+                srcInjectiveAddress: fromAddress,
+                dstInjectiveAddress: address,
+            })
+            let result = await this.txManager.enqueue(msg)
+            console.log(result)
+        })
+    }
 
 }
 
