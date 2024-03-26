@@ -259,5 +259,14 @@
     "time_bought": "2024-03-20T04:01:00.368Z",
     "profit": 0,
     "is_moon_bag": false
+  },
+  {
+    "pair_contract": "inj1myuxrdrd060wunzdzqxda3n2guedsn3nzxm9mj",
+    "balance": 4.531818181818182e+25,
+    "amount_in": 100000000000000,
+    "token_denom": "inj1puwde6qxl5v96f5sw0dmql4r3a0e9wvxp3w805",
+    "time_bought": "2024-03-26T08:09:27.877Z",
+    "profit": 0,
+    "is_moon_bag": false
   }
 ]

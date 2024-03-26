@@ -22,6 +22,7 @@ const Astroport = require('./astroport');
 const DojoSwap = require('./dojoswap');
 colors.enable();
 require('dotenv').config();
+const { DEFAULT_STD_FEE } = require("@injectivelabs/utils");
 
 class InjectiveSniper {
 
@@ -619,7 +620,7 @@ class InjectiveSniper {
                     token0Meta: token0Info,
                     token1Meta: token1Info,
                     astroportLink: `https://app.astroport.fi/swap?from=${token0Info.denom}&to=${token1Info.denom}`,
-                    coinhallLink: `https://coinhall.org/injective/${pairContract}`,
+                    coinhallLink: `https://coinhall.org/injective/${pairContract}?trader=${this.walletAddress}`,
                     dexscreenerLink: `https://dexscreener.com/injective/${pairContract}?maker=${this.walletAddress}`,
                     dojoSwapLink: `https://dojo.trading/swap?type=swap&from=${token0Info.denom}&to=${token1Info.denom}`,
                     factory: factory,
@@ -978,9 +979,14 @@ class InjectiveSniper {
             },
         });
 
+        const GAS = {
+            ...DEFAULT_STD_FEE,
+            gas: "700000",
+        };
+
         for (let attempt = 1; attempt <= retries; attempt++) {
             try {
-                const result = await this.txManager.enqueue(msg);
+                const result = await this.txManager.enqueue(msg, GAS);
                 if (result) {
                     console.log("Swap executed successfully:", result.txHash);
 

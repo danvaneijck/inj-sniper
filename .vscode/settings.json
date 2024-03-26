@@ -3,5 +3,7 @@
         "astro",
         "Astroport",
         "Injective"
-    ]
+    ],
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
 }

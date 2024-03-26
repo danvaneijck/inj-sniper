@@ -2481,7 +2481,7 @@
     },
     "astroportLink": "https://app.astroport.fi/swap?from=inj&to=peggy0xdAC17F958D2ee523a2206206994597C13D831ec7",
     "coinhallLink": "https://coinhall.org/injective/inj1h0mpv48ctcsmydymh2hnkal7hla5gl4gftemqv",
-    "dexscreenerLink": "https://dexscreener.com/injective/inj1h0mpv48ctcsmydymh2hnkal7hla5gl4gftemqv?maker=inj1q2m26a7jdzjyfdn545vqsude3zwwtfrdap5jgz",
+    "dexscreenerLink": "https://dexscreener.com/injective/inj1h0mpv48ctcsmydymh2hnkal7hla5gl4gftemqv?maker=inj1l2gcrfr6aenjyt5jddk79j7w5v0twskw6n70y8",
     "dojoSwapLink": "https://dojo.trading/swap?type=swap&from=inj&to=peggy0xdAC17F958D2ee523a2206206994597C13D831ec7",
     "factory": "inj1pc2vxcmnyzawnwkf03n2ggvt997avtuwagqngk",
     "asset_infos": [
@@ -12464,5 +12464,73 @@
     ],
     "liquidity": 0.008071882,
     "liquidityUpdate": "2024-03-26T05:21:44.465Z"
+  },
+  {
+    "token0Meta": {
+      "denom": "inj",
+      "name": "Injective",
+      "symbol": "INJ",
+      "decimals": 18,
+      "tokenType": "native",
+      "logo": "injective-v3.png",
+      "coinGeckoId": "injective-protocol",
+      "erc20": {
+        "symbol": "INJ",
+        "decimals": 18,
+        "address": "0xe28b3B32B6c345A34Ff64674606124Dd5Aceca30"
+      },
+      "cw20s": [
+        {
+          "decimals": 8,
+          "symbol": "INJbsc",
+          "source": "binance-smart-chain",
+          "address": "inj1xcgprh58szttp0vqtztvcfy34tkpupr563ua40"
+        },
+        {
+          "decimals": 8,
+          "symbol": "INJet",
+          "source": "ethereum-wormhole",
+          "address": "inj1v8gg4wzfauwf9l7895t0eyrrkwe65vh5n7dqmw"
+        }
+      ],
+      "tokenVerification": "verified",
+      "cw20": {
+        "decimals": 8,
+        "symbol": "INJbsc",
+        "source": "binance-smart-chain",
+        "address": "inj1xcgprh58szttp0vqtztvcfy34tkpupr563ua40"
+      }
+    },
+    "token1Meta": {
+      "denom": "inj1puwde6qxl5v96f5sw0dmql4r3a0e9wvxp3w805",
+      "name": "trippinj",
+      "symbol": "TRIPPY",
+      "decimals": 18,
+      "tokenType": "cw20",
+      "total_supply": "1000000000000000000000000000"
+    },
+    "astroportLink": "https://app.astroport.fi/swap?from=inj&to=inj1puwde6qxl5v96f5sw0dmql4r3a0e9wvxp3w805",
+    "coinhallLink": "https://coinhall.org/injective/inj1myuxrdrd060wunzdzqxda3n2guedsn3nzxm9mj",
+    "dexscreenerLink": "https://dexscreener.com/injective/inj1myuxrdrd060wunzdzqxda3n2guedsn3nzxm9mj?maker=inj1l2gcrfr6aenjyt5jddk79j7w5v0twskw6n70y8",
+    "dojoSwapLink": "https://dojo.trading/swap?type=swap&from=inj&to=inj1puwde6qxl5v96f5sw0dmql4r3a0e9wvxp3w805",
+    "factory": "inj1pc2vxcmnyzawnwkf03n2ggvt997avtuwagqngk",
+    "asset_infos": [
+      {
+        "native_token": {
+          "denom": "inj"
+        }
+      },
+      {
+        "token": {
+          "contract_addr": "inj1puwde6qxl5v96f5sw0dmql4r3a0e9wvxp3w805"
+        }
+      }
+    ],
+    "contract_addr": "inj1myuxrdrd060wunzdzqxda3n2guedsn3nzxm9mj",
+    "liquidity_token": "inj1pn90xurugx5mv4mfeahsuxlh78sf3xx84egfzf",
+    "asset_decimals": [
+      18,
+      18
+    ]
   }
 ]
