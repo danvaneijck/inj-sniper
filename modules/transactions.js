@@ -8,17 +8,24 @@ const {
 } = require('@injectivelabs/sdk-ts');
 const { BigNumberInBase, DEFAULT_STD_FEE, DEFAULT_BLOCK_TIMEOUT_HEIGHT } = require('@injectivelabs/utils')
 
+
+const GAS = {
+    ...DEFAULT_STD_FEE,
+    gas: '300000'
+}
+
 class TransactionManager {
 
-    constructor(privateKey) {
+    constructor(privateKey, endpoints) {
+        this.endpoints = endpoints
         this.privateKey = privateKey
         this.queue = [];
         this.isProcessing = false;
     }
 
-    enqueue(message) {
+    enqueue(message, gas = GAS) {
         return new Promise((resolve, reject) => {
-            this.queue.push({ transaction: message, resolve, reject });
+            this.queue.push({ transaction: message, gas, resolve, reject });
 
             if (!this.isProcessing) {
                 this.processQueue();
@@ -34,9 +41,9 @@ class TransactionManager {
         if (!this.isProcessing && this.queue.length > 0) {
             this.isProcessing = true;
 
-            const { transaction, resolve, reject } = this.dequeue();
+            const { transaction, gas, resolve, reject } = this.dequeue();
 
-            this.signAndBroadcastTransaction(transaction)
+            this.signAndBroadcastTransaction(transaction, gas)
                 .then((txResponse) => {
                     resolve(txResponse);
                     this.isProcessing = false;
@@ -51,11 +58,12 @@ class TransactionManager {
         }
     }
 
-    async signAndBroadcastTransaction(msg, memo = '') {
+    async signAndBroadcastTransaction(msg, gas = GAS, memo = '') {
         try {
-            const restEndpoint = "https://sentry.lcd.injective.network"
-            const gRPC = "https://sentry.chain.grpc-web.injective.network"
-            const chainId = "injective-1"
+            const restEndpoint = this.endpoints.rest
+            const gRPC = this.endpoints.grpc
+
+            const chainId = gRPC.includes("testnet") ? "injective-888" : "injective-1"
 
             const walletAddress = this.privateKey.toAddress().toBech32()
             const publicKey = this.privateKey.toPublicKey().toBase64();
@@ -73,18 +81,10 @@ class TransactionManager {
                 DEFAULT_BLOCK_TIMEOUT_HEIGHT,
             )
 
-            const GAS = {
-                ...DEFAULT_STD_FEE,
-                gas: '300000'
-            }
-
-            console.log(JSON.stringify(GAS))
-            console.log(JSON.stringify(msg))
-
             const { signBytes, txRaw } = createTransaction({
                 message: msg,
                 memo: memo,
-                fee: GAS,
+                fee: gas,
                 pubKey: publicKey,
                 sequence: baseAccount.sequence,
                 timeoutHeight: timeoutHeight.toNumber(),
@@ -95,17 +95,18 @@ class TransactionManager {
             const signature = await this.privateKey.sign(Buffer.from(signBytes));
             txRaw.signatures = [signature];
 
-            console.log(`Transaction Hash: ${TxClient.hash(txRaw)}`);
+            // console.log(`Transaction Hash: ${TxClient.hash(txRaw)}`);
 
             const txService = new TxGrpcClient(gRPC);
 
+            // console.log("simulate tx")
             const simulationResponse = await txService.simulate(txRaw);
 
-            console.log(
-                `Transaction simulation response: ${JSON.stringify(
-                    simulationResponse.gasInfo,
-                )}`,
-            );
+            // console.log(
+            //     `Transaction simulation response: ${JSON.stringify(
+            //         simulationResponse.gasInfo,
+            //     )}`,
+            // );
 
             const txResponse = await txService.broadcast(txRaw);
 
@@ -113,9 +114,9 @@ class TransactionManager {
                 console.log(`Transaction failed: ${txResponse.rawLog}`);
                 return null
             } else {
-                console.log(
-                    `Broadcasted transaction hash: ${JSON.stringify(txResponse.txHash)}`,
-                );
+                // console.log(
+                //     `Broadcasted transaction hash: ${JSON.stringify(txResponse.txHash)}`,
+                // );
                 return txResponse
             }
         } catch (error) {

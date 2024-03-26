@@ -3,9 +3,14 @@ const {
     PrivateKey,
     ChainGrpcBankApi,
     IndexerRestExplorerApi,
-    IndexerGrpcExplorerApi, MsgSend
+    IndexerGrpcExplorerApi,
+    MsgSend,
+    MsgInstantiateContract,
+    MsgExecuteContractCompat,
+    IndexerGrpcAccountPortfolioApi,
+    MsgExecuteContract
 } = require('@injectivelabs/sdk-ts');
-const { getNetworkEndpoints, Network } = require('@injectivelabs/networks');
+const { DEFAULT_STD_FEE } = require('@injectivelabs/utils')
 const { DenomClientAsync } = require('@injectivelabs/sdk-ui-ts');
 const fs = require('fs/promises');
 const TransactionManager = require("./transactions")
@@ -19,16 +24,18 @@ const csv = require('csv-parser');
 
 class InjectiveTokenTools {
 
-    constructor(config) {
-        this.RPC = config.gRpc
+    constructor(endpoints) {
+        this.endpoints = endpoints
+        this.RPC = endpoints.grpc
+
+        this.dojoBurnAddress = "inj1wu0cs0zl38pfss54df6t7hq82k3lgmcdex2uwn"
 
         console.log(`Init tools on ${this.RPC}`.bgGreen)
 
         this.chainGrpcWasmApi = new ChainGrpcWasmApi(this.RPC);
         this.chainGrpcBankApi = new ChainGrpcBankApi(this.RPC);
 
-        this.indexerRestExplorerApi = new IndexerRestExplorerApi(config.explorerAPI)
-        this.indexerGrpcExplorerApi = new IndexerGrpcExplorerApi(config.endpoints.explorer)
+        this.indexerRestExplorerApi = new IndexerRestExplorerApi(endpoints.explorer)
 
         this.privateKey = PrivateKey.fromMnemonic(process.env.MNEMONIC)
         this.publicKey = this.privateKey.toAddress()
@@ -36,7 +43,7 @@ class InjectiveTokenTools {
         this.walletAddress = this.privateKey.toAddress().toBech32()
         console.log(`Loaded wallet from private key ${this.walletAddress}`.bgGreen)
 
-        this.txManager = new TransactionManager(this.privateKey)
+        this.txManager = new TransactionManager(this.privateKey, endpoints)
 
         this.txMap = new Map()
         this.preSaleAmounts = new Map()
@@ -47,10 +54,6 @@ class InjectiveTokenTools {
         this.txMap = await this.loadMapFromFile("txMap.json", "address")
         // this.preSaleAmounts = await this.loadMapFromFile("presaleAmounts.json", "address")
         console.log("finish init")
-    }
-
-    async createNewWallet() {
-
     }
 
     async getTxByHash(txHash) {
@@ -238,10 +241,17 @@ class InjectiveTokenTools {
                     totalAmountReceived += Number(amount)
                 }
 
-                if (Number(amount < minContribution || Number(amount) > maxContribution)) {
+                if (recipient == address && (Number(amount < minContribution || Number(amount) > maxContribution))) {
                     // console.log("amount outside of min max", amount / Math.pow(10, 18), message)
                     let totalSent = Number(amount)
-                    let toRefund = Number(amount)
+                    let toRefund = 0
+                    if (Number(amount) > maxContribution) {
+                        toRefund = Number(amount) - maxContribution
+                    }
+                    else {
+                        toRefund = Number(amount)
+                    }
+
                     let entry = this.preSaleAmounts.get(sender)
 
                     if (entry) {
@@ -295,14 +305,19 @@ class InjectiveTokenTools {
                 }
 
                 if (sender && recipient && amount) {
+                    console.log(sender, address)
                     if (sender == address) {
+                        console.log("SENDER IS ME")
                         // potentially doing a refund
                         let participant = recipient
                         if (this.preSaleAmounts.has(participant)) {
                             let entry = this.preSaleAmounts.get(participant)
+                            let amountRefunded = entry.amountRefunded ?? 0 + Number(amount)
                             this.preSaleAmounts.set(participant, {
                                 ...entry,
                                 address: participant,
+                                amountRefunded: amountRefunded,
+                                contribution: (entry.contribution ?? 0) - amountRefunded
                             })
                         }
                     }
@@ -373,7 +388,7 @@ class InjectiveTokenTools {
 
         let leftOver = totalR - totalC - totalRef
 
-        // console.log(`${totalR} - ${totalC} - ${totalRef} = ${leftOver}`)
+        console.log(`${totalR} - ${totalC} - ${totalRef} = ${leftOver}`)
         return totalC
 
     }
@@ -390,10 +405,15 @@ class InjectiveTokenTools {
         console.log("\nsaved refund amounts csv")
     }
 
-    async generateAirdropCSV(totalContribution, totalSupply, decimals, percentToAirdrop, outputFile) {
+    async generateAirdropCSV(totalContribution, totalSupply, decimals, percentToAirdrop, devAllocation, outputFile) {
         console.log(`\ntotal supply: ${totalSupply}`)
 
         let amountToDrop = (totalSupply * Math.pow(10, decimals)) * percentToAirdrop
+        let forDev = (amountToDrop * devAllocation)
+        amountToDrop -= forDev
+
+        console.log(`dev allocated tokens: ${forDev / Math.pow(10, 18)}`)
+
         console.log(`number of tokens to airdrop: ${amountToDrop / Math.pow(10, decimals)}`)
 
         console.log(`total raised INJ: ${totalContribution}`)
@@ -416,7 +436,7 @@ class InjectiveTokenTools {
             let percentOfSupply = Number(entry.contribution) / Number(totalContribution * Math.pow(10, 18))
 
             let numberForUser = amountToDrop * percentOfSupply
-            dropAmounts.set(sender, numberForUser);
+            dropAmounts.set(sender, ((numberForUser / Math.pow(10, 18)).toFixed(0)) + "0".repeat(18));
             tracking += numberForUser / Math.pow(10, 18)
         })
 
@@ -436,7 +456,7 @@ class InjectiveTokenTools {
             }
         });
 
-        console.log("\nsaved airdrop amounts csv\n")
+        console.log("saved airdrop amounts csv")
     }
 
     async sendRefunds(fromAddress) {
@@ -459,13 +479,240 @@ class InjectiveTokenTools {
 
         map.forEach(async (amount, address) => {
             const msg = MsgSend.fromJSON({
-                amount,
+                amount: {
+                    amount: amount,
+                    denom: 'inj'
+                },
+                srcInjectiveAddress: fromAddress,
+                dstInjectiveAddress: address,
+            })
+
+            let result = await this.txManager.enqueue(msg)
+            console.log(`tx success ${result.timestamp} ${this.endpoints.explorerUrl}/transaction/${result.txHash}`.green)
+        })
+    }
+
+    async sendAirdrop(fromAddress, denom) {
+        console.log("\nsending airdrops")
+        const map = new Map();
+
+        try {
+            const file = await fs.readFile('data/airdrop.csv', { encoding: "utf8" })
+            file
+                .split('\n')
+                .forEach(line => {
+                    if (line.trim() !== '') {
+                        const row = line.split(',');
+                        map.set(row[0], row[1])
+                    }
+                });
+        } catch (error) {
+            console.error('Error reading CSV file:', error);
+        }
+
+        map.forEach(async (amount, address) => {
+            const msg = MsgSend.fromJSON({
+                amount: {
+                    amount: amount,
+                    denom: denom
+                },
                 srcInjectiveAddress: fromAddress,
                 dstInjectiveAddress: address,
             })
             let result = await this.txManager.enqueue(msg)
-            console.log(result)
+            console.log(`tx success ${result.timestamp} ${this.endpoints.explorerUrl}/transaction/${result.txHash}`.green)
         })
+    }
+
+    async createCW20Token(supply, decimals) {
+        console.log(`deploy cw20 token with supply ${supply} and decimals ${decimals}`)
+
+        const token = {
+            name: "TEST",
+            symbol: "TEST",
+            decimals: decimals,
+            initial_balances: [
+                {
+                    address: this.publicKey.toBech32(),
+                    amount: supply.toString() + `0`.repeat(decimals)
+                }
+            ],
+            marketing: {
+                project: "TEST",
+                description: "TEST",
+                marketing: this.publicKey.toBech32(),
+                logo: {
+                    url: "https://TEST/"
+                }
+            }
+        }
+
+        const msg = MsgInstantiateContract.fromJSON({
+            admin: "",
+            codeId: "357",
+            label: "CW20 Token Deployment",
+            msg: token,
+            sender: this.publicKey.toBech32()
+        })
+
+
+        let result = await this.txManager.enqueue(msg)
+        console.log(`tx success ${result.timestamp} ${this.endpoints.explorerUrl}/transaction/${result.txHash}`.green)
+
+        let attributes = result.events[result.events.length - 1].attributes
+        let address = attributes.find(x => String.fromCharCode.apply(null, x.key) == "contract_address").value
+        address = String.fromCharCode.apply(null, address).replace(/"/g, '');
+        return address
+
+    }
+
+    async createDojoPool(denom) {
+        console.log("create pair on dojoswap")
+        const msg = MsgExecuteContract.fromJSON({
+            contractAddress: this.endpoints.dojoFactory,
+            sender: this.publicKey.toBech32(),
+            msg: {
+                create_pair: {
+                    assets: [
+                        {
+                            info: {
+                                native_token: {
+                                    denom: "inj"
+                                }
+                            },
+                            amount: '0'
+                        },
+                        {
+                            info: {
+                                token: {
+                                    contract_addr: denom
+                                }
+                            },
+                            amount: '0'
+                        },
+
+                    ]
+                }
+            },
+        })
+
+        const GAS = {
+            ...DEFAULT_STD_FEE,
+            gas: '700000'
+        }
+
+        let result = await this.txManager.enqueue(msg, GAS)
+        console.log(`tx success ${result.timestamp} ${this.endpoints.explorerUrl}/transaction/${result.txHash}`.green)
+
+        let attributes = result.events[result.events.length - 1].attributes
+        let address = attributes.find(x => String.fromCharCode.apply(null, x.key) == "pair_contract_addr").value
+        address = String.fromCharCode.apply(null, address).replace(/"/g, '');
+
+        let liquidityTokenAddress = attributes.find(x => String.fromCharCode.apply(null, x.key) == "liquidity_token_addr").value
+        liquidityTokenAddress = String.fromCharCode.apply(null, liquidityTokenAddress).replace(/"/g, '');
+
+        return { pairAddress: address, liquidityTokenAddress: liquidityTokenAddress }
+    }
+
+    async increaseAllowance(pairAddress, tokenDenom, amount) {
+        console.log(`increase allowance of ${pairAddress} for ${tokenDenom}`)
+
+        const msg = MsgExecuteContractCompat.fromJSON({
+            sender: this.publicKey.toBech32(),
+            contractAddress: tokenDenom,
+            msg: {
+                increase_allowance: {
+                    spender: pairAddress,
+                    amount: amount,
+                    expires: {
+                        never: {}
+                    }
+                }
+            }
+        })
+
+        let result = await this.txManager.enqueue(msg)
+        console.log(`tx success ${result.timestamp} ${this.endpoints.explorerUrl}/transaction/${result.txHash}`.green)
+    }
+
+    async provideLiquidity(
+        pairAddress,
+        tokenDenom,
+        tokenAmount,
+        injAmount
+    ) {
+        console.log(`provide liquidity of ${tokenAmount} ${tokenDenom} and ${injAmount} INJ`)
+
+        const msg = MsgExecuteContractCompat.fromJSON({
+            sender: this.publicKey.toBech32(),
+            contractAddress: pairAddress,
+            msg: {
+                provide_liquidity: {
+                    assets: [
+                        {
+                            info: {
+                                token: {
+                                    contract_addr: tokenDenom
+                                }
+                            },
+                            amount: tokenAmount
+                        },
+                        {
+                            info: {
+                                native_token: {
+                                    denom: 'inj'
+                                }
+                            },
+                            amount: injAmount
+                        }
+                    ]
+                }
+            },
+            funds: { denom: 'inj', amount: injAmount }
+        })
+
+        const GAS = {
+            ...DEFAULT_STD_FEE,
+            gas: '700000'
+        }
+
+        let result = await this.txManager.enqueue(msg, GAS)
+        console.log(`tx success ${result.timestamp} ${this.endpoints.explorerUrl}/transaction/${result.txHash}`.green)
+
+    }
+
+    async queryTokenForBalance(tokenAddress) {
+        try {
+            const query = Buffer.from(JSON.stringify({ balance: { address: this.walletAddress } })).toString('base64');
+            const info = await this.chainGrpcWasmApi.fetchSmartContractState(tokenAddress, query);
+            const decoded = JSON.parse(new TextDecoder().decode(info.data));
+            return decoded
+        }
+        catch (e) {
+            console.log(`Error queryTokenForBalance: ${tokenAddress} ${e}`.red)
+        }
+        return null
+    }
+
+    async burnLiquidity(lpTokenAddress) {
+        console.log("burn liquidity")
+
+        let balance = await this.queryTokenForBalance(lpTokenAddress)
+        if (balance) balance = balance.balance
+
+        const msg = MsgExecuteContract.fromJSON({
+            contractAddress: lpTokenAddress,
+            sender: this.publicKey.toBech32(),
+            msg: {
+                transfer: {
+                    recipient: this.dojoBurnAddress,
+                    amount: balance
+                }
+            },
+        })
+
+        let result = await this.txManager.enqueue(msg)
+        console.log(`tx success ${result.timestamp} ${this.endpoints.explorerUrl}/transaction/${result.txHash}`.green)
     }
 
 }

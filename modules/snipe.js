@@ -24,8 +24,9 @@ colors.enable();
 require('dotenv').config();
 
 class InjectiveSniper {
+
     constructor(config) {
-        this.RPC = config.gRpc
+        this.RPC = config.endpoints.grpc
         this.live = config.live
 
         console.log(`Init on ${this.RPC}`.bgGreen)
@@ -49,12 +50,8 @@ class InjectiveSniper {
             }
         })
 
-        console.log(getNetworkEndpoints(Network.Mainnet))
-
         this.chainGrpcBankApi = new ChainGrpcBankApi(this.RPC)
-        this.indexerRestExplorerApi = new IndexerRestExplorerApi(
-            `${getNetworkEndpoints(Network.Mainnet).explorer}/api/explorer/v1`,
-        )
+        this.indexerRestExplorerApi = new IndexerRestExplorerApi(config.endpoints.explorer)
 
         this.monitorNewPairs = false
 
@@ -64,7 +61,7 @@ class InjectiveSniper {
         this.walletAddress = this.privateKey.toAddress().toBech32()
         console.log(`Loaded wallet from private key ${this.walletAddress}`.bgGreen)
 
-        this.txManager = new TransactionManager(this.privateKey)
+        this.txManager = new TransactionManager(this.privateKey, config.endpoints)
 
         this.baseAssetName = "INJ"
         this.baseDenom = "inj"
@@ -767,7 +764,7 @@ class InjectiveSniper {
 
                 await this.calculateLiquidity(pair)
 
-                if (pair.liquidity < 1) {
+                if (pair.liquidity < 0.01) {
                     let message = `:small_red_triangle_down: ${pairName} rugged!`
                     this.sendMessageToDiscord(message);
                 }
@@ -1647,7 +1644,7 @@ class InjectiveSniper {
             for (const pair of this.lowLiqPairsToMonitor.values()) {
                 await this.checkPairForProvideLiquidity(pair);
             }
-            await new Promise(resolve => setTimeout(resolve, 1000));
+            await new Promise(resolve => setTimeout(resolve, 2500));
         }
     }
 

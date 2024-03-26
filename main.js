@@ -1,10 +1,10 @@
 const InjectiveSniper = require("./modules/snipe")
-
+const { MAIN_NET, TEST_NET } = require("./constants")
 const LIVE_TRADING = false
 
 const CONFIG = {
     live: LIVE_TRADING,
-    gRpc: "https://sentry.chain.grpc-web.injective.network",
+    endpoints: MAIN_NET,
     tokenTypes: ['native', 'tokenFactory', 'cw20'],
     pairType: '{"xyk":{}}',
     maxSpread: 0.49,
@@ -13,7 +13,7 @@ const CONFIG = {
     stopLoss: 95,                       // %
     moonBagPercent: 0.20,               // %
     tradeTimeLimit: 1000,               // mins
-    lowLiquidityThreshold: 10000,       // USD
+    lowLiquidityThreshold: 0.001,       // USD
     highLiquidityThreshold: 100000,     // USD
 }
 
