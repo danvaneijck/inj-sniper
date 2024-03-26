@@ -5,6 +5,8 @@ const { PrivateKey } = require("@injectivelabs/sdk-ts");
 
 const main = async () => {
 
+    const tokenDenom = "inj1puwde6qxl5v96f5sw0dmql4r3a0e9wvxp3w805"
+
     try {
         const tools = new InjectiveTokenTools(MAIN_NET);
         await tools.init();
@@ -19,12 +21,15 @@ const main = async () => {
         const minPerWallet = Number(0.42); // INJ
         const maxPerWallet = Number(69); // INJ
 
+        console.log(tokenDenom)
+
         // TODO get sent token amounts
         const totalRaised = await tools.getPreSaleAmounts(
             preSaleWallet,
             maxCap,
             minPerWallet,
-            maxPerWallet
+            maxPerWallet,
+            tokenDenom
         );
 
         // SEND REFUNDS
@@ -48,11 +53,10 @@ const main = async () => {
         return
 
         // CREATING THE TOKEN
-        const tokenDenom = await tools.createCW20Token(
-            tokenSupply,
-            tokenDecimals
-        );
-        // const tokenDenom = "inj1puwde6qxl5v96f5sw0dmql4r3a0e9wvxp3w805"
+        // const tokenDenom = await tools.createCW20Token(
+        //     tokenSupply,
+        //     tokenDecimals
+        // );
         console.log(`new token denom ${tokenDenom}`);
 
         // SEND THE AIRDROP

@@ -3,6 +3,15 @@
     "address": "inj1q2m26a7jdzjyfdn545vqsude3zwwtfrdap5jgz",
     "amountSent": 50000000000000000,
     "contribution": 0,
-    "toRefund": 50000000000000000
+    "toRefund": 50000000000000000,
+    "tokensSent": "77186964000000000000000000"
+  },
+  {
+    "address": "inj1lq9wn94d49tt7gc834cxkm0j5kwlwu4gm65lhe",
+    "tokensSent": "293310463000000000000000000"
+  },
+  {
+    "address": "inj1sy2aad37tku3dz0353epczxd95hvuhzl0lhfqh",
+    "tokensSent": "79502573000000000000000000"
   }
 ]

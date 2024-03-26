@@ -155,7 +155,7 @@ class InjectiveTokenTools {
         }
     }
 
-    async getPreSaleAmounts(address, max, minPerWallet, maxPerWallet) {
+    async getPreSaleAmounts(address, max, minPerWallet, maxPerWallet, tokenAddress = null) {
         let allTransactions = this.txMap.get(address);
         if (!allTransactions) {
             console.log("no tx yet");
@@ -215,6 +215,18 @@ class InjectiveTokenTools {
                     recipient = message.message["to_address"];
                 } else {
                     // sending out the memes
+                    if (tokenAddress !== null && message.message.contract == tokenAddress && message.type == "/cosmwasm.wasm.v1.MsgExecuteContract") {
+                        let msg = message.message.msg
+                        recipient = msg["transfer"]["recipient"];
+                        amount = msg["transfer"]["amount"];
+                        console.log(`airdropped ${recipient}, amount: ${amount}`.bgCyan)
+                        let entry = this.preSaleAmounts.get(recipient);
+                        this.preSaleAmounts.set(recipient, {
+                            ...entry,
+                            address: recipient,
+                            tokensSent: amount
+                        });
+                    }
                     return;
                 }
 
