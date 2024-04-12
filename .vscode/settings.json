@@ -1,9 +1,5 @@
 {
-    "cSpell.words": [
-        "astro",
-        "Astroport",
-        "Injective"
-    ],
+    "cSpell.words": ["astro", "Astroport", "Injective", "shroom"],
     "editor.formatOnSave": true,
     "editor.defaultFormatter": "esbenp.prettier-vscode"
 }

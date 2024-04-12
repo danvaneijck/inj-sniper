@@ -99,7 +99,52 @@ class InjectiveTokenTools {
         }
     }
 
-    async getTxFromAddress(address) {
+    async getContractTx(address) {
+        const contractAddress = address;
+        let limit = 100;
+        let skip = 0;
+
+        let allTransactions = [];
+        let transactions = await this.indexerRestExplorerApi.fetchContractTransactionsWithMessages({
+            contractAddress,
+            params: {
+                limit,
+                skip,
+            },
+        });
+
+        try {
+            console.log(`total tx for ${contractAddress} : ${transactions.paging.total}`);
+            do {
+                const currentTransactions = transactions.transactions || [];
+                allTransactions.push(...currentTransactions);
+
+                if (currentTransactions.length == 0) {
+                    break
+                }
+
+                let toSkip = (skip + limit) > transactions.paging.total ? transactions.paging.total - skip : limit;
+                skip += Number(toSkip);
+                skip = Math.min(skip, 10000);
+
+                transactions = await this.indexerRestExplorerApi.fetchContractTransactionsWithMessages({
+                    contractAddress,
+                    params: {
+                        limit,
+                        skip,
+                    },
+                });
+            } while (allTransactions.length < transactions.paging.total);
+        } catch (error) {
+            console.error("An error occurred getting pair transactions:", error);
+            // console.log(transactions);
+        }
+
+        console.log(allTransactions.length)
+        return allTransactions
+    }
+
+    async getAccountTx(address) {
         console.log("get presale tx from address", address);
 
         try {
@@ -147,6 +192,8 @@ class InjectiveTokenTools {
                     Array.from(this.txMap.values())
                 );
             }
+
+            return allTransactions
         } catch (error) {
             console.error(
                 "An error occurred getting pair transactions:",
@@ -157,6 +204,7 @@ class InjectiveTokenTools {
 
     async getPreSaleAmounts(address, max, minPerWallet, maxPerWallet, tokenAddress = null) {
         let allTransactions = this.txMap.get(address);
+
         if (!allTransactions) {
             console.log("no tx yet");
             return;
@@ -205,7 +253,8 @@ class InjectiveTokenTools {
                     sender = message.message["sender"];
                     recipient = msg["transfer"]["recipient"];
                     amount = msg["transfer"]["amount"];
-                } else if (message.type == "/cosmos.bank.v1beta1.MsgSend") {
+                }
+                else if (message.type == "/cosmos.bank.v1beta1.MsgSend") {
                     amount = message.message.amount
                         ? message.message.amount[0].denom == "inj"
                             ? message.message.amount[0].amount
@@ -213,26 +262,37 @@ class InjectiveTokenTools {
                         : null;
                     sender = message.message["from_address"];
                     recipient = message.message["to_address"];
+
                 } else {
                     // sending out the memes
                     if (tokenAddress !== null && message.message.contract == tokenAddress && message.type == "/cosmwasm.wasm.v1.MsgExecuteContract") {
                         let msg = message.message.msg
                         recipient = msg["transfer"]["recipient"];
                         amount = msg["transfer"]["amount"];
-                        console.log(`airdropped ${recipient}, amount: ${amount}`.bgCyan)
+
+                        // console.log(`airdropped ${recipient}, amount: ${amount}`.bgCyan)
+
                         let entry = this.preSaleAmounts.get(recipient);
                         this.preSaleAmounts.set(recipient, {
                             ...entry,
                             address: recipient,
-                            tokensSent: amount
+                            tokensSent: amount,
+                            tokensSentFormatted: Number(amount / Math.pow(10, 18))
                         });
                     }
-                    return;
+                    return
                 }
 
                 if (recipient == address) {
                     totalAmountReceived += Number(amount);
                 }
+
+                let withinMaxCap = Number(totalValidContributions) <= maxCap;
+                if (recipient == address) {
+                    withinMaxCap = Number(totalValidContributions) + Number(amount) <= maxCap;
+                }
+
+                let room = (maxCap - Number(totalValidContributions)) / Math.pow(10, 18);
 
                 if (
                     recipient == address &&
@@ -251,6 +311,9 @@ class InjectiveTokenTools {
                         toRefund = Number(amount);
                     }
 
+                    toRefund -= entry ? (entry.amountRefunded ?? 0) : 0
+                    if (toRefund < 0) toRefund = 0
+
                     this.preSaleAmounts.set(sender, {
                         ...entry,
                         address: sender,
@@ -258,25 +321,24 @@ class InjectiveTokenTools {
                         contribution: totalSent - toRefund,
                         toRefund: toRefund,
                     });
-                    totalValidContributions += totalSent - toRefund;
+
+                    totalValidContributions += (totalSent - toRefund);
                     return;
                 }
 
-                let withinMaxCap =
-                    Number(totalValidContributions) + Number(amount) <= maxCap;
-                let room = maxCap - Number(totalValidContributions);
-
                 if (
+                    recipient == address &&
                     !withinMaxCap &&
                     maxCapHit == false &&
-                    room / Math.pow(10, 18) > 1
+                    room > 0.5
                 ) {
-                    console.log(
-                        `transfer of ${amount / Math.pow(10, 18)
-                        } INJ puts sale over max of ${max}. space left: ${(
-                            room / Math.pow(10, 18)
-                        ).toFixed(2)} INJ`
-                    );
+                    // console.log(
+                    //     `transfer of ${amount / Math.pow(10, 18)
+                    //     } INJ puts sale over max of ${max}. space left: ${(
+                    //         room
+                    //     ).toFixed(2)} INJ`
+                    // );
+
                     let totalSent = Number(amount);
                     let toRefund = Number(amount);
                     let entry = this.preSaleAmounts.get(sender);
@@ -284,7 +346,10 @@ class InjectiveTokenTools {
                     if (entry) {
                         totalSent += Number(entry.amountSent ?? 0);
                         toRefund += Number(entry.toRefund ?? 0);
+                        toRefund -= Number(entry.amountRefunded ?? 0)
                     }
+
+                    if (toRefund < 0) toRefund = 0
 
                     this.preSaleAmounts.set(sender, {
                         ...entry,
@@ -293,35 +358,42 @@ class InjectiveTokenTools {
                         contribution: Number(totalSent) - Number(toRefund),
                         toRefund: toRefund,
                     });
+
                     totalValidContributions +=
-                        Number(totalSent) - Number(toRefund);
+                        (Number(totalSent) - Number(toRefund));
                     return;
                 }
 
-                if (!withinMaxCap && maxCapHit == false && room < 5) {
+                if (!withinMaxCap && maxCapHit == false && room < 0.5) {
                     maxCapHit = blockTimestamp;
                     maxCapBlock = blockNumber;
-                    console.log("max cap hit");
+                    console.log(`max cap hit with room left ${room}`);
                 }
 
                 if (sender && recipient && amount) {
                     if (sender == address) {
-                        console.log("SENDER IS ME");
                         // potentially doing a refund
                         let participant = recipient;
+
                         if (this.preSaleAmounts.has(participant)) {
                             let entry = this.preSaleAmounts.get(participant);
-                            console.log(entry)
                             let amountRefunded =
                                 (entry.amountRefunded ?? 0) + Number(amount);
+
+                            // console.log("SENDER IS ME, refunded", amountRefunded);
+
+                            let toRefund = (entry.toRefund ?? 0) - amountRefunded
+                            if (toRefund < 0) toRefund = 0
+
                             this.preSaleAmounts.set(participant, {
                                 ...entry,
                                 address: participant,
                                 amountRefunded: amountRefunded,
                                 contribution:
-                                    (entry.contribution ?? 0) - amountRefunded,
-                                toRefund: (entry.toRefund ?? 0) - amountRefunded
+                                    (entry.contribution ?? 0),
+                                toRefund: toRefund
                             });
+
                         }
                     } else {
                         // received funds for presale
@@ -341,6 +413,8 @@ class InjectiveTokenTools {
                                 toRefund = amount;
                             }
 
+                            toRefund -= (entry.amountRefunded ?? 0)
+
                             this.preSaleAmounts.set(sender, {
                                 ...entry,
                                 address: sender,
@@ -348,9 +422,14 @@ class InjectiveTokenTools {
                                 contribution: totalSent - toRefund,
                                 toRefund: toRefund,
                             });
-                            totalValidContributions += totalSent - toRefund;
+                            if (totalSent - toRefund < 0) {
+                                console.log("contrib lower than 0")
+                            }
+                            totalValidContributions += (totalSent - toRefund);
+
                         } else {
                             let toRefund = !withinMaxCap ? Number(amount) : 0;
+
                             this.preSaleAmounts.set(sender, {
                                 address: sender,
                                 timeSent: blockTimestamp.format(),
@@ -358,12 +437,20 @@ class InjectiveTokenTools {
                                 contribution: Number(amount) - toRefund,
                                 toRefund: toRefund,
                             });
+
+                            if (Number(amount) - toRefund < 0) {
+                                console.log("contrib lower than 0")
+                            }
+
                             totalValidContributions +=
-                                Number(amount) - toRefund;
+                                (Number(amount) - toRefund);
                         }
                     }
                 }
             });
+
+            // console.log(`total valid contributions ${totalValidContributions}`)
+
         });
 
         console.log(
@@ -371,6 +458,23 @@ class InjectiveTokenTools {
             (totalAmountReceived / Math.pow(10, 18)).toFixed(2),
             "INJ"
         );
+
+        this.preSaleAmounts.forEach((value, key) => {
+            // Calculate the new formatted fields
+            const amountSentFormatted = value.amountSent / Math.pow(10, 18);
+            const totalContributionFormatted = value.contribution / Math.pow(10, 18);
+            const toRefundFormatted = value.toRefund / Math.pow(10, 18);
+            const amountRefundedFormatted = (value.amountRefunded ?? 0) / Math.pow(10, 18);
+
+            // Update the object in the map with the new fields
+            this.preSaleAmounts.set(key, {
+                ...value,
+                amountSentFormatted: amountSentFormatted,
+                totalContributionFormatted: totalContributionFormatted,
+                toRefundFormatted: toRefundFormatted,
+                amountRefundedFormatted: amountRefundedFormatted,
+            });
+        });
 
         this.saveDataToFile(
             "presaleAmounts.json",
@@ -384,8 +488,12 @@ class InjectiveTokenTools {
             totalRefunded += entry.amountRefunded ?? 0;
             totalContribution += entry.contribution ?? 0;
             totalToRefund += entry.toRefund ?? 0;
-            if (entry.amountSent - entry.toRefund - entry.contribution != 0) {
-                console.log(entry);
+            // if (entry.amountSent - entry.toRefund - entry.contribution != 0) {
+            //     console.log(entry);
+            // }
+
+            if (entry.totalContributionFormatted > 0 && !entry.tokensSent) {
+                console.log(entry.address);
             }
         });
 
@@ -412,11 +520,85 @@ class InjectiveTokenTools {
         );
         let totalC = Number((totalContribution / Math.pow(10, 18)).toFixed(2));
         let totalRef = Number((totalToRefund / Math.pow(10, 18)).toFixed(2));
+        totalRefunded = Number((totalRefunded / Math.pow(10, 18)).toFixed(2));
 
-        let leftOver = totalR - totalC - totalRef;
+        let leftOver = totalR - totalC - totalRef - totalRefunded;
 
-        console.log(`${totalR} - ${totalC} - ${totalRef} = ${leftOver}`);
+        console.log(`${totalR} - ${totalC} - ${totalRef} - ${totalRefunded} = ${leftOver}`);
         return totalC;
+    }
+
+    calculatePercentageOfPercentage(x) {
+        if (x < 1 || x > 10000000) {
+            return 'x is out of the expected range (1 to 10,000,000)';
+        }
+
+        var xAsPercentageOfTotal = (x / 10000000) * 100;
+
+        var percentageOf25 = xAsPercentageOfTotal * 0.25;
+
+        return percentageOf25;
+    }
+
+    async getMultiplier(presaleWallet, multiplierToken) {
+        let allTransactions = await this.getContractTx(multiplierToken)
+
+        allTransactions.forEach((tx) => {
+            if (!tx.messages) return
+            tx.messages.forEach((message) => {
+                if (message.value.contract == multiplierToken) {
+                    if (message.value.msg.transfer) {
+                        let recipient = message.value.msg.transfer.recipient
+                        let amount = message.value.msg.transfer.amount
+                        let sender = message.value.sender
+                        if (recipient == presaleWallet) {
+                            console.log(`sender ${sender} sent ${amount / Math.pow(10, 18)} shroom to pre sale wallet`)
+
+                            if (this.preSaleAmounts.has(sender)) {
+                                let entry = this.preSaleAmounts.get(sender)
+                                let a = entry.multiplierTokensSent ?? 0
+                                this.preSaleAmounts.set(sender, {
+                                    ...entry,
+                                    multiplierTokensSent: Number(amount / Math.pow(10, 18)) + Number(a),
+                                })
+                            }
+                            else {
+                                this.preSaleAmounts.set(sender, {
+                                    multiplierTokensSent: 0,
+                                })
+                            }
+                        }
+                    }
+                }
+            })
+        })
+
+        this.preSaleAmounts.forEach((entry, address) => {
+            if (!entry.multiplierTokensSent) {
+                this.preSaleAmounts.set(address, {
+                    ...entry,
+                    multiplierTokensSent: 0,
+                    multiplier: 0,
+                    adjustedContribution: entry.contribution
+                });
+                return
+            }
+            let tokensSent = entry.multiplierTokensSent;
+            if (tokensSent > 10000000) tokensSent = 10000000;
+            let multi = this.calculatePercentageOfPercentage(tokensSent) / 100;
+
+            this.preSaleAmounts.set(address, {
+                ...entry,
+                multiplier: multi,
+                adjustedContribution: Number(entry.contribution) + ((multi) * entry.contribution)
+            });
+        });
+
+        let total = 0
+        this.preSaleAmounts.forEach((entry, address) => {
+            if (entry.adjustedContribution) total += Number(entry.adjustedContribution)
+        })
+        return total
     }
 
     async generateRefundList() {
@@ -432,6 +614,7 @@ class InjectiveTokenTools {
 
     async generateAirdropCSV(
         totalContribution,
+        totalAdjustedContribution,
         totalSupply,
         decimals,
         percentToAirdrop,
@@ -460,22 +643,29 @@ class InjectiveTokenTools {
         Array.from(this.preSaleAmounts.values()).forEach((entry) => {
             if (entry.contribution <= 0) return;
 
-            if (entry.contribution > 100 * Math.pow(10, 18)) {
-                console.log(`over max: ${entry}`);
-            }
-
             let sender = entry.address;
             let percentOfSupply =
-                Number(entry.contribution) /
-                Number(totalContribution * Math.pow(10, 18));
+                Number(entry.adjustedContribution) /
+                Number(totalAdjustedContribution);
             let numberForUser = amountToDrop * percentOfSupply;
 
-            dropAmounts.set(
+            this.preSaleAmounts.set(entry.address, {
+                ...entry,
+                tokensToSend: numberForUser ? (numberForUser / Math.pow(10, 18)).toFixed(0) + "0".repeat(18) : '0'
+            })
+
+            if (numberForUser) dropAmounts.set(
                 sender,
                 (numberForUser / Math.pow(10, 18)).toFixed(0) + "0".repeat(18)
             );
-            tracking += numberForUser / Math.pow(10, 18);
+
+            if (numberForUser) tracking += numberForUser / Math.pow(10, 18);
         });
+
+        this.saveDataToFile(
+            "presaleAmounts.json",
+            Array.from(this.preSaleAmounts.values())
+        );
 
         console.log(
             `total to send ${tracking} to ${dropAmounts.size} participants`
@@ -483,7 +673,7 @@ class InjectiveTokenTools {
 
         let csvData = "";
         dropAmounts.forEach((amount, sender) => {
-            csvData += `${sender},${amount}\n`;
+            if (amount) csvData += `${sender},${amount}\n`;
         });
 
         try {
@@ -632,6 +822,30 @@ class InjectiveTokenTools {
         ).value;
         address = String.fromCharCode.apply(null, address).replace(/"/g, "");
         return address;
+    }
+
+    async updateMarketing(address) {
+        console.log(
+            `update token marketing`, address
+        );
+
+        const token = {
+            upload_logo: {
+                url: "https://bafybeiagzjm2qjc7rnqggwsmf4kv7xmz4zd757qkc5jecm3mtelojtdxiy.ipfs.w3s.link/shroom_icon.webp"
+            }
+        };
+
+        const msg = MsgExecuteContract.fromJSON({
+            contractAddress: address,
+            sender: this.publicKey.toBech32(),
+            msg: token
+        });
+        let result = await this.txManager.enqueue(msg);
+
+        console.log(
+            `tx success ${result.timestamp} ${this.endpoints.explorerUrl}/transaction/${result.txHash}`
+                .green
+        );
     }
 
     async createDojoPool(denom) {
@@ -804,6 +1018,93 @@ class InjectiveTokenTools {
                 .green
         );
     }
+
+    async getTokenHolders(tokenAddress) {
+        let accountsWithBalances = {};
+        try {
+            let startAfter = "";
+            let hasMore = true;
+
+            while (hasMore) {
+                const accountsQuery = Buffer.from(
+                    JSON.stringify({
+                        all_accounts: {
+                            start_after: startAfter,
+                            limit: 10
+                        }
+                    })
+                ).toString("base64");
+
+                const accountsInfo = await this.chainGrpcWasmApi.fetchSmartContractState(tokenAddress, accountsQuery);
+                const accountsDecoded = JSON.parse(new TextDecoder().decode(accountsInfo.data));
+
+                if (accountsDecoded && accountsDecoded.accounts && accountsDecoded.accounts.length > 0) {
+                    for (let walletAddress of accountsDecoded.accounts) {
+                        const balanceQuery = Buffer.from(
+                            JSON.stringify({ balance: { address: walletAddress } })
+                        ).toString("base64");
+
+                        const balanceInfo = await this.chainGrpcWasmApi.fetchSmartContractState(tokenAddress, balanceQuery);
+                        const balanceDecoded = JSON.parse(new TextDecoder().decode(balanceInfo.data));
+
+                        accountsWithBalances[walletAddress] = balanceDecoded.balance;
+                    }
+
+                    startAfter = accountsDecoded.accounts[accountsDecoded.accounts.length - 1];
+                } else {
+                    hasMore = false;
+                }
+            }
+
+            console.log(accountsWithBalances);
+
+            let nonZeroHolders = 0;
+            let totalAmountHeld = BigInt(0);
+
+            for (let key in accountsWithBalances) {
+                let balance = BigInt(accountsWithBalances[key]);
+                if (balance > 0) {
+                    nonZeroHolders++;
+                    totalAmountHeld += balance;
+                }
+            }
+
+            console.log(`Total number of holders with non-zero balance: ${nonZeroHolders}`);
+            console.log(`Total amount held: ${(Number(totalAmountHeld) / Math.pow(10, 18)).toFixed(2)}`);
+
+            let holders = [];
+            for (let address in accountsWithBalances) {
+                let balance = BigInt(accountsWithBalances[address]);
+                if (balance > 0) {
+                    let percentageHeld = Number(balance) / Number(totalAmountHeld) * 100;
+                    holders.push({
+                        address,
+                        balance: (Number(balance) / Math.pow(10, 18)).toFixed(2),
+                        percentageHeld: percentageHeld.toFixed(2)
+                    });
+                }
+            }
+
+            holders.sort((a, b) => b.percentageHeld - a.percentageHeld);
+
+            let csvContent = "Address,Total Amount Held,Percentage Held\n";
+            holders.forEach(holder => {
+                csvContent += `${holder.address},${holder.balance},${holder.percentageHeld}%\n`;
+            });
+
+            (async () => {
+                await fs.writeFile('data/balances.csv', csvContent);
+                console.log('The file has been saved!');
+            })();
+
+            return accountsWithBalances;
+        } catch (e) {
+            console.log(`Error in getTokenHoldersWithBalances: ${tokenAddress} ${e}`.red);
+            return null;
+        }
+    }
+
+
 }
 
 module.exports = InjectiveTokenTools;

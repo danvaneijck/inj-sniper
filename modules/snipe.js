@@ -56,7 +56,7 @@ class InjectiveSniper {
 
         this.monitorNewPairs = false
 
-        this.privateKey = PrivateKey.fromMnemonic(process.env.MNEMONIC)
+        this.privateKey = PrivateKey.fromMnemonic(process.env.SNIPER_MNEMONIC)
         this.publicKey = this.privateKey.toAddress()
 
         this.walletAddress = this.privateKey.toAddress().toBech32()
@@ -1610,7 +1610,9 @@ class InjectiveSniper {
                 `${pairInfo.coinhallLink}\n` +
                 `create pair tx: https://explorer.injective.network/transaction/${pair.txHash}\n<@352761566401265664>`;
 
-            this.sendMessageToDiscord(message);
+
+            if (txTime > moment().subtract(1, 'minute')) this.sendMessageToDiscord(message);
+
             await this.calculateLiquidity(pairInfo);
             console.log(`${pair.address} liquidity: ${pairInfo.liquidity}`)
 
@@ -1620,7 +1622,7 @@ class InjectiveSniper {
                 txTime > moment().subtract(1, 'minute') && this.live
             ) {
                 await this.buyMemeToken(pairInfo, this.snipeAmount);
-            } else {
+            } else if (txTime > moment().subtract(5, 'minute')) {
                 this.startMonitorPairForLiq(pair.address);
             }
 
