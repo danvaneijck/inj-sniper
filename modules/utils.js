@@ -552,13 +552,14 @@ class InjectiveTokenTools {
                         let amount = message.value.msg.transfer.amount
                         let sender = message.value.sender
                         if (recipient == presaleWallet) {
-                            console.log(`sender ${sender} sent ${amount / Math.pow(10, 18)} shroom to pre sale wallet`)
+                            console.log(`sender ${sender} sent ${amount} shroom to pre sale wallet`)
 
                             if (this.preSaleAmounts.has(sender)) {
                                 let entry = this.preSaleAmounts.get(sender)
                                 let a = entry.multiplierTokensSent ?? 0
                                 this.preSaleAmounts.set(sender, {
                                     ...entry,
+                                    multiplierTokensSentRaw: (Number(amount) + Number(a)).toString(),
                                     multiplierTokensSent: Number(amount / Math.pow(10, 18)) + Number(a),
                                 })
                             }

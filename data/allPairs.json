@@ -17601,7 +17601,7 @@
       18
     ],
     "liquidity": 2291.2587863771128,
-    "liquidityUpdate": "2024-04-12T11:57:13.141Z"
+    "liquidityUpdate": "2024-04-12T11:57:53.145Z"
   },
   {
     "token0Meta": {
@@ -17672,5 +17672,1560 @@
     ],
     "liquidity": 3.8098899599999996e-16,
     "liquidityUpdate": "2024-04-12T10:29:21.614Z"
+  },
+  {
+    "token0Meta": {
+      "denom": "factory/inj1wgzj93vs2rdfff0jrhp6t7xfzsjpsay9g7un3l/SHIELD",
+      "name": "SHIELD",
+      "symbol": "SHIELD",
+      "decimals": 6,
+      "tokenType": "tokenFactory",
+      "display": "SHIELD",
+      "description": "SHIELD",
+      "logo": "https://i.imghippo.com/files/CHonT1712933304.png",
+      "coinGeckoId": "",
+      "tokenVerification": "internal"
+    },
+    "token1Meta": {
+      "denom": "inj",
+      "name": "Injective",
+      "symbol": "INJ",
+      "decimals": 18,
+      "tokenType": "native",
+      "logo": "injective-v3.png",
+      "coinGeckoId": "injective-protocol",
+      "erc20": {
+        "symbol": "INJ",
+        "decimals": 18,
+        "address": "0xe28b3B32B6c345A34Ff64674606124Dd5Aceca30"
+      },
+      "cw20s": [
+        {
+          "decimals": 8,
+          "symbol": "INJbsc",
+          "source": "binance-smart-chain",
+          "address": "inj1xcgprh58szttp0vqtztvcfy34tkpupr563ua40"
+        },
+        {
+          "decimals": 8,
+          "symbol": "INJet",
+          "source": "ethereum-wormhole",
+          "address": "inj1v8gg4wzfauwf9l7895t0eyrrkwe65vh5n7dqmw"
+        }
+      ],
+      "tokenVerification": "verified",
+      "cw20": {
+        "decimals": 8,
+        "symbol": "INJbsc",
+        "source": "binance-smart-chain",
+        "address": "inj1xcgprh58szttp0vqtztvcfy34tkpupr563ua40"
+      }
+    },
+    "astroportLink": "https://app.astroport.fi/swap?from=factory/inj1wgzj93vs2rdfff0jrhp6t7xfzsjpsay9g7un3l/SHIELD&to=inj",
+    "coinhallLink": "https://coinhall.org/injective/inj1k9pgz2gh90lq3qxasr32hqfpvqqu23wu930jnj?trader=inj1sy2aad37tku3dz0353epczxd95hvuhzl0lhfqh",
+    "dexscreenerLink": "https://dexscreener.com/injective/inj1k9pgz2gh90lq3qxasr32hqfpvqqu23wu930jnj?maker=inj1sy2aad37tku3dz0353epczxd95hvuhzl0lhfqh",
+    "dojoSwapLink": "https://dojo.trading/swap?type=swap&from=factory/inj1wgzj93vs2rdfff0jrhp6t7xfzsjpsay9g7un3l/SHIELD&to=inj",
+    "factory": "inj19aenkaj6qhymmt746av8ck4r8euthq3zmxr2r6",
+    "asset_infos": [
+      {
+        "native_token": {
+          "denom": "factory/inj1wgzj93vs2rdfff0jrhp6t7xfzsjpsay9g7un3l/SHIELD"
+        }
+      },
+      {
+        "native_token": {
+          "denom": "inj"
+        }
+      }
+    ],
+    "contract_addr": "inj1k9pgz2gh90lq3qxasr32hqfpvqqu23wu930jnj",
+    "liquidity_token": "inj17tmghhkm5u5lqeypgp39ucd0a06vvk8eyx6628",
+    "pair_type": {
+      "xyk": {}
+    },
+    "liquidity": 3.0781367474899998e-12,
+    "liquidityUpdate": "2024-04-12T17:47:33.893Z"
+  },
+  {
+    "token0Meta": {
+      "denom": "inj1m9yfd6f2dw0f6uyx4r2av2xk8s5fq5m7pt3mec",
+      "name": "Spuurk",
+      "symbol": "Spuurk",
+      "decimals": 18,
+      "tokenType": "cw20",
+      "total_supply": "21000000000000000000000000"
+    },
+    "token1Meta": {
+      "denom": "inj",
+      "name": "Injective",
+      "symbol": "INJ",
+      "decimals": 18,
+      "tokenType": "native",
+      "logo": "injective-v3.png",
+      "coinGeckoId": "injective-protocol",
+      "erc20": {
+        "symbol": "INJ",
+        "decimals": 18,
+        "address": "0xe28b3B32B6c345A34Ff64674606124Dd5Aceca30"
+      },
+      "cw20s": [
+        {
+          "decimals": 8,
+          "symbol": "INJbsc",
+          "source": "binance-smart-chain",
+          "address": "inj1xcgprh58szttp0vqtztvcfy34tkpupr563ua40"
+        },
+        {
+          "decimals": 8,
+          "symbol": "INJet",
+          "source": "ethereum-wormhole",
+          "address": "inj1v8gg4wzfauwf9l7895t0eyrrkwe65vh5n7dqmw"
+        }
+      ],
+      "tokenVerification": "verified",
+      "cw20": {
+        "decimals": 8,
+        "symbol": "INJbsc",
+        "source": "binance-smart-chain",
+        "address": "inj1xcgprh58szttp0vqtztvcfy34tkpupr563ua40"
+      }
+    },
+    "astroportLink": "https://app.astroport.fi/swap?from=inj1m9yfd6f2dw0f6uyx4r2av2xk8s5fq5m7pt3mec&to=inj",
+    "coinhallLink": "https://coinhall.org/injective/inj16s7esj8xet0p0cpxw4dyjhwx5lyc7jzgag4nc9?trader=inj1sy2aad37tku3dz0353epczxd95hvuhzl0lhfqh",
+    "dexscreenerLink": "https://dexscreener.com/injective/inj16s7esj8xet0p0cpxw4dyjhwx5lyc7jzgag4nc9?maker=inj1sy2aad37tku3dz0353epczxd95hvuhzl0lhfqh",
+    "dojoSwapLink": "https://dojo.trading/swap?type=swap&from=inj1m9yfd6f2dw0f6uyx4r2av2xk8s5fq5m7pt3mec&to=inj",
+    "factory": "inj1pc2vxcmnyzawnwkf03n2ggvt997avtuwagqngk",
+    "asset_infos": [
+      {
+        "token": {
+          "contract_addr": "inj1m9yfd6f2dw0f6uyx4r2av2xk8s5fq5m7pt3mec"
+        }
+      },
+      {
+        "native_token": {
+          "denom": "inj"
+        }
+      }
+    ],
+    "contract_addr": "inj16s7esj8xet0p0cpxw4dyjhwx5lyc7jzgag4nc9",
+    "liquidity_token": "inj1gt0ltfl2dfgjld65dtmhwyye38fedh382hccqe",
+    "asset_decimals": [
+      18,
+      18
+    ],
+    "liquidity": 38.79378246063077,
+    "liquidityUpdate": "2024-04-14T05:25:04.005Z"
+  },
+  {
+    "token0Meta": {
+      "denom": "inj1xd2l3406kypepnnczcn6fm0lnmsk6qk7dakryn",
+      "name": "SAMP",
+      "symbol": "SAM",
+      "decimals": 18,
+      "tokenType": "cw20",
+      "total_supply": "6900000000000000000000000000000"
+    },
+    "token1Meta": {
+      "denom": "inj",
+      "name": "Injective",
+      "symbol": "INJ",
+      "decimals": 18,
+      "tokenType": "native",
+      "logo": "injective-v3.png",
+      "coinGeckoId": "injective-protocol",
+      "erc20": {
+        "symbol": "INJ",
+        "decimals": 18,
+        "address": "0xe28b3B32B6c345A34Ff64674606124Dd5Aceca30"
+      },
+      "cw20s": [
+        {
+          "decimals": 8,
+          "symbol": "INJbsc",
+          "source": "binance-smart-chain",
+          "address": "inj1xcgprh58szttp0vqtztvcfy34tkpupr563ua40"
+        },
+        {
+          "decimals": 8,
+          "symbol": "INJet",
+          "source": "ethereum-wormhole",
+          "address": "inj1v8gg4wzfauwf9l7895t0eyrrkwe65vh5n7dqmw"
+        }
+      ],
+      "tokenVerification": "verified",
+      "cw20": {
+        "decimals": 8,
+        "symbol": "INJbsc",
+        "source": "binance-smart-chain",
+        "address": "inj1xcgprh58szttp0vqtztvcfy34tkpupr563ua40"
+      }
+    },
+    "astroportLink": "https://app.astroport.fi/swap?from=inj1xd2l3406kypepnnczcn6fm0lnmsk6qk7dakryn&to=inj",
+    "coinhallLink": "https://coinhall.org/injective/inj1ddy8dapw94tuusqxkj2ttp8nefafndyxcaarcg?trader=inj1sy2aad37tku3dz0353epczxd95hvuhzl0lhfqh",
+    "dexscreenerLink": "https://dexscreener.com/injective/inj1ddy8dapw94tuusqxkj2ttp8nefafndyxcaarcg?maker=inj1sy2aad37tku3dz0353epczxd95hvuhzl0lhfqh",
+    "dojoSwapLink": "https://dojo.trading/swap?type=swap&from=inj1xd2l3406kypepnnczcn6fm0lnmsk6qk7dakryn&to=inj",
+    "factory": "inj1pc2vxcmnyzawnwkf03n2ggvt997avtuwagqngk",
+    "asset_infos": [
+      {
+        "token": {
+          "contract_addr": "inj1xd2l3406kypepnnczcn6fm0lnmsk6qk7dakryn"
+        }
+      },
+      {
+        "native_token": {
+          "denom": "inj"
+        }
+      }
+    ],
+    "contract_addr": "inj1ddy8dapw94tuusqxkj2ttp8nefafndyxcaarcg",
+    "liquidity_token": "inj1r3g8lar0k9hytw5rhgeuskruap9dnrkdawxkwc",
+    "asset_decimals": [
+      18,
+      18
+    ],
+    "liquidity": 0.51208902,
+    "liquidityUpdate": "2024-04-14T09:09:09.947Z"
+  },
+  {
+    "token0Meta": {
+      "denom": "inj1q4amkjwefyh60nhtvtzhsmpz3mukc0fmpt6vd0",
+      "name": "JOKER",
+      "symbol": "JOKER",
+      "decimals": 8,
+      "tokenType": "cw20",
+      "total_supply": "500000000000000000"
+    },
+    "token1Meta": {
+      "denom": "inj",
+      "name": "Injective",
+      "symbol": "INJ",
+      "decimals": 18,
+      "tokenType": "native",
+      "logo": "injective-v3.png",
+      "coinGeckoId": "injective-protocol",
+      "erc20": {
+        "symbol": "INJ",
+        "decimals": 18,
+        "address": "0xe28b3B32B6c345A34Ff64674606124Dd5Aceca30"
+      },
+      "cw20s": [
+        {
+          "decimals": 8,
+          "symbol": "INJbsc",
+          "source": "binance-smart-chain",
+          "address": "inj1xcgprh58szttp0vqtztvcfy34tkpupr563ua40"
+        },
+        {
+          "decimals": 8,
+          "symbol": "INJet",
+          "source": "ethereum-wormhole",
+          "address": "inj1v8gg4wzfauwf9l7895t0eyrrkwe65vh5n7dqmw"
+        }
+      ],
+      "tokenVerification": "verified",
+      "cw20": {
+        "decimals": 8,
+        "symbol": "INJbsc",
+        "source": "binance-smart-chain",
+        "address": "inj1xcgprh58szttp0vqtztvcfy34tkpupr563ua40"
+      }
+    },
+    "astroportLink": "https://app.astroport.fi/swap?from=inj1q4amkjwefyh60nhtvtzhsmpz3mukc0fmpt6vd0&to=inj",
+    "coinhallLink": "https://coinhall.org/injective/inj1ew86tl2lus063333y0r9xt8uzxljlmqettg442?trader=inj1sy2aad37tku3dz0353epczxd95hvuhzl0lhfqh",
+    "dexscreenerLink": "https://dexscreener.com/injective/inj1ew86tl2lus063333y0r9xt8uzxljlmqettg442?maker=inj1sy2aad37tku3dz0353epczxd95hvuhzl0lhfqh",
+    "dojoSwapLink": "https://dojo.trading/swap?type=swap&from=inj1q4amkjwefyh60nhtvtzhsmpz3mukc0fmpt6vd0&to=inj",
+    "factory": "inj1pc2vxcmnyzawnwkf03n2ggvt997avtuwagqngk",
+    "asset_infos": [
+      {
+        "token": {
+          "contract_addr": "inj1q4amkjwefyh60nhtvtzhsmpz3mukc0fmpt6vd0"
+        }
+      },
+      {
+        "native_token": {
+          "denom": "inj"
+        }
+      }
+    ],
+    "contract_addr": "inj1ew86tl2lus063333y0r9xt8uzxljlmqettg442",
+    "liquidity_token": "inj1zmpdwmxq9f26wc82gvsgx0d8hemtv5cjx3twrs",
+    "asset_decimals": [
+      8,
+      18
+    ],
+    "liquidity": 67.51906651638895,
+    "liquidityUpdate": "2024-04-15T20:57:42.135Z"
+  },
+  {
+    "token0Meta": {
+      "denom": "ibc/695B1D16DE4D0FD293E6B79451640974080B59AA60942974C1CC906568DED795",
+      "name": "n/a",
+      "symbol": "n/a",
+      "decimals": 6,
+      "tokenType": "cw20"
+    },
+    "token1Meta": {
+      "denom": "inj",
+      "name": "Injective",
+      "symbol": "INJ",
+      "decimals": 18,
+      "tokenType": "native",
+      "logo": "injective-v3.png",
+      "coinGeckoId": "injective-protocol",
+      "erc20": {
+        "symbol": "INJ",
+        "decimals": 18,
+        "address": "0xe28b3B32B6c345A34Ff64674606124Dd5Aceca30"
+      },
+      "cw20s": [
+        {
+          "decimals": 8,
+          "symbol": "INJbsc",
+          "source": "binance-smart-chain",
+          "address": "inj1xcgprh58szttp0vqtztvcfy34tkpupr563ua40"
+        },
+        {
+          "decimals": 8,
+          "symbol": "INJet",
+          "source": "ethereum-wormhole",
+          "address": "inj1v8gg4wzfauwf9l7895t0eyrrkwe65vh5n7dqmw"
+        }
+      ],
+      "tokenVerification": "verified",
+      "cw20": {
+        "decimals": 8,
+        "symbol": "INJbsc",
+        "source": "binance-smart-chain",
+        "address": "inj1xcgprh58szttp0vqtztvcfy34tkpupr563ua40"
+      }
+    },
+    "astroportLink": "https://app.astroport.fi/swap?from=ibc/695B1D16DE4D0FD293E6B79451640974080B59AA60942974C1CC906568DED795&to=inj",
+    "coinhallLink": "https://coinhall.org/injective/inj1u3zssezkrt9j2jlajst69y0e5cmf8antm7wz69?trader=inj1sy2aad37tku3dz0353epczxd95hvuhzl0lhfqh",
+    "dexscreenerLink": "https://dexscreener.com/injective/inj1u3zssezkrt9j2jlajst69y0e5cmf8antm7wz69?maker=inj1sy2aad37tku3dz0353epczxd95hvuhzl0lhfqh",
+    "dojoSwapLink": "https://dojo.trading/swap?type=swap&from=ibc/695B1D16DE4D0FD293E6B79451640974080B59AA60942974C1CC906568DED795&to=inj",
+    "factory": "inj19aenkaj6qhymmt746av8ck4r8euthq3zmxr2r6",
+    "asset_infos": [
+      {
+        "native_token": {
+          "denom": "ibc/695B1D16DE4D0FD293E6B79451640974080B59AA60942974C1CC906568DED795"
+        }
+      },
+      {
+        "native_token": {
+          "denom": "inj"
+        }
+      }
+    ],
+    "contract_addr": "inj1u3zssezkrt9j2jlajst69y0e5cmf8antm7wz69",
+    "liquidity_token": "inj12d5hg634ntrwj68v57gxvg7pmf3j8zy4p0ywh2",
+    "pair_type": {
+      "xyk": {}
+    }
+  },
+  {
+    "token0Meta": {
+      "denom": "factory/inj1238tn4srtzzplhgtd7fdrzdrf77hf9fye6q2xa/TALIS",
+      "name": "TALIS",
+      "symbol": "TALIS",
+      "decimals": 6,
+      "tokenType": "tokenFactory",
+      "display": "TALIS",
+      "description": "From Monet to Money",
+      "logo": "https://pbs.twimg.com/profile_images/1389244283748823046/sOY6n24s_400x400.jpg",
+      "coinGeckoId": "",
+      "tokenVerification": "internal"
+    },
+    "token1Meta": {
+      "denom": "inj",
+      "name": "Injective",
+      "symbol": "INJ",
+      "decimals": 18,
+      "tokenType": "native",
+      "logo": "injective-v3.png",
+      "coinGeckoId": "injective-protocol",
+      "erc20": {
+        "symbol": "INJ",
+        "decimals": 18,
+        "address": "0xe28b3B32B6c345A34Ff64674606124Dd5Aceca30"
+      },
+      "cw20s": [
+        {
+          "decimals": 8,
+          "symbol": "INJbsc",
+          "source": "binance-smart-chain",
+          "address": "inj1xcgprh58szttp0vqtztvcfy34tkpupr563ua40"
+        },
+        {
+          "decimals": 8,
+          "symbol": "INJet",
+          "source": "ethereum-wormhole",
+          "address": "inj1v8gg4wzfauwf9l7895t0eyrrkwe65vh5n7dqmw"
+        }
+      ],
+      "tokenVerification": "verified",
+      "cw20": {
+        "decimals": 8,
+        "symbol": "INJbsc",
+        "source": "binance-smart-chain",
+        "address": "inj1xcgprh58szttp0vqtztvcfy34tkpupr563ua40"
+      }
+    },
+    "astroportLink": "https://app.astroport.fi/swap?from=factory/inj1238tn4srtzzplhgtd7fdrzdrf77hf9fye6q2xa/TALIS&to=inj",
+    "coinhallLink": "https://coinhall.org/injective/inj1ggegw5qd4cyx57hp4fhqwjlm52j3rwnhdszdu9?trader=inj1sy2aad37tku3dz0353epczxd95hvuhzl0lhfqh",
+    "dexscreenerLink": "https://dexscreener.com/injective/inj1ggegw5qd4cyx57hp4fhqwjlm52j3rwnhdszdu9?maker=inj1sy2aad37tku3dz0353epczxd95hvuhzl0lhfqh",
+    "dojoSwapLink": "https://dojo.trading/swap?type=swap&from=factory/inj1238tn4srtzzplhgtd7fdrzdrf77hf9fye6q2xa/TALIS&to=inj",
+    "factory": "inj19aenkaj6qhymmt746av8ck4r8euthq3zmxr2r6",
+    "asset_infos": [
+      {
+        "native_token": {
+          "denom": "factory/inj1238tn4srtzzplhgtd7fdrzdrf77hf9fye6q2xa/TALIS"
+        }
+      },
+      {
+        "native_token": {
+          "denom": "inj"
+        }
+      }
+    ],
+    "contract_addr": "inj1ggegw5qd4cyx57hp4fhqwjlm52j3rwnhdszdu9",
+    "liquidity_token": "inj1vu8yt4hczfxvzy5ah42575wd88dfh5ezfss5tm",
+    "pair_type": {
+      "xyk": {}
+    },
+    "liquidity": 1.0945035353124e-11,
+    "liquidityUpdate": "2024-04-16T08:04:31.412Z"
+  },
+  {
+    "token0Meta": {
+      "denom": "inj",
+      "name": "Injective",
+      "symbol": "INJ",
+      "decimals": 18,
+      "tokenType": "native",
+      "logo": "injective-v3.png",
+      "coinGeckoId": "injective-protocol",
+      "erc20": {
+        "symbol": "INJ",
+        "decimals": 18,
+        "address": "0xe28b3B32B6c345A34Ff64674606124Dd5Aceca30"
+      },
+      "cw20s": [
+        {
+          "decimals": 8,
+          "symbol": "INJbsc",
+          "source": "binance-smart-chain",
+          "address": "inj1xcgprh58szttp0vqtztvcfy34tkpupr563ua40"
+        },
+        {
+          "decimals": 8,
+          "symbol": "INJet",
+          "source": "ethereum-wormhole",
+          "address": "inj1v8gg4wzfauwf9l7895t0eyrrkwe65vh5n7dqmw"
+        }
+      ],
+      "tokenVerification": "verified",
+      "cw20": {
+        "decimals": 8,
+        "symbol": "INJbsc",
+        "source": "binance-smart-chain",
+        "address": "inj1xcgprh58szttp0vqtztvcfy34tkpupr563ua40"
+      }
+    },
+    "token1Meta": {
+      "denom": "factory/inj1nccncwqx5q22lf4uh83dhe89e3f0sh8kljf055/HOUND",
+      "name": "HOUND",
+      "symbol": "HOUND",
+      "decimals": 6,
+      "tokenType": "tokenFactory",
+      "display": "HOUND",
+      "description": "$Hound on Injective",
+      "logo": "ipfs://bafybeifsc3kp6nic3x5qfqltzxirrvgfj53p24bxiu3ikktdpesisrannm",
+      "coinGeckoId": "",
+      "tokenVerification": "internal"
+    },
+    "astroportLink": "https://app.astroport.fi/swap?from=inj&to=factory/inj1nccncwqx5q22lf4uh83dhe89e3f0sh8kljf055/HOUND",
+    "coinhallLink": "https://coinhall.org/injective/inj176gxsega8fulnr0fqpsmpmr4dlyzc7qu55z5tm?trader=inj1sy2aad37tku3dz0353epczxd95hvuhzl0lhfqh",
+    "dexscreenerLink": "https://dexscreener.com/injective/inj176gxsega8fulnr0fqpsmpmr4dlyzc7qu55z5tm?maker=inj1sy2aad37tku3dz0353epczxd95hvuhzl0lhfqh",
+    "dojoSwapLink": "https://dojo.trading/swap?type=swap&from=inj&to=factory/inj1nccncwqx5q22lf4uh83dhe89e3f0sh8kljf055/HOUND",
+    "factory": "inj1pc2vxcmnyzawnwkf03n2ggvt997avtuwagqngk",
+    "asset_infos": [
+      {
+        "native_token": {
+          "denom": "inj"
+        }
+      },
+      {
+        "native_token": {
+          "denom": "factory/inj1nccncwqx5q22lf4uh83dhe89e3f0sh8kljf055/HOUND"
+        }
+      }
+    ],
+    "contract_addr": "inj176gxsega8fulnr0fqpsmpmr4dlyzc7qu55z5tm",
+    "liquidity_token": "inj1kj8u68fmn3y9v7ytafnnsctcwh8rjh5cz3kczv",
+    "asset_decimals": [
+      18,
+      6
+    ],
+    "liquidity": 8641.896123569,
+    "liquidityUpdate": "2024-04-17T06:38:37.758Z"
+  },
+  {
+    "token0Meta": {
+      "denom": "inj1y07h8hugnqnqvrpj9kmjpsva7pj4yjwjjkd0u4",
+      "name": "Astrophile",
+      "symbol": "ASTRO",
+      "decimals": 18,
+      "tokenType": "cw20",
+      "total_supply": "10000000000000000000000000"
+    },
+    "token1Meta": {
+      "denom": "inj",
+      "name": "Injective",
+      "symbol": "INJ",
+      "decimals": 18,
+      "tokenType": "native",
+      "logo": "injective-v3.png",
+      "coinGeckoId": "injective-protocol",
+      "erc20": {
+        "symbol": "INJ",
+        "decimals": 18,
+        "address": "0xe28b3B32B6c345A34Ff64674606124Dd5Aceca30"
+      },
+      "cw20s": [
+        {
+          "decimals": 8,
+          "symbol": "INJbsc",
+          "source": "binance-smart-chain",
+          "address": "inj1xcgprh58szttp0vqtztvcfy34tkpupr563ua40"
+        },
+        {
+          "decimals": 8,
+          "symbol": "INJet",
+          "source": "ethereum-wormhole",
+          "address": "inj1v8gg4wzfauwf9l7895t0eyrrkwe65vh5n7dqmw"
+        }
+      ],
+      "tokenVerification": "verified",
+      "cw20": {
+        "decimals": 8,
+        "symbol": "INJbsc",
+        "source": "binance-smart-chain",
+        "address": "inj1xcgprh58szttp0vqtztvcfy34tkpupr563ua40"
+      }
+    },
+    "astroportLink": "https://app.astroport.fi/swap?from=inj1y07h8hugnqnqvrpj9kmjpsva7pj4yjwjjkd0u4&to=inj",
+    "coinhallLink": "https://coinhall.org/injective/inj1n48x4r2svw8tufsuesl8qdfkx7erq8dj3ex7yj?trader=inj1sy2aad37tku3dz0353epczxd95hvuhzl0lhfqh",
+    "dexscreenerLink": "https://dexscreener.com/injective/inj1n48x4r2svw8tufsuesl8qdfkx7erq8dj3ex7yj?maker=inj1sy2aad37tku3dz0353epczxd95hvuhzl0lhfqh",
+    "dojoSwapLink": "https://dojo.trading/swap?type=swap&from=inj1y07h8hugnqnqvrpj9kmjpsva7pj4yjwjjkd0u4&to=inj",
+    "factory": "inj1pc2vxcmnyzawnwkf03n2ggvt997avtuwagqngk",
+    "asset_infos": [
+      {
+        "token": {
+          "contract_addr": "inj1y07h8hugnqnqvrpj9kmjpsva7pj4yjwjjkd0u4"
+        }
+      },
+      {
+        "native_token": {
+          "denom": "inj"
+        }
+      }
+    ],
+    "contract_addr": "inj1n48x4r2svw8tufsuesl8qdfkx7erq8dj3ex7yj",
+    "liquidity_token": "inj1j36n3xa6g5r8l9r9kdn0rzfz2g5vxpzslffy3v",
+    "asset_decimals": [
+      18,
+      18
+    ],
+    "liquidity": 0.15425392238230817,
+    "liquidityUpdate": "2024-04-17T00:49:10.847Z"
+  },
+  {
+    "token0Meta": {
+      "denom": "inj1h6hma5fahwutgzynjrk3jkzygqfxf3l32hv673",
+      "name": "SENSEI ",
+      "symbol": "SNJT",
+      "decimals": 18,
+      "tokenType": "cw20",
+      "total_supply": "100000000000000000000000000"
+    },
+    "token1Meta": {
+      "denom": "inj",
+      "name": "Injective",
+      "symbol": "INJ",
+      "decimals": 18,
+      "tokenType": "native",
+      "logo": "injective-v3.png",
+      "coinGeckoId": "injective-protocol",
+      "erc20": {
+        "symbol": "INJ",
+        "decimals": 18,
+        "address": "0xe28b3B32B6c345A34Ff64674606124Dd5Aceca30"
+      },
+      "cw20s": [
+        {
+          "decimals": 8,
+          "symbol": "INJbsc",
+          "source": "binance-smart-chain",
+          "address": "inj1xcgprh58szttp0vqtztvcfy34tkpupr563ua40"
+        },
+        {
+          "decimals": 8,
+          "symbol": "INJet",
+          "source": "ethereum-wormhole",
+          "address": "inj1v8gg4wzfauwf9l7895t0eyrrkwe65vh5n7dqmw"
+        }
+      ],
+      "tokenVerification": "verified",
+      "cw20": {
+        "decimals": 8,
+        "symbol": "INJbsc",
+        "source": "binance-smart-chain",
+        "address": "inj1xcgprh58szttp0vqtztvcfy34tkpupr563ua40"
+      }
+    },
+    "astroportLink": "https://app.astroport.fi/swap?from=inj1h6hma5fahwutgzynjrk3jkzygqfxf3l32hv673&to=inj",
+    "coinhallLink": "https://coinhall.org/injective/inj15vmk90g5xnv4egj3j2x3c6vydr9u8t43qa570f?trader=inj1sy2aad37tku3dz0353epczxd95hvuhzl0lhfqh",
+    "dexscreenerLink": "https://dexscreener.com/injective/inj15vmk90g5xnv4egj3j2x3c6vydr9u8t43qa570f?maker=inj1sy2aad37tku3dz0353epczxd95hvuhzl0lhfqh",
+    "dojoSwapLink": "https://dojo.trading/swap?type=swap&from=inj1h6hma5fahwutgzynjrk3jkzygqfxf3l32hv673&to=inj",
+    "factory": "inj1pc2vxcmnyzawnwkf03n2ggvt997avtuwagqngk",
+    "asset_infos": [
+      {
+        "token": {
+          "contract_addr": "inj1h6hma5fahwutgzynjrk3jkzygqfxf3l32hv673"
+        }
+      },
+      {
+        "native_token": {
+          "denom": "inj"
+        }
+      }
+    ],
+    "contract_addr": "inj15vmk90g5xnv4egj3j2x3c6vydr9u8t43qa570f",
+    "liquidity_token": "inj144w7kj66856x8qm0e6q88jfcs944pf466tlczp",
+    "asset_decimals": [
+      18,
+      18
+    ],
+    "liquidity": 45.342250097586515,
+    "liquidityUpdate": "2024-04-17T06:38:32.424Z"
+  },
+  {
+    "token0Meta": {
+      "denom": "inj19lwxrsr2ke407xw2fdgs80f3rghg2pueqae3vf",
+      "name": "Cat Wif Luck",
+      "symbol": "WIFLUCK",
+      "decimals": 6,
+      "tokenType": "cw20",
+      "total_supply": "1391780000000"
+    },
+    "token1Meta": {
+      "denom": "inj",
+      "name": "Injective",
+      "symbol": "INJ",
+      "decimals": 18,
+      "tokenType": "native",
+      "logo": "injective-v3.png",
+      "coinGeckoId": "injective-protocol",
+      "erc20": {
+        "symbol": "INJ",
+        "decimals": 18,
+        "address": "0xe28b3B32B6c345A34Ff64674606124Dd5Aceca30"
+      },
+      "cw20s": [
+        {
+          "decimals": 8,
+          "symbol": "INJbsc",
+          "source": "binance-smart-chain",
+          "address": "inj1xcgprh58szttp0vqtztvcfy34tkpupr563ua40"
+        },
+        {
+          "decimals": 8,
+          "symbol": "INJet",
+          "source": "ethereum-wormhole",
+          "address": "inj1v8gg4wzfauwf9l7895t0eyrrkwe65vh5n7dqmw"
+        }
+      ],
+      "tokenVerification": "verified",
+      "cw20": {
+        "decimals": 8,
+        "symbol": "INJbsc",
+        "source": "binance-smart-chain",
+        "address": "inj1xcgprh58szttp0vqtztvcfy34tkpupr563ua40"
+      }
+    },
+    "astroportLink": "https://app.astroport.fi/swap?from=inj19lwxrsr2ke407xw2fdgs80f3rghg2pueqae3vf&to=inj",
+    "coinhallLink": "https://coinhall.org/injective/inj1m4agsxvtk4dar48alsgc488lqm636tkqgez4yl?trader=inj1sy2aad37tku3dz0353epczxd95hvuhzl0lhfqh",
+    "dexscreenerLink": "https://dexscreener.com/injective/inj1m4agsxvtk4dar48alsgc488lqm636tkqgez4yl?maker=inj1sy2aad37tku3dz0353epczxd95hvuhzl0lhfqh",
+    "dojoSwapLink": "https://dojo.trading/swap?type=swap&from=inj19lwxrsr2ke407xw2fdgs80f3rghg2pueqae3vf&to=inj",
+    "factory": "inj1pc2vxcmnyzawnwkf03n2ggvt997avtuwagqngk",
+    "asset_infos": [
+      {
+        "token": {
+          "contract_addr": "inj19lwxrsr2ke407xw2fdgs80f3rghg2pueqae3vf"
+        }
+      },
+      {
+        "native_token": {
+          "denom": "inj"
+        }
+      }
+    ],
+    "contract_addr": "inj1m4agsxvtk4dar48alsgc488lqm636tkqgez4yl",
+    "liquidity_token": "inj1gs5kfcnp85qen2p7w8s3f9mq5cmhaz49cx7n7m",
+    "asset_decimals": [
+      6,
+      18
+    ],
+    "liquidity": 1.0840239309790801e-8,
+    "liquidityUpdate": "2024-04-17T22:49:09.132Z"
+  },
+  {
+    "token0Meta": {
+      "denom": "factory/inj1n8kcnuzsrg9d7guu8c5n4cxcurqyszthy29yhg/EVITCEJNI",
+      "name": "EVITCEJNI",
+      "symbol": "EVITCEJNI",
+      "decimals": 6,
+      "tokenType": "tokenFactory",
+      "display": "EVITCEJNI",
+      "description": "INJECTIVE FOR MEME",
+      "logo": "ipfs://bafkreihxzrt7d5rd235o6z4gdlqruyfbp4s4cfzsf3uim2vfcxx3jbs5iu",
+      "coinGeckoId": "",
+      "tokenVerification": "internal"
+    },
+    "token1Meta": {
+      "denom": "inj",
+      "name": "Injective",
+      "symbol": "INJ",
+      "decimals": 18,
+      "tokenType": "native",
+      "logo": "injective-v3.png",
+      "coinGeckoId": "injective-protocol",
+      "erc20": {
+        "symbol": "INJ",
+        "decimals": 18,
+        "address": "0xe28b3B32B6c345A34Ff64674606124Dd5Aceca30"
+      },
+      "cw20s": [
+        {
+          "decimals": 8,
+          "symbol": "INJbsc",
+          "source": "binance-smart-chain",
+          "address": "inj1xcgprh58szttp0vqtztvcfy34tkpupr563ua40"
+        },
+        {
+          "decimals": 8,
+          "symbol": "INJet",
+          "source": "ethereum-wormhole",
+          "address": "inj1v8gg4wzfauwf9l7895t0eyrrkwe65vh5n7dqmw"
+        }
+      ],
+      "tokenVerification": "verified",
+      "cw20": {
+        "decimals": 8,
+        "symbol": "INJbsc",
+        "source": "binance-smart-chain",
+        "address": "inj1xcgprh58szttp0vqtztvcfy34tkpupr563ua40"
+      }
+    },
+    "astroportLink": "https://app.astroport.fi/swap?from=factory/inj1n8kcnuzsrg9d7guu8c5n4cxcurqyszthy29yhg/EVITCEJNI&to=inj",
+    "coinhallLink": "https://coinhall.org/injective/inj1jgv8pfyr9ftj5jn0ewf7gm8wr8ca84zngs9en0?trader=inj1sy2aad37tku3dz0353epczxd95hvuhzl0lhfqh",
+    "dexscreenerLink": "https://dexscreener.com/injective/inj1jgv8pfyr9ftj5jn0ewf7gm8wr8ca84zngs9en0?maker=inj1sy2aad37tku3dz0353epczxd95hvuhzl0lhfqh",
+    "dojoSwapLink": "https://dojo.trading/swap?type=swap&from=factory/inj1n8kcnuzsrg9d7guu8c5n4cxcurqyszthy29yhg/EVITCEJNI&to=inj",
+    "factory": "inj1pc2vxcmnyzawnwkf03n2ggvt997avtuwagqngk",
+    "asset_infos": [
+      {
+        "native_token": {
+          "denom": "factory/inj1n8kcnuzsrg9d7guu8c5n4cxcurqyszthy29yhg/EVITCEJNI"
+        }
+      },
+      {
+        "native_token": {
+          "denom": "inj"
+        }
+      }
+    ],
+    "contract_addr": "inj1jgv8pfyr9ftj5jn0ewf7gm8wr8ca84zngs9en0",
+    "liquidity_token": "inj14zg4kreh5877zj04qta2gn79nkr6f7captfe39",
+    "asset_decimals": [
+      6,
+      18
+    ],
+    "liquidity": 2.163811342,
+    "liquidityUpdate": "2024-04-18T06:58:49.712Z"
+  },
+  {
+    "token0Meta": {
+      "denom": "inj1rdy2hzjw83hs2dec28lw6q3f8an5pma8l38uey",
+      "name": "LBKT",
+      "symbol": "LBKT",
+      "decimals": 18,
+      "tokenType": "cw20",
+      "total_supply": "1000000000000000000000"
+    },
+    "token1Meta": {
+      "denom": "inj",
+      "name": "Injective",
+      "symbol": "INJ",
+      "decimals": 18,
+      "tokenType": "native",
+      "logo": "injective-v3.png",
+      "coinGeckoId": "injective-protocol",
+      "erc20": {
+        "symbol": "INJ",
+        "decimals": 18,
+        "address": "0xe28b3B32B6c345A34Ff64674606124Dd5Aceca30"
+      },
+      "cw20s": [
+        {
+          "decimals": 8,
+          "symbol": "INJbsc",
+          "source": "binance-smart-chain",
+          "address": "inj1xcgprh58szttp0vqtztvcfy34tkpupr563ua40"
+        },
+        {
+          "decimals": 8,
+          "symbol": "INJet",
+          "source": "ethereum-wormhole",
+          "address": "inj1v8gg4wzfauwf9l7895t0eyrrkwe65vh5n7dqmw"
+        }
+      ],
+      "tokenVerification": "verified",
+      "cw20": {
+        "decimals": 8,
+        "symbol": "INJbsc",
+        "source": "binance-smart-chain",
+        "address": "inj1xcgprh58szttp0vqtztvcfy34tkpupr563ua40"
+      }
+    },
+    "astroportLink": "https://app.astroport.fi/swap?from=inj1rdy2hzjw83hs2dec28lw6q3f8an5pma8l38uey&to=inj",
+    "coinhallLink": "https://coinhall.org/injective/inj1ramludxeuaj7gz588mk7adflxsk53rrljcc6fw?trader=inj1sy2aad37tku3dz0353epczxd95hvuhzl0lhfqh",
+    "dexscreenerLink": "https://dexscreener.com/injective/inj1ramludxeuaj7gz588mk7adflxsk53rrljcc6fw?maker=inj1sy2aad37tku3dz0353epczxd95hvuhzl0lhfqh",
+    "dojoSwapLink": "https://dojo.trading/swap?type=swap&from=inj1rdy2hzjw83hs2dec28lw6q3f8an5pma8l38uey&to=inj",
+    "factory": "inj1pc2vxcmnyzawnwkf03n2ggvt997avtuwagqngk",
+    "asset_infos": [
+      {
+        "token": {
+          "contract_addr": "inj1rdy2hzjw83hs2dec28lw6q3f8an5pma8l38uey"
+        }
+      },
+      {
+        "native_token": {
+          "denom": "inj"
+        }
+      }
+    ],
+    "contract_addr": "inj1ramludxeuaj7gz588mk7adflxsk53rrljcc6fw",
+    "liquidity_token": "inj17ewc6qjew7jgxdmw3v9ek2veapr64ea4lcngt5",
+    "asset_decimals": [
+      18,
+      18
+    ]
+  },
+  {
+    "token0Meta": {
+      "denom": "factory/inj1k0mzgwd4ujuu9w95xzs8p7qu8udy3atqj3sau7/HALVING",
+      "name": "HALVING",
+      "symbol": "HALVING",
+      "decimals": 6,
+      "tokenType": "tokenFactory",
+      "display": "HALVING",
+      "description": "bitcoin HALVING",
+      "logo": "https://th.bing.com/th/id/R.45019b059e108c76fb9f9f0b5f992de7?rik=sy2hT3yBk5eJUQ&pid=ImgRaw&r=0",
+      "coinGeckoId": "",
+      "tokenVerification": "internal"
+    },
+    "token1Meta": {
+      "denom": "inj",
+      "name": "Injective",
+      "symbol": "INJ",
+      "decimals": 18,
+      "tokenType": "native",
+      "logo": "injective-v3.png",
+      "coinGeckoId": "injective-protocol",
+      "erc20": {
+        "symbol": "INJ",
+        "decimals": 18,
+        "address": "0xe28b3B32B6c345A34Ff64674606124Dd5Aceca30"
+      },
+      "cw20s": [
+        {
+          "decimals": 8,
+          "symbol": "INJbsc",
+          "source": "binance-smart-chain",
+          "address": "inj1xcgprh58szttp0vqtztvcfy34tkpupr563ua40"
+        },
+        {
+          "decimals": 8,
+          "symbol": "INJet",
+          "source": "ethereum-wormhole",
+          "address": "inj1v8gg4wzfauwf9l7895t0eyrrkwe65vh5n7dqmw"
+        }
+      ],
+      "tokenVerification": "verified",
+      "cw20": {
+        "decimals": 8,
+        "symbol": "INJbsc",
+        "source": "binance-smart-chain",
+        "address": "inj1xcgprh58szttp0vqtztvcfy34tkpupr563ua40"
+      }
+    },
+    "astroportLink": "https://app.astroport.fi/swap?from=factory/inj1k0mzgwd4ujuu9w95xzs8p7qu8udy3atqj3sau7/HALVING&to=inj",
+    "coinhallLink": "https://coinhall.org/injective/inj10whx5cyzhvkm89xfj6zez9tzwpstxl6ftwed0l?trader=inj1sy2aad37tku3dz0353epczxd95hvuhzl0lhfqh",
+    "dexscreenerLink": "https://dexscreener.com/injective/inj10whx5cyzhvkm89xfj6zez9tzwpstxl6ftwed0l?maker=inj1sy2aad37tku3dz0353epczxd95hvuhzl0lhfqh",
+    "dojoSwapLink": "https://dojo.trading/swap?type=swap&from=factory/inj1k0mzgwd4ujuu9w95xzs8p7qu8udy3atqj3sau7/HALVING&to=inj",
+    "factory": "inj19aenkaj6qhymmt746av8ck4r8euthq3zmxr2r6",
+    "asset_infos": [
+      {
+        "native_token": {
+          "denom": "factory/inj1k0mzgwd4ujuu9w95xzs8p7qu8udy3atqj3sau7/HALVING"
+        }
+      },
+      {
+        "native_token": {
+          "denom": "inj"
+        }
+      }
+    ],
+    "contract_addr": "inj10whx5cyzhvkm89xfj6zez9tzwpstxl6ftwed0l",
+    "liquidity_token": "inj18yk6cf5pj2n59p38qzzwfg2pluhf5deyw9h73v",
+    "pair_type": {
+      "xyk": {}
+    }
+  },
+  {
+    "token0Meta": {
+      "denom": "factory/inj1k0mzgwd4ujuu9w95xzs8p7qu8udy3atqj3sau7/POTIN",
+      "name": "POTIN",
+      "symbol": "POTIN",
+      "decimals": 6,
+      "tokenType": "tokenFactory",
+      "display": "POTIN",
+      "description": "blodimir potin",
+      "logo": "https://i.ibb.co/S39c6vR/potin.jpg",
+      "coinGeckoId": "",
+      "tokenVerification": "internal"
+    },
+    "token1Meta": {
+      "denom": "inj",
+      "name": "Injective",
+      "symbol": "INJ",
+      "decimals": 18,
+      "tokenType": "native",
+      "logo": "injective-v3.png",
+      "coinGeckoId": "injective-protocol",
+      "erc20": {
+        "symbol": "INJ",
+        "decimals": 18,
+        "address": "0xe28b3B32B6c345A34Ff64674606124Dd5Aceca30"
+      },
+      "cw20s": [
+        {
+          "decimals": 8,
+          "symbol": "INJbsc",
+          "source": "binance-smart-chain",
+          "address": "inj1xcgprh58szttp0vqtztvcfy34tkpupr563ua40"
+        },
+        {
+          "decimals": 8,
+          "symbol": "INJet",
+          "source": "ethereum-wormhole",
+          "address": "inj1v8gg4wzfauwf9l7895t0eyrrkwe65vh5n7dqmw"
+        }
+      ],
+      "tokenVerification": "verified",
+      "cw20": {
+        "decimals": 8,
+        "symbol": "INJbsc",
+        "source": "binance-smart-chain",
+        "address": "inj1xcgprh58szttp0vqtztvcfy34tkpupr563ua40"
+      }
+    },
+    "astroportLink": "https://app.astroport.fi/swap?from=factory/inj1k0mzgwd4ujuu9w95xzs8p7qu8udy3atqj3sau7/POTIN&to=inj",
+    "coinhallLink": "https://coinhall.org/injective/inj1x9enz97xzamjkvpfnedkqkh6kvndw7ultkcys4?trader=inj1sy2aad37tku3dz0353epczxd95hvuhzl0lhfqh",
+    "dexscreenerLink": "https://dexscreener.com/injective/inj1x9enz97xzamjkvpfnedkqkh6kvndw7ultkcys4?maker=inj1sy2aad37tku3dz0353epczxd95hvuhzl0lhfqh",
+    "dojoSwapLink": "https://dojo.trading/swap?type=swap&from=factory/inj1k0mzgwd4ujuu9w95xzs8p7qu8udy3atqj3sau7/POTIN&to=inj",
+    "factory": "inj19aenkaj6qhymmt746av8ck4r8euthq3zmxr2r6",
+    "asset_infos": [
+      {
+        "native_token": {
+          "denom": "factory/inj1k0mzgwd4ujuu9w95xzs8p7qu8udy3atqj3sau7/POTIN"
+        }
+      },
+      {
+        "native_token": {
+          "denom": "inj"
+        }
+      }
+    ],
+    "contract_addr": "inj1x9enz97xzamjkvpfnedkqkh6kvndw7ultkcys4",
+    "liquidity_token": "inj13fgtjmsfeye7yfyqgvpntj8a20p6yhaf0uhjch",
+    "pair_type": {
+      "xyk": {}
+    }
+  },
+  {
+    "token0Meta": {
+      "denom": "inj",
+      "name": "Injective",
+      "symbol": "INJ",
+      "decimals": 18,
+      "tokenType": "native",
+      "logo": "injective-v3.png",
+      "coinGeckoId": "injective-protocol",
+      "erc20": {
+        "symbol": "INJ",
+        "decimals": 18,
+        "address": "0xe28b3B32B6c345A34Ff64674606124Dd5Aceca30"
+      },
+      "cw20s": [
+        {
+          "decimals": 8,
+          "symbol": "INJbsc",
+          "source": "binance-smart-chain",
+          "address": "inj1xcgprh58szttp0vqtztvcfy34tkpupr563ua40"
+        },
+        {
+          "decimals": 8,
+          "symbol": "INJet",
+          "source": "ethereum-wormhole",
+          "address": "inj1v8gg4wzfauwf9l7895t0eyrrkwe65vh5n7dqmw"
+        }
+      ],
+      "tokenVerification": "verified",
+      "cw20": {
+        "decimals": 8,
+        "symbol": "INJbsc",
+        "source": "binance-smart-chain",
+        "address": "inj1xcgprh58szttp0vqtztvcfy34tkpupr563ua40"
+      }
+    },
+    "token1Meta": {
+      "denom": "inj10dqyn46ljqwzx4947zc3dska84hpnwc7r6rzzs",
+      "name": "TRY",
+      "symbol": "TRY",
+      "decimals": 18,
+      "tokenType": "cw20",
+      "total_supply": "1000000000000000000000"
+    },
+    "astroportLink": "https://app.astroport.fi/swap?from=inj&to=inj10dqyn46ljqwzx4947zc3dska84hpnwc7r6rzzs",
+    "coinhallLink": "https://coinhall.org/injective/inj1wqavgchkusf7g6383hxwjkk9xz03n3rul2amnc?trader=inj1sy2aad37tku3dz0353epczxd95hvuhzl0lhfqh",
+    "dexscreenerLink": "https://dexscreener.com/injective/inj1wqavgchkusf7g6383hxwjkk9xz03n3rul2amnc?maker=inj1sy2aad37tku3dz0353epczxd95hvuhzl0lhfqh",
+    "dojoSwapLink": "https://dojo.trading/swap?type=swap&from=inj&to=inj10dqyn46ljqwzx4947zc3dska84hpnwc7r6rzzs",
+    "factory": "inj1pc2vxcmnyzawnwkf03n2ggvt997avtuwagqngk",
+    "asset_infos": [
+      {
+        "native_token": {
+          "denom": "inj"
+        }
+      },
+      {
+        "token": {
+          "contract_addr": "inj10dqyn46ljqwzx4947zc3dska84hpnwc7r6rzzs"
+        }
+      }
+    ],
+    "contract_addr": "inj1wqavgchkusf7g6383hxwjkk9xz03n3rul2amnc",
+    "liquidity_token": "inj1a3pcd7kyjntznyuu0q5jgm2zx4zcpfnamqm4e5",
+    "asset_decimals": [
+      18,
+      18
+    ]
+  },
+  {
+    "token0Meta": {
+      "denom": "inj1ncjqkvnxpyyhvm475std34eyn5c7eydpxxagds",
+      "name": "hug",
+      "symbol": "hug",
+      "decimals": 18,
+      "tokenType": "cw20",
+      "total_supply": "10000000000000000000000000000"
+    },
+    "token1Meta": {
+      "denom": "inj",
+      "name": "Injective",
+      "symbol": "INJ",
+      "decimals": 18,
+      "tokenType": "native",
+      "logo": "injective-v3.png",
+      "coinGeckoId": "injective-protocol",
+      "erc20": {
+        "symbol": "INJ",
+        "decimals": 18,
+        "address": "0xe28b3B32B6c345A34Ff64674606124Dd5Aceca30"
+      },
+      "cw20s": [
+        {
+          "decimals": 8,
+          "symbol": "INJbsc",
+          "source": "binance-smart-chain",
+          "address": "inj1xcgprh58szttp0vqtztvcfy34tkpupr563ua40"
+        },
+        {
+          "decimals": 8,
+          "symbol": "INJet",
+          "source": "ethereum-wormhole",
+          "address": "inj1v8gg4wzfauwf9l7895t0eyrrkwe65vh5n7dqmw"
+        }
+      ],
+      "tokenVerification": "verified",
+      "cw20": {
+        "decimals": 8,
+        "symbol": "INJbsc",
+        "source": "binance-smart-chain",
+        "address": "inj1xcgprh58szttp0vqtztvcfy34tkpupr563ua40"
+      }
+    },
+    "astroportLink": "https://app.astroport.fi/swap?from=inj1ncjqkvnxpyyhvm475std34eyn5c7eydpxxagds&to=inj",
+    "coinhallLink": "https://coinhall.org/injective/inj1me4awmkhlc76tycgd2yqrj7rnzwdfqa2yuj4qk?trader=inj1sy2aad37tku3dz0353epczxd95hvuhzl0lhfqh",
+    "dexscreenerLink": "https://dexscreener.com/injective/inj1me4awmkhlc76tycgd2yqrj7rnzwdfqa2yuj4qk?maker=inj1sy2aad37tku3dz0353epczxd95hvuhzl0lhfqh",
+    "dojoSwapLink": "https://dojo.trading/swap?type=swap&from=inj1ncjqkvnxpyyhvm475std34eyn5c7eydpxxagds&to=inj",
+    "factory": "inj1pc2vxcmnyzawnwkf03n2ggvt997avtuwagqngk",
+    "asset_infos": [
+      {
+        "token": {
+          "contract_addr": "inj1ncjqkvnxpyyhvm475std34eyn5c7eydpxxagds"
+        }
+      },
+      {
+        "native_token": {
+          "denom": "inj"
+        }
+      }
+    ],
+    "contract_addr": "inj1me4awmkhlc76tycgd2yqrj7rnzwdfqa2yuj4qk",
+    "liquidity_token": "inj1r7c3euea3jehd6c9qad2nakq3qdh3qdd6nk8vf",
+    "asset_decimals": [
+      18,
+      18
+    ],
+    "liquidity": 5.4514376000000006e-17,
+    "liquidityUpdate": "2024-04-19T00:46:28.303Z"
+  },
+  {
+    "token0Meta": {
+      "denom": "inj1zyg7gvzzsc0q39vhv5je50r2jcfv2ru506pd7w",
+      "name": "Experimental Economy",
+      "symbol": "ELE",
+      "decimals": 6,
+      "tokenType": "cw20",
+      "total_supply": "21000000000000"
+    },
+    "token1Meta": {
+      "denom": "inj",
+      "name": "Injective",
+      "symbol": "INJ",
+      "decimals": 18,
+      "tokenType": "native",
+      "logo": "injective-v3.png",
+      "coinGeckoId": "injective-protocol",
+      "erc20": {
+        "symbol": "INJ",
+        "decimals": 18,
+        "address": "0xe28b3B32B6c345A34Ff64674606124Dd5Aceca30"
+      },
+      "cw20s": [
+        {
+          "decimals": 8,
+          "symbol": "INJbsc",
+          "source": "binance-smart-chain",
+          "address": "inj1xcgprh58szttp0vqtztvcfy34tkpupr563ua40"
+        },
+        {
+          "decimals": 8,
+          "symbol": "INJet",
+          "source": "ethereum-wormhole",
+          "address": "inj1v8gg4wzfauwf9l7895t0eyrrkwe65vh5n7dqmw"
+        }
+      ],
+      "tokenVerification": "verified",
+      "cw20": {
+        "decimals": 8,
+        "symbol": "INJbsc",
+        "source": "binance-smart-chain",
+        "address": "inj1xcgprh58szttp0vqtztvcfy34tkpupr563ua40"
+      }
+    },
+    "astroportLink": "https://app.astroport.fi/swap?from=inj1zyg7gvzzsc0q39vhv5je50r2jcfv2ru506pd7w&to=inj",
+    "coinhallLink": "https://coinhall.org/injective/inj1jrg0whnd5t5sjtkkey65009u7lp4pvaptl5ypv?trader=inj1sy2aad37tku3dz0353epczxd95hvuhzl0lhfqh",
+    "dexscreenerLink": "https://dexscreener.com/injective/inj1jrg0whnd5t5sjtkkey65009u7lp4pvaptl5ypv?maker=inj1sy2aad37tku3dz0353epczxd95hvuhzl0lhfqh",
+    "dojoSwapLink": "https://dojo.trading/swap?type=swap&from=inj1zyg7gvzzsc0q39vhv5je50r2jcfv2ru506pd7w&to=inj",
+    "factory": "inj1pc2vxcmnyzawnwkf03n2ggvt997avtuwagqngk",
+    "asset_infos": [
+      {
+        "token": {
+          "contract_addr": "inj1zyg7gvzzsc0q39vhv5je50r2jcfv2ru506pd7w"
+        }
+      },
+      {
+        "native_token": {
+          "denom": "inj"
+        }
+      }
+    ],
+    "contract_addr": "inj1jrg0whnd5t5sjtkkey65009u7lp4pvaptl5ypv",
+    "liquidity_token": "inj1sfp5qg4x989n7ttyp4nua0f26zjr0q7h09u2a7",
+    "asset_decimals": [
+      6,
+      18
+    ],
+    "liquidity": 558.199798243527,
+    "liquidityUpdate": "2024-04-19T20:29:02.366Z"
+  },
+  {
+    "token0Meta": {
+      "denom": "inj12tkaz9e540zszf5vtlxc0aksywu9rejnwxmv3n",
+      "name": "BLACK PANTHER",
+      "symbol": "BLACK",
+      "decimals": 18,
+      "tokenType": "cw20",
+      "total_supply": "800000000000000000000000000"
+    },
+    "token1Meta": {
+      "denom": "inj",
+      "name": "Injective",
+      "symbol": "INJ",
+      "decimals": 18,
+      "tokenType": "native",
+      "logo": "injective-v3.png",
+      "coinGeckoId": "injective-protocol",
+      "erc20": {
+        "symbol": "INJ",
+        "decimals": 18,
+        "address": "0xe28b3B32B6c345A34Ff64674606124Dd5Aceca30"
+      },
+      "cw20s": [
+        {
+          "decimals": 8,
+          "symbol": "INJbsc",
+          "source": "binance-smart-chain",
+          "address": "inj1xcgprh58szttp0vqtztvcfy34tkpupr563ua40"
+        },
+        {
+          "decimals": 8,
+          "symbol": "INJet",
+          "source": "ethereum-wormhole",
+          "address": "inj1v8gg4wzfauwf9l7895t0eyrrkwe65vh5n7dqmw"
+        }
+      ],
+      "tokenVerification": "verified",
+      "cw20": {
+        "decimals": 8,
+        "symbol": "INJbsc",
+        "source": "binance-smart-chain",
+        "address": "inj1xcgprh58szttp0vqtztvcfy34tkpupr563ua40"
+      }
+    },
+    "astroportLink": "https://app.astroport.fi/swap?from=inj12tkaz9e540zszf5vtlxc0aksywu9rejnwxmv3n&to=inj",
+    "coinhallLink": "https://coinhall.org/injective/inj1dweq7ycauc9lt087smjqpxakrp90xrrxealjqm?trader=inj1sy2aad37tku3dz0353epczxd95hvuhzl0lhfqh",
+    "dexscreenerLink": "https://dexscreener.com/injective/inj1dweq7ycauc9lt087smjqpxakrp90xrrxealjqm?maker=inj1sy2aad37tku3dz0353epczxd95hvuhzl0lhfqh",
+    "dojoSwapLink": "https://dojo.trading/swap?type=swap&from=inj12tkaz9e540zszf5vtlxc0aksywu9rejnwxmv3n&to=inj",
+    "factory": "inj1pc2vxcmnyzawnwkf03n2ggvt997avtuwagqngk",
+    "asset_infos": [
+      {
+        "token": {
+          "contract_addr": "inj12tkaz9e540zszf5vtlxc0aksywu9rejnwxmv3n"
+        }
+      },
+      {
+        "native_token": {
+          "denom": "inj"
+        }
+      }
+    ],
+    "contract_addr": "inj1dweq7ycauc9lt087smjqpxakrp90xrrxealjqm",
+    "liquidity_token": "inj1y6jyghxpc44n4f5vpu9erhpm755w8ce3mhtnxv",
+    "asset_decimals": [
+      18,
+      18
+    ],
+    "liquidity": 1.108672236e-14,
+    "liquidityUpdate": "2024-04-19T15:53:02.111Z"
+  },
+  {
+    "token0Meta": {
+      "denom": "factory/inj1k0mzgwd4ujuu9w95xzs8p7qu8udy3atqj3sau7/MIB",
+      "name": "MIB",
+      "symbol": "MIB",
+      "decimals": 6,
+      "tokenType": "tokenFactory",
+      "display": "MIB",
+      "description": "Men in black",
+      "logo": "https://dd.dexscreener.com/ds-data/tokens/solana/2R17yTrumSnWN8NXxUgDprjDLyP4eHQkHmP92oeaG1v6.png?size=lg&key=b33bca",
+      "coinGeckoId": "",
+      "tokenVerification": "internal"
+    },
+    "token1Meta": {
+      "denom": "inj",
+      "name": "Injective",
+      "symbol": "INJ",
+      "decimals": 18,
+      "tokenType": "native",
+      "logo": "injective-v3.png",
+      "coinGeckoId": "injective-protocol",
+      "erc20": {
+        "symbol": "INJ",
+        "decimals": 18,
+        "address": "0xe28b3B32B6c345A34Ff64674606124Dd5Aceca30"
+      },
+      "cw20s": [
+        {
+          "decimals": 8,
+          "symbol": "INJbsc",
+          "source": "binance-smart-chain",
+          "address": "inj1xcgprh58szttp0vqtztvcfy34tkpupr563ua40"
+        },
+        {
+          "decimals": 8,
+          "symbol": "INJet",
+          "source": "ethereum-wormhole",
+          "address": "inj1v8gg4wzfauwf9l7895t0eyrrkwe65vh5n7dqmw"
+        }
+      ],
+      "tokenVerification": "verified",
+      "cw20": {
+        "decimals": 8,
+        "symbol": "INJbsc",
+        "source": "binance-smart-chain",
+        "address": "inj1xcgprh58szttp0vqtztvcfy34tkpupr563ua40"
+      }
+    },
+    "astroportLink": "https://app.astroport.fi/swap?from=factory/inj1k0mzgwd4ujuu9w95xzs8p7qu8udy3atqj3sau7/MIB&to=inj",
+    "coinhallLink": "https://coinhall.org/injective/inj15ng3t7spmrxtduurg2hpqwhcpx54zwldduym6x?trader=inj1sy2aad37tku3dz0353epczxd95hvuhzl0lhfqh",
+    "dexscreenerLink": "https://dexscreener.com/injective/inj15ng3t7spmrxtduurg2hpqwhcpx54zwldduym6x?maker=inj1sy2aad37tku3dz0353epczxd95hvuhzl0lhfqh",
+    "dojoSwapLink": "https://dojo.trading/swap?type=swap&from=factory/inj1k0mzgwd4ujuu9w95xzs8p7qu8udy3atqj3sau7/MIB&to=inj",
+    "factory": "inj19aenkaj6qhymmt746av8ck4r8euthq3zmxr2r6",
+    "asset_infos": [
+      {
+        "native_token": {
+          "denom": "factory/inj1k0mzgwd4ujuu9w95xzs8p7qu8udy3atqj3sau7/MIB"
+        }
+      },
+      {
+        "native_token": {
+          "denom": "inj"
+        }
+      }
+    ],
+    "contract_addr": "inj15ng3t7spmrxtduurg2hpqwhcpx54zwldduym6x",
+    "liquidity_token": "inj18sv5f2u6aa6kespr305wcyvnuha0xzv7aejnrk",
+    "pair_type": {
+      "xyk": {}
+    },
+    "liquidity": 4.8378836731859995e-12,
+    "liquidityUpdate": "2024-04-19T13:11:24.900Z"
+  },
+  {
+    "token0Meta": {
+      "denom": "inj",
+      "name": "Injective",
+      "symbol": "INJ",
+      "decimals": 18,
+      "tokenType": "native",
+      "logo": "injective-v3.png",
+      "coinGeckoId": "injective-protocol",
+      "erc20": {
+        "symbol": "INJ",
+        "decimals": 18,
+        "address": "0xe28b3B32B6c345A34Ff64674606124Dd5Aceca30"
+      },
+      "cw20s": [
+        {
+          "decimals": 8,
+          "symbol": "INJbsc",
+          "source": "binance-smart-chain",
+          "address": "inj1xcgprh58szttp0vqtztvcfy34tkpupr563ua40"
+        },
+        {
+          "decimals": 8,
+          "symbol": "INJet",
+          "source": "ethereum-wormhole",
+          "address": "inj1v8gg4wzfauwf9l7895t0eyrrkwe65vh5n7dqmw"
+        }
+      ],
+      "tokenVerification": "verified",
+      "cw20": {
+        "decimals": 8,
+        "symbol": "INJbsc",
+        "source": "binance-smart-chain",
+        "address": "inj1xcgprh58szttp0vqtztvcfy34tkpupr563ua40"
+      }
+    },
+    "token1Meta": {
+      "denom": "inj1gsm06ndeq620sp73lu26nz76rqfpy9qtg7xfdw",
+      "name": "DUBAIcoin",
+      "symbol": "DUBAIcoin",
+      "decimals": 6,
+      "tokenType": "cw20",
+      "total_supply": "1000000000000000"
+    },
+    "astroportLink": "https://app.astroport.fi/swap?from=inj&to=inj1gsm06ndeq620sp73lu26nz76rqfpy9qtg7xfdw",
+    "coinhallLink": "https://coinhall.org/injective/inj1430396dc55ndhvffgd8yrau63n343kjavc3tvx?trader=inj1sy2aad37tku3dz0353epczxd95hvuhzl0lhfqh",
+    "dexscreenerLink": "https://dexscreener.com/injective/inj1430396dc55ndhvffgd8yrau63n343kjavc3tvx?maker=inj1sy2aad37tku3dz0353epczxd95hvuhzl0lhfqh",
+    "dojoSwapLink": "https://dojo.trading/swap?type=swap&from=inj&to=inj1gsm06ndeq620sp73lu26nz76rqfpy9qtg7xfdw",
+    "factory": "inj1pc2vxcmnyzawnwkf03n2ggvt997avtuwagqngk",
+    "asset_infos": [
+      {
+        "native_token": {
+          "denom": "inj"
+        }
+      },
+      {
+        "token": {
+          "contract_addr": "inj1gsm06ndeq620sp73lu26nz76rqfpy9qtg7xfdw"
+        }
+      }
+    ],
+    "contract_addr": "inj1430396dc55ndhvffgd8yrau63n343kjavc3tvx",
+    "liquidity_token": "inj1zcgprgl542847ygzrnclyac5sxc2gry55ra33z",
+    "asset_decimals": [
+      18,
+      6
+    ],
+    "liquidity": 2.2364825946878402e-10,
+    "liquidityUpdate": "2024-04-19T16:05:33.158Z"
+  },
+  {
+    "token0Meta": {
+      "denom": "inj18epz5afrhu0zehdlj0mp8cfmv3vtusq6fd6ufw",
+      "name": "Lunc Candy  (Wormhole)",
+      "symbol": "LNC",
+      "decimals": 6,
+      "tokenType": "cw20",
+      "total_supply": "5000000000"
+    },
+    "token1Meta": {
+      "denom": "inj",
+      "name": "Injective",
+      "symbol": "INJ",
+      "decimals": 18,
+      "tokenType": "native",
+      "logo": "injective-v3.png",
+      "coinGeckoId": "injective-protocol",
+      "erc20": {
+        "symbol": "INJ",
+        "decimals": 18,
+        "address": "0xe28b3B32B6c345A34Ff64674606124Dd5Aceca30"
+      },
+      "cw20s": [
+        {
+          "decimals": 8,
+          "symbol": "INJbsc",
+          "source": "binance-smart-chain",
+          "address": "inj1xcgprh58szttp0vqtztvcfy34tkpupr563ua40"
+        },
+        {
+          "decimals": 8,
+          "symbol": "INJet",
+          "source": "ethereum-wormhole",
+          "address": "inj1v8gg4wzfauwf9l7895t0eyrrkwe65vh5n7dqmw"
+        }
+      ],
+      "tokenVerification": "verified",
+      "cw20": {
+        "decimals": 8,
+        "symbol": "INJbsc",
+        "source": "binance-smart-chain",
+        "address": "inj1xcgprh58szttp0vqtztvcfy34tkpupr563ua40"
+      }
+    },
+    "astroportLink": "https://app.astroport.fi/swap?from=inj18epz5afrhu0zehdlj0mp8cfmv3vtusq6fd6ufw&to=inj",
+    "coinhallLink": "https://coinhall.org/injective/inj19utus5xtfw328dhqsuh82p9tm9glj4995z89ec?trader=inj1sy2aad37tku3dz0353epczxd95hvuhzl0lhfqh",
+    "dexscreenerLink": "https://dexscreener.com/injective/inj19utus5xtfw328dhqsuh82p9tm9glj4995z89ec?maker=inj1sy2aad37tku3dz0353epczxd95hvuhzl0lhfqh",
+    "dojoSwapLink": "https://dojo.trading/swap?type=swap&from=inj18epz5afrhu0zehdlj0mp8cfmv3vtusq6fd6ufw&to=inj",
+    "factory": "inj1pc2vxcmnyzawnwkf03n2ggvt997avtuwagqngk",
+    "asset_infos": [
+      {
+        "token": {
+          "contract_addr": "inj18epz5afrhu0zehdlj0mp8cfmv3vtusq6fd6ufw"
+        }
+      },
+      {
+        "native_token": {
+          "denom": "inj"
+        }
+      }
+    ],
+    "contract_addr": "inj19utus5xtfw328dhqsuh82p9tm9glj4995z89ec",
+    "liquidity_token": "inj1qcu0tmn9ql9fdpffz8f3r04p8gugpvfz4u3k67",
+    "asset_decimals": [
+      6,
+      18
+    ],
+    "liquidity": 0.27971216000000004,
+    "liquidityUpdate": "2024-04-19T12:59:44.465Z"
+  },
+  {
+    "token0Meta": {
+      "denom": "factory/inj16eckaf75gcu9uxdglyvmh63k9t0l7chd0qmu85/black",
+      "name": "black",
+      "symbol": "black",
+      "decimals": 6,
+      "tokenType": "tokenFactory",
+      "display": "BLACK",
+      "description": "Black Panther Protocol Token",
+      "logo": "unknown.svg",
+      "coinGeckoId": "",
+      "tokenVerification": "internal"
+    },
+    "token1Meta": {
+      "denom": "inj",
+      "name": "Injective",
+      "symbol": "INJ",
+      "decimals": 18,
+      "tokenType": "native",
+      "logo": "injective-v3.png",
+      "coinGeckoId": "injective-protocol",
+      "erc20": {
+        "symbol": "INJ",
+        "decimals": 18,
+        "address": "0xe28b3B32B6c345A34Ff64674606124Dd5Aceca30"
+      },
+      "cw20s": [
+        {
+          "decimals": 8,
+          "symbol": "INJbsc",
+          "source": "binance-smart-chain",
+          "address": "inj1xcgprh58szttp0vqtztvcfy34tkpupr563ua40"
+        },
+        {
+          "decimals": 8,
+          "symbol": "INJet",
+          "source": "ethereum-wormhole",
+          "address": "inj1v8gg4wzfauwf9l7895t0eyrrkwe65vh5n7dqmw"
+        }
+      ],
+      "tokenVerification": "verified",
+      "cw20": {
+        "decimals": 8,
+        "symbol": "INJbsc",
+        "source": "binance-smart-chain",
+        "address": "inj1xcgprh58szttp0vqtztvcfy34tkpupr563ua40"
+      }
+    },
+    "astroportLink": "https://app.astroport.fi/swap?from=factory/inj16eckaf75gcu9uxdglyvmh63k9t0l7chd0qmu85/black&to=inj",
+    "coinhallLink": "https://coinhall.org/injective/inj1g7vyjm2fkhw0gnven40lvwucykm8ztg48feur0?trader=inj1sy2aad37tku3dz0353epczxd95hvuhzl0lhfqh",
+    "dexscreenerLink": "https://dexscreener.com/injective/inj1g7vyjm2fkhw0gnven40lvwucykm8ztg48feur0?maker=inj1sy2aad37tku3dz0353epczxd95hvuhzl0lhfqh",
+    "dojoSwapLink": "https://dojo.trading/swap?type=swap&from=factory/inj16eckaf75gcu9uxdglyvmh63k9t0l7chd0qmu85/black&to=inj",
+    "factory": "inj1pc2vxcmnyzawnwkf03n2ggvt997avtuwagqngk",
+    "asset_infos": [
+      {
+        "native_token": {
+          "denom": "factory/inj16eckaf75gcu9uxdglyvmh63k9t0l7chd0qmu85/black"
+        }
+      },
+      {
+        "native_token": {
+          "denom": "inj"
+        }
+      }
+    ],
+    "contract_addr": "inj1g7vyjm2fkhw0gnven40lvwucykm8ztg48feur0",
+    "liquidity_token": "inj1rurfcp9nev8gj5hrzlyq7r6wv068lhmus67zvu",
+    "asset_decimals": [
+      6,
+      18
+    ],
+    "liquidity": 746318.5782870313,
+    "liquidityUpdate": "2024-04-19T20:29:06.561Z"
   }
 ]
