@@ -1105,6 +1105,82 @@ class InjectiveTokenTools {
         }
     }
 
+    async getNFTCollectionInfo(collectionAddress) {
+        const infoQuery = Buffer.from(
+            JSON.stringify({
+                contract_info: {}
+            })
+        ).toString("base64");
+
+        const info = await this.chainGrpcWasmApi.fetchSmartContractState(collectionAddress, infoQuery);
+        const infoDecoded = JSON.parse(new TextDecoder().decode(info.data));
+        console.log(infoDecoded)
+    }
+
+    async getNFTHolders(collectionAddress) {
+        const marketPlace = "inj1l9nh9wv24fktjvclc4zgrgyzees7rwdtx45f54"
+        const numTokensQuery = Buffer.from(
+            JSON.stringify({
+                num_tokens: {}
+            })
+        ).toString("base64");
+
+        const numTokensInfo = await this.chainGrpcWasmApi.fetchSmartContractState(collectionAddress, numTokensQuery);
+        const numTokensDecoded = JSON.parse(new TextDecoder().decode(numTokensInfo.data));
+
+        console.log(numTokensDecoded);
+        const totalTokens = numTokensDecoded.count;
+
+        let startAfter = "";
+        let hasMore = true;
+        const holderMap = {};
+
+        while (hasMore) {
+            const allTokensQuery = Buffer.from(
+                JSON.stringify({
+                    all_tokens: {
+                        start_after: startAfter.length > 0 ? startAfter : null,
+                        limit: 30
+                    }
+                })
+            ).toString("base64");
+
+            const allTokensInfo = await this.chainGrpcWasmApi.fetchSmartContractState(collectionAddress, allTokensQuery);
+            const allTokensDecoded = JSON.parse(new TextDecoder().decode(allTokensInfo.data));
+            console.log(allTokensDecoded.tokens[0]);
+
+            if (allTokensDecoded && allTokensDecoded.tokens && allTokensDecoded.tokens.length > 0) {
+                allTokensDecoded.tokens.forEach(token => {
+                    const owner = token.owner;
+                    if (holderMap[owner]) {
+                        holderMap[owner].numberHeld++;
+                        holderMap[owner].metadataIds.push(token.metadata_uri);
+                    } else {
+                        holderMap[owner] = {
+                            numberHeld: 1,
+                            address: owner,
+                            metadataIds: [token.metadata_uri]
+                        };
+                    }
+                });
+
+                startAfter = allTokensDecoded.tokens[allTokensDecoded.tokens.length - 1].token_id;
+            } else {
+                hasMore = false;
+            }
+        }
+
+        Object.keys(holderMap).forEach(key => {
+            holderMap[key].percentHeld = Number((holderMap[key].numberHeld / totalTokens * 100).toFixed(4))
+        });
+
+        // Converting map to an array and sorting by numberHeld descending
+        const sortedHolders = Object.values(holderMap).sort((a, b) => b.numberHeld - a.numberHeld);
+
+        console.log(sortedHolders);
+        return sortedHolders; // Returning the sorted list of holders
+    }
+
 
 }
 

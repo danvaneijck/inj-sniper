@@ -1,1 +1,10 @@
-[]
+[
+  {
+    "pair_contract": "inj1tpt9u0lvz2njw6a7m8pufdamd6mt8ymh8cw4nc",
+    "balance": "211428571429",
+    "amount_in": 0,
+    "token_denom": "factory/inj10pz3xq7zf8xudqxaqealgyrnfk66u3c99ud5m2/SMELLY",
+    "profit": 0,
+    "is_moon_bag": true
+  }
+]

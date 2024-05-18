@@ -9,9 +9,9 @@ const main = async () => {
         const tools = new InjectiveTokenTools(MAIN_NET);
         await tools.init();
 
-        const privateKey = PrivateKey.fromMnemonic(process.env.MNEMONIC);
-        const publicKey = privateKey.toAddress();
-        const address = publicKey.toBech32()
+        const cheebee = "inj1047jye6gwds2xu7f9qzuwqfjduvjnqt3daf5cy"
+
+        await tools.getNFTCollectionInfo(cheebee)
 
 
     } catch (error) {

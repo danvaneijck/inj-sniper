@@ -23,6 +23,7 @@ const DojoSwap = require('./dojoswap');
 colors.enable();
 require('dotenv').config();
 const { DEFAULT_STD_FEE } = require("@injectivelabs/utils");
+const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
 
 class InjectiveSniper {
 
@@ -134,6 +135,7 @@ class InjectiveSniper {
                     `profit goal: ${(this.profitGoalPercent).toFixed(2)}%, stop loss: ${(this.stopLoss).toFixed(2)}%,` +
                     ` targeting pairs between $${this.lowLiquidityThreshold} and $${this.highLiquidityThreshold} in liquidity`
                 )
+                // await this.sendMessageToTelegram("bot online 💡")
                 this.discordClient.guilds.cache.forEach(guild => {
                     guild.commands.create(new SlashCommandBuilder()
                         .setName('get_positions')
@@ -475,6 +477,27 @@ class InjectiveSniper {
         }
     }
 
+    async sendMessageToTelegram(message) {
+        const token = process.env.TG_BOT_TOKEN
+        const chatId = process.env.TG_CHAT_ID
+        const url = `https://api.telegram.org/bot${token}/sendMessage`;
+        console.log(url)
+
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                chat_id: chatId,
+                text: message,
+            }),
+        });
+
+        const data = await response.json();
+        console.log(data);
+    }
+
     async updateBaseAssetPrice() {
         let baseAssetPair = await this.getPairInfo(this.dojoSwapPricePair)
 
@@ -547,7 +570,7 @@ class InjectiveSniper {
             return factoryDecoded
         }
         catch (e) {
-            console.log(`Error checking factory for pair: ${assetInfos} ${e}`.red)
+            console.log(`Error checking factory for pair: ${JSON.stringify(assetInfos, null, 2)} ${e}`.red)
         }
         return null
     }
@@ -594,11 +617,11 @@ class InjectiveSniper {
                         || denom.includes("ibc")
                     ) {
                         tokenInfo = await this.getDenomMetadata(denom)
-                        if (denom.includes("factory")) {
-                            let name = denom.split("/")[2]
-                            tokenInfo['name'] = name
-                            tokenInfo['symbol'] = name
-                        }
+                        // if (denom.includes("factory")) {
+                        //     let name = denom.split("/")[2]
+                        //     tokenInfo['name'] = name
+                        //     tokenInfo['symbol'] = name
+                        // }
 
                     }
                     else {
@@ -1444,10 +1467,17 @@ class InjectiveSniper {
         }
         const pairName = `${pair.token0Meta.symbol}, ${pair.token1Meta.symbol}`;
 
+        const memeTokenMeta = pair.token0Meta.denom === this.baseDenom
+            ? pair.token1Meta
+            : pair.token0Meta;
+
         const startTime = new Date().getTime();
         const contractAddress = pairContract;
         let limit = 100;
         let skip = 0;
+
+        const trippyHoldersLink = `https://trippyinj.xyz/token-holders?address=${memeTokenMeta.denom}`
+        const trippyLiquidityLink = `https://trippyinj.xyz/token-liquidity?address=${pairContract}`
 
         let allTransactions = [];
         let transactions = await this.indexerRestExplorerApi.fetchContractTransactions({
@@ -1527,6 +1557,7 @@ class InjectiveSniper {
                             const txTime = moment(txInfo['blockTimestamp'], 'YYYY-MM-DD HH:mm:ss.SSS Z');
                             console.log(`${pairName} liquidity added: $${liquidity} ${txTime.fromNow()}`);
 
+
                             if (txTime < moment().subtract(15, 'minute')) {
                                 console.log(`liq added over time limit: ${txTime.fromNow()}`)
                                 this.stopMonitorPairForLiq(pairContract);
@@ -1541,9 +1572,20 @@ class InjectiveSniper {
                                 console.log("small amount of liquidity added")
                                 this.sendMessageToDiscord(`:eyes: ${pairName} - Small liquidity Added: $${liquidity}\n` +
                                     `<t:${txTime.unix()}:R>\n` +
-                                    `add liq tx: https://explorer.injective.network/transaction/${txHash}` +
-                                    `\n<@352761566401265664>`)
-                                await this.monitorPairForPriceChange(pair, 5, 5, 5)
+                                    `add liq tx: https://explorer.injective.network/transaction/${txHash}\n` +
+                                    `view holders: ${trippyHoldersLink}\n` +
+                                    `view liquidity holders: ${trippyLiquidityLink}\n` +
+                                    `<@352761566401265664>`)
+
+                                // await this.monitorPairForPriceChange(pair, 5, 5, 5)
+
+                                this.sendMessageToTelegram(
+                                    `👀 ${pairName} - Liquidity Added from tx: $${liquidity}\n` +
+                                    `${txTime.format()}\n` +
+                                    `add liq tx: https://explorer.injective.network/transaction/${txHash}\n` +
+                                    `view holders: ${trippyHoldersLink}\n` +
+                                    `view liquidity holders: ${trippyLiquidityLink}`
+                                )
                                 return;
                             }
 
@@ -1555,15 +1597,24 @@ class InjectiveSniper {
                                 this.stopMonitorPairForLiq(pairContract);
                                 this.sendMessageToDiscord(`:eyes: ${pairName} - Liquidity Added from tx: $${liquidity}\n` +
                                     `<t:${txTime.unix()}:R>\n` +
-                                    `add liq tx: https://explorer.injective.network/transaction/${txHash}` +
-                                    `\n<@352761566401265664>`)
+                                    `add liq tx: https://explorer.injective.network/transaction/${txHash}\n` +
+                                    `view holders: ${trippyHoldersLink}\n` +
+                                    `view liquidity holders: ${trippyLiquidityLink}\n` +
+                                    `<@352761566401265664>`)
 
+                                this.sendMessageToTelegram(
+                                    `👀 ${pairName} - Liquidity Added from tx: $${liquidity}\n` +
+                                    `${txTime.format()}\n` +
+                                    `add liq tx: https://explorer.injective.network/transaction/${txHash}\n` +
+                                    `view holders: ${trippyHoldersLink}\n` +
+                                    `view liquidity holders: ${trippyLiquidityLink}`
+                                )
 
                                 if (this.live) {
                                     await this.buyMemeToken(pair, this.snipeAmount);
                                 }
                                 else {
-                                    this.monitorPairForPriceChange(pair, 10, 10, 5)
+                                    // this.monitorPairForPriceChange(pair, 10, 10, 10)
                                 }
 
                                 return;
@@ -1593,6 +1644,13 @@ class InjectiveSniper {
 
         console.log(JSON.stringify(pairInfo, null, 2))
 
+        const memeTokenMeta = pairInfo.token0Meta.denom === this.baseDenom
+            ? pairInfo.token1Meta
+            : pairInfo.token0Meta;
+
+        const trippyHoldersLink = `https://trippyinj.xyz/token-holders?address=${memeTokenMeta.denom}`
+        const trippyLiquidityLink = `https://trippyinj.xyz/token-liquidity?address=${pair.address}`
+
         if (
             pairInfo &&
             pairInfo.token0Meta &&
@@ -1608,8 +1666,18 @@ class InjectiveSniper {
                 `<t:${txTime.unix()}:R>\n` +
                 `${dex == "DojoSwap" ? pairInfo.dojoSwapLink : pairInfo.astroportLink}\n` +
                 `${pairInfo.coinhallLink}\n` +
-                `create pair tx: https://explorer.injective.network/transaction/${pair.txHash}\n<@352761566401265664>`;
+                `create pair tx: https://explorer.injective.network/transaction/${pair.txHash}\n` +
+                `view holders: ${trippyHoldersLink}` +
+                `<@352761566401265664>`;
 
+            await this.sendMessageToTelegram(
+                `🆕 New pair found on ${dex}: ${pairInfo.token0Meta.symbol}, ` +
+                `${pairInfo.token1Meta.symbol}: \n` +
+                `${txTime.format()}\n` +
+                `create pair tx: https://explorer.injective.network/transaction/${pair.txHash}\n` +
+                `view holders: ${trippyHoldersLink}\n` +
+                `view liquidity holders: ${trippyLiquidityLink}`
+            )
 
             if (txTime > moment().subtract(1, 'minute')) this.sendMessageToDiscord(message);
 
@@ -1626,9 +1694,28 @@ class InjectiveSniper {
                 this.startMonitorPairForLiq(pair.address);
             }
 
-        } else {
+        }
+        else {
+            const message = `:new: New pair found on ${dex}: ${pairInfo.token0Meta.symbol}, ` +
+                `${pairInfo.token1Meta.symbol}: \n` +
+                `<t:${txTime.unix()}:R>\n` +
+                `${dex == "DojoSwap" ? pairInfo.dojoSwapLink : pairInfo.astroportLink}\n` +
+                `${pairInfo.coinhallLink}\n` +
+                `create pair tx: https://explorer.injective.network/transaction/${pair.txHash}\n` +
+                `<@352761566401265664>`;
+
             console.log(`Ignored pair ${pair.address}, ${JSON.stringify(pairInfo, null, 2)}`);
-            this.sendMessageToDiscord(`Ignored new pair on ${dex} https://dexscreener.com/injective/${pair.address}`);
+
+            this.sendMessageToDiscord(message);
+
+            await this.sendMessageToTelegram(
+                `🆕 New pair found on ${dex}: ${pairInfo.token0Meta.symbol}, ` +
+                `${pairInfo.token1Meta.symbol}: \n` +
+                `${txTime.format()}\n` +
+                `create pair tx: https://explorer.injective.network/transaction/${pair.txHash}\n` +
+                `view holders: ${trippyHoldersLink}\n` +
+                `view liquidity holders: ${trippyLiquidityLink}`
+            )
 
             this.ignoredPairs.add(pair.address);
         }
