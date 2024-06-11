@@ -6,5 +6,13 @@
     "token_denom": "factory/inj10pz3xq7zf8xudqxaqealgyrnfk66u3c99ud5m2/SMELLY",
     "profit": 0,
     "is_moon_bag": true
+  },
+  {
+    "pair_contract": "inj1gyzvcy2u3euq2wzl9hr0pn54xme8dh50l4wq3f",
+    "balance": "2997000",
+    "amount_in": 0,
+    "token_denom": "factory/inj163072g64wsn8a9n2mydwlx7c0aqt4l7pjseeuu/PORTAL",
+    "profit": 0,
+    "is_moon_bag": true
   }
 ]

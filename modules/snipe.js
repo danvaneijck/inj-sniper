@@ -128,13 +128,13 @@ class InjectiveSniper {
 
             this.discordClient.on('ready', async () => {
                 console.log(`Logged in as ${this.discordClient.user.tag}!`.gray);
-                await this.sendMessageToDiscord(
-                    `:arrows_clockwise: Start up INJ Sniper on RPC: ${this.RPC}\n` +
-                    `:chart_with_upwards_trend: Trading mode: ${this.live ? ':exclamation: LIVE :exclamation:' : 'TEST'}\n` +
-                    `:gun: Snipe amount: ${this.snipeAmount} ${this.baseAssetName} ($${((this.baseAssetPrice / Math.pow(10, this.stableAsset.decimals)) * this.snipeAmount).toFixed(2)}), ` +
-                    `profit goal: ${(this.profitGoalPercent).toFixed(2)}%, stop loss: ${(this.stopLoss).toFixed(2)}%,` +
-                    ` targeting pairs between $${this.lowLiquidityThreshold} and $${this.highLiquidityThreshold} in liquidity`
-                )
+                // await this.sendMessageToDiscord(
+                //     `:arrows_clockwise: Start up INJ Sniper on RPC: ${this.RPC}\n` +
+                //     `:chart_with_upwards_trend: Trading mode: ${this.live ? ':exclamation: LIVE :exclamation:' : 'TEST'}\n` +
+                //     `:gun: Snipe amount: ${this.snipeAmount} ${this.baseAssetName} ($${((this.baseAssetPrice / Math.pow(10, this.stableAsset.decimals)) * this.snipeAmount).toFixed(2)}), ` +
+                //     `profit goal: ${(this.profitGoalPercent).toFixed(2)}%, stop loss: ${(this.stopLoss).toFixed(2)}%,` +
+                //     ` targeting pairs between $${this.lowLiquidityThreshold} and $${this.highLiquidityThreshold} in liquidity`
+                // )
                 // await this.sendMessageToTelegram("bot online 💡")
                 this.discordClient.guilds.cache.forEach(guild => {
                     guild.commands.create(new SlashCommandBuilder()
@@ -606,10 +606,8 @@ class InjectiveSniper {
                         ? assetInfo['native_token']['denom']
                         : assetInfo['token']['contract_addr'];
 
-                    let tokenInfo = undefined
-                    // if (denom.includes("ibc")) {
-                    //     continue
-                    // }
+                    let tokenInfo = {}
+
                     if (
                         denom === this.baseDenom
                         || denom.includes("factory")
@@ -617,11 +615,11 @@ class InjectiveSniper {
                         || denom.includes("ibc")
                     ) {
                         tokenInfo = await this.getDenomMetadata(denom)
-                        // if (denom.includes("factory")) {
-                        //     let name = denom.split("/")[2]
-                        //     tokenInfo['name'] = name
-                        //     tokenInfo['symbol'] = name
-                        // }
+                        if (denom.includes("factory") && !tokenInfo['name']) {
+                            let name = denom.split("/")[2]
+                            tokenInfo['name'] = name
+                            tokenInfo['symbol'] = name
+                        }
 
                     }
                     else {
@@ -730,8 +728,6 @@ class InjectiveSniper {
             const poolQuery = Buffer.from(JSON.stringify({ pool: {} })).toString('base64');
             let poolInfo = await this.chainGrpcWasmApi.fetchSmartContractState(pair.contract_addr, poolQuery)
             let poolDecoded = JSON.parse(new TextDecoder().decode(poolInfo.data))
-
-            // console.log(`pool decoded ${JSON.stringify(poolDecoded, null, 2)}`)
 
             const baseAssetAmount = poolDecoded.assets.find(asset => {
                 if (asset.info.native_token) {
