@@ -1,5 +1,5 @@
-const InjectiveTokenTools = require("./modules/utils");
-const { MAIN_NET, TEST_NET } = require("./constants");
+const InjectiveTokenTools = require("../modules/utils");
+const { MAIN_NET, TEST_NET } = require("../constants");
 const { PrivateKey } = require("@injectivelabs/sdk-ts");
 
 const main = async () => {

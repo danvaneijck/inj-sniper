@@ -11,7 +11,7 @@ const { BigNumberInBase, DEFAULT_STD_FEE, DEFAULT_BLOCK_TIMEOUT_HEIGHT } = requi
 
 const GAS = {
     ...DEFAULT_STD_FEE,
-    gas: '300000'
+    gas: '600000'
 }
 
 class TransactionManager {

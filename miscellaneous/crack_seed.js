@@ -1,20 +1,20 @@
 const { PrivateKey } = require('@injectivelabs/sdk-ts');
 
-const targetPublicKey = "inj1885v7fawkappcsk9gqdeqpwmcme46zdfvy8rkx";
+const targetPublicKey = "inj1scjke0zm6920v9eewkzryak3jedk5j9yp6lfm0";
 
 const possibleWords = [
-    ["ordinary"],
-    ["order", "sight", "place", "stock", "focus", "place", "space", "range"],
-    ["elder"],
-    ["effort", "talent", "wisdom", "energy", "action", "spirit", "choice"],
-    ["matrix"],
-    ["sting", "swarm"],
-    ["weasel"],
-    ["album", "track", "music"],
-    ["receive", "acquire", "approve", "welcome", "embrace", "consent"],
-    ["stomach"],
-    ["social"],
-    ["dress", "smart", "quick", "crisp", "keen", "clever", "razor", "extra", "super", "knife"]
+    ["log", "leg", "lug", "lag"],
+    ["bachelor"],
+    ["vessel"],
+    ["help", "save", "bail", "seek", "call", "warn", "plea", "yell"],
+    ["point", "track", "queue"],
+    ["crane", "hoist"],
+    ["unique", "select", "exotic", "single", "custom"],
+    ["plan", "ring", "gyro", "east", "west", "axis", "dial", "gear"],
+    ["catch", "throw", "shoot", "carry", "serve"],
+    ["census", "concur", "consul"],
+    ["cat", "dog", "rat", "bat", "pug"],
+    ["race"]
 ];
 
 function* product(...args) {
@@ -37,9 +37,9 @@ function* product(...args) {
 
             const privateKeyFromMnemonic = PrivateKey.fromMnemonic(mnemonic);
             const address = privateKeyFromMnemonic.toAddress().toBech32();
-            // console.log(address)
+            console.log(address)
             if (address.toString() === targetPublicKey) {
-                console.log(`Matching mnemonic found: ${mnemonic}`);
+                console.log(`Matching mnemonic found: ${mnemonic} ${address}`);
                 break;
             }
         }

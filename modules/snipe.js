@@ -1000,7 +1000,8 @@ class InjectiveSniper {
 
         const GAS = {
             ...DEFAULT_STD_FEE,
-            gas: "700000",
+            amount: [{ amount: '200000000000000', denom: 'inj' }],
+            gas: "600000",
         };
 
         for (let attempt = 1; attempt <= retries; attempt++) {
@@ -1009,10 +1010,13 @@ class InjectiveSniper {
                 if (result) {
                     console.log("Swap executed successfully:", result.txHash);
 
-                    const returnAmount = this.parseReturnAmountFromEvents(result.rawLog);
+                    console.log(result)
+
+                    const returnAmount = this.parseReturnAmountFromEvents(result.events);
+
                     if (returnAmount !== undefined) {
                         this.handleSuccessfulSwap(pair, returnAmount, adjustedAmount, memeTokenMeta, result.txHash);
-                        await this.monitorPairToSell(pair, 10);
+                        // await this.monitorPairToSell(pair, 10);
                     } else {
                         console.error("Return amount not found in events.");
                     }
@@ -1029,20 +1033,27 @@ class InjectiveSniper {
         this.sendMessageToDiscord(`Failed to execute swap after ${retries} attempts.`)
     }
 
-    parseReturnAmountFromEvents(rawLog) {
-        const events = JSON.parse(rawLog)[0]?.events;
+    parseReturnAmountFromEvents(events) {
         if (!events) return undefined;
         const wasmEvents = events.filter((event) => event.type === "wasm");
         if (wasmEvents.length < 1) return undefined;
-        for (const i in wasmEvents) {
-            let wasmEvent = wasmEvents[i]
-            const returnAmountAttribute = wasmEvent.attributes.find((attr) => attr.key === "return_amount");
+
+        for (const wasmEvent of wasmEvents) {
+            console.log(wasmEvent);
+            const returnAmountAttribute = wasmEvent.attributes.find((attr) => {
+                const key = new TextDecoder().decode(attr.key);
+                return key === "return_amount";
+            });
+
             if (returnAmountAttribute) {
-                return returnAmountAttribute.value
+                const value = new TextDecoder().decode(returnAmountAttribute.value);
+                return value;
             }
         }
-        return undefined
+
+        return undefined;
     }
+
 
     handleSuccessfulSwap(pair, returnAmount, adjustedAmount, memeTokenMeta, txHash) {
         const balance = this.positions.get(pair.contract_addr)?.balance || 0;
@@ -1123,6 +1134,12 @@ class InjectiveSniper {
 
         let spread = this.maxSpread
 
+        const GAS = {
+            ...DEFAULT_STD_FEE,
+            amount: [{ amount: '200000000000000', denom: 'inj' }],
+            gas: "600000",
+        };
+
         let retryCount = 0;
         while (retryCount < maxRetries) {
 
@@ -1130,7 +1147,7 @@ class InjectiveSniper {
                 swap: {
                     offer_asset: {
                         info: memeAssetInfo,
-                        amount: amount.toString(),
+                        amount: amount.toLocaleString('fullwide', { useGrouping: false })
                     },
                     max_spread: spread.toString(),
                 },
@@ -1142,7 +1159,7 @@ class InjectiveSniper {
                 msg: swapOperations,
                 funds: {
                     denom: memeTokenMeta.denom,
-                    amount: amount.toString(),
+                    amount: amount.toLocaleString('fullwide', { useGrouping: false })
                 },
             });
 
@@ -1150,7 +1167,7 @@ class InjectiveSniper {
                 swapOperations = {
                     send: {
                         contract: pair.contract_addr,
-                        amount: amount.toString(),
+                        amount: amount.toLocaleString('fullwide', { useGrouping: false }),
                         msg: Buffer.from(JSON.stringify({ swap: {} })).toString('base64')
                     },
                 };
@@ -1162,7 +1179,7 @@ class InjectiveSniper {
             }
 
             try {
-                let result = await this.txManager.enqueue(msg);
+                let result = await this.txManager.enqueue(msg, GAS);
 
                 if (!result) {
                     console.log("Sell failed");
@@ -1184,7 +1201,7 @@ class InjectiveSniper {
                     console.log("Swap executed successfully:", result.txHash);
 
                     let profit = 0
-                    const returnAmount = this.parseReturnAmountFromEvents(result.rawLog);
+                    const returnAmount = this.parseReturnAmountFromEvents(result.events);
                     if (returnAmount !== undefined) {
                         profit = returnAmount - position.amount_in
                     } else {
@@ -1666,7 +1683,7 @@ class InjectiveSniper {
                 `view holders: ${trippyHoldersLink}` +
                 `<@352761566401265664>`;
 
-            await this.sendMessageToTelegram(
+            if (txTime > moment().subtract(10, 'minute')) await this.sendMessageToTelegram(
                 `🆕 New pair found on ${dex}: ${pairInfo.token0Meta.symbol}, ` +
                 `${pairInfo.token1Meta.symbol}: \n` +
                 `${txTime.format()}\n` +
@@ -1675,7 +1692,7 @@ class InjectiveSniper {
                 `view liquidity holders: ${trippyLiquidityLink}`
             )
 
-            if (txTime > moment().subtract(1, 'minute')) this.sendMessageToDiscord(message);
+            if (txTime > moment().subtract(10, 'minute')) this.sendMessageToDiscord(message);
 
             await this.calculateLiquidity(pairInfo);
             console.log(`${pair.address} liquidity: ${pairInfo.liquidity}`)
@@ -1702,9 +1719,9 @@ class InjectiveSniper {
 
             console.log(`Ignored pair ${pair.address}, ${JSON.stringify(pairInfo, null, 2)}`);
 
-            this.sendMessageToDiscord(message);
+            if (txTime > moment().subtract(10, 'minute')) this.sendMessageToDiscord(message);
 
-            await this.sendMessageToTelegram(
+            if (txTime > moment().subtract(10, 'minute')) await this.sendMessageToTelegram(
                 `🆕 New pair found on ${dex}: ${pairInfo.token0Meta.symbol}, ` +
                 `${pairInfo.token1Meta.symbol}: \n` +
                 `${txTime.format()}\n` +
