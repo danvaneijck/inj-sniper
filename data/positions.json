@@ -15,5 +15,14 @@
     "token_denom": "factory/inj1sy2aad37tku3dz0353epczxd95hvuhzl0lhfqh/FUN",
     "profit": 0,
     "is_moon_bag": true
+  },
+  {
+    "pair_contract": "inj1f9gnm2sf2s0rtvuk4ngr3uae9hrqe8k97n6m6y",
+    "balance": 504935643562,
+    "amount_in": 100000000000000,
+    "token_denom": "factory/inj1sy2aad37tku3dz0353epczxd95hvuhzl0lhfqh/FUNNY",
+    "time_bought": "2024-10-16T10:32:59.888Z",
+    "profit": 0,
+    "is_moon_bag": false
   }
 ]

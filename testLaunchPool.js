@@ -8,7 +8,7 @@ const main = async () => {
     const dojoFactory = "inj1pc2vxcmnyzawnwkf03n2ggvt997avtuwagqngk"
     const privateKey = PrivateKey.fromMnemonic(process.env.SNIPER_MNEMONIC);
     const sourceAddress = privateKey.toAddress().toBech32();
-    const denom = "factory/inj1sy2aad37tku3dz0353epczxd95hvuhzl0lhfqh/FUN"
+    const denom = "factory/inj1sy2aad37tku3dz0353epczxd95hvuhzl0lhfqh/FUNNY"
 
     try {
         // const msg = MsgExecuteContract.fromJSON({
@@ -40,7 +40,7 @@ const main = async () => {
 
         const msg = MsgExecuteContractCompat.fromJSON({
             sender: sourceAddress,
-            contractAddress: "inj19ky6vfk6l2v59p3eycp7jlw4q8l2d3addqutjt",
+            contractAddress: "inj1f9gnm2sf2s0rtvuk4ngr3uae9hrqe8k97n6m6y",
             msg: {
                 provide_liquidity: {
                     assets: [
