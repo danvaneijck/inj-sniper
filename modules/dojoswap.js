@@ -23,7 +23,7 @@ class DojoSwap {
     }
 
     async checkForNewPairs(allPairs, ignoredPairs) {
-        const startTime = new Date().getTime();
+        const startTime = Date.now();
 
         const contractAddress = this.dojoFactory;
         const limit = 10;
@@ -31,57 +31,45 @@ class DojoSwap {
 
         const transactions = await this.indexerRestExplorerApi.fetchContractTransactions({
             contractAddress,
-            params: {
-                limit,
-                skip,
-            },
+            params: { limit, skip },
         });
 
-        const newPairs = []
+        const newPairs = [];
 
         await Promise.all(
             transactions.transactions.map(async (tx) => {
                 const txHash = tx.txHash;
-                let txInfo = await this.getTxByHash(txHash);
-                if (!txInfo) {
-                    console.log(`failed to get txInfo`)
-                    return
+                const txInfo = await this.getTxByHash(txHash);
+                if (!txInfo || txInfo.errorLog.length > 0) {
+                    return;
                 }
-                if (txInfo['errorLog'].length > 0) {
-                    return
+                for (const { message: msg } of txInfo.messages) {
+                    let message;
+                    try {
+                        message = typeof msg.msg === 'string' ? JSON.parse(msg.msg) : msg.msg;
+                    } catch (error) {
+                        message = msg.msg;
+                    }
+                    if (message && typeof message === 'object' && message.create_pair) {
+                        const events = txInfo.logs[0].events;
+                        const pairAddress = events[events.length - 1].attributes.find(attr => attr.key === "pair_contract_addr").value;
+                        if (!allPairs.has(pairAddress) && !ignoredPairs.has(pairAddress)) {
+                            newPairs.push({
+                                address: pairAddress,
+                                tx: txInfo,
+                                txHash,
+                                factory: this.dojoFactory,
+                            });
+                        }
+                    }
                 }
-                await Promise.all(
-                    txInfo.messages.map(async (msg) => {
-                        let message;
-                        try {
-                            message = JSON.parse(msg.message.msg);
-                        } catch (error) {
-                            message = msg.message.msg;
-                        }
-                        if (typeof message === 'object') {
-                            const firstKey = Object.keys(message)[0];
-                            if (firstKey == "create_pair") {
-                                const pairAddress = txInfo.logs[0].events[txInfo.logs[0].events.length - 1].attributes.find((attr) => attr.key === "pair_contract_addr").value;
-                                if (!allPairs.has(pairAddress) && !ignoredPairs.has(pairAddress)) {
-                                    newPairs.push({
-                                        "address": pairAddress,
-                                        "tx": txInfo,
-                                        "txHash": txHash,
-                                        "factory": this.dojoFactory
-                                    })
-                                }
-                            }
-                        }
-                    })
-                );
             })
         );
 
-        const endTime = new Date().getTime();
-        const executionTime = endTime - startTime;
-        console.log(`Finished check for new pairs on DojoSwap in ${executionTime} milliseconds`.gray);
+        const executionTime = Date.now() - startTime;
+        console.log(`Finished checking for new pairs on DojoSwap in ${executionTime} milliseconds`.gray);
 
-        return newPairs
+        return newPairs;
     }
 
     async getQuoteFromRouter(pair, amount) {

@@ -3,106 +3,16 @@
     "token0Meta": {
       "denom": "inj",
       "name": "Injective",
-      "symbol": "INJ",
+      "symbol": "inj",
       "decimals": 18,
-      "tokenType": "native",
-      "logo": "injective-v3.png",
-      "coinGeckoId": "injective-protocol",
-      "erc20": {
-        "symbol": "INJ",
-        "decimals": 18,
-        "address": "0xe28b3B32B6c345A34Ff64674606124Dd5Aceca30"
-      },
-      "cw20s": [
-        {
-          "decimals": 8,
-          "symbol": "INJbsc",
-          "source": "binance-smart-chain",
-          "address": "inj1xcgprh58szttp0vqtztvcfy34tkpupr563ua40"
-        },
-        {
-          "decimals": 8,
-          "symbol": "INJet",
-          "source": "ethereum-wormhole",
-          "address": "inj1v8gg4wzfauwf9l7895t0eyrrkwe65vh5n7dqmw"
-        }
-      ],
-      "tokenVerification": "verified",
-      "cw20": {
-        "decimals": 8,
-        "symbol": "INJbsc",
-        "source": "binance-smart-chain",
-        "address": "inj1xcgprh58szttp0vqtztvcfy34tkpupr563ua40"
-      }
+      "tokenType": "native"
     },
     "token1Meta": {
       "denom": "peggy0xdAC17F958D2ee523a2206206994597C13D831ec7",
-      "name": "Tether",
-      "symbol": "USDT",
+      "name": "n/a",
+      "symbol": "n/a",
       "decimals": 6,
-      "tokenType": "erc20",
-      "logo": "usdt.png",
-      "coinGeckoId": "tether",
-      "erc20": {
-        "symbol": "USDT",
-        "decimals": 6,
-        "address": "0xdAC17F958D2ee523a2206206994597C13D831ec7"
-      },
-      "ibcs": [
-        {
-          "decimals": 6,
-          "symbol": "USDTkv",
-          "isNative": true,
-          "baseDenom": "erc20/tether/usdt",
-          "path": "transfer/channel-143",
-          "channelId": "channel-143",
-          "hash": "4ABBEF4C8926DDDB320AE5188CFD63267ABBCEFC0583E4AE05D6E5AA2401DDAB",
-          "source": "cosmos"
-        }
-      ],
-      "cw20s": [
-        {
-          "decimals": 6,
-          "symbol": "USDTbsc",
-          "source": "binance-smart-chain",
-          "address": "inj1l9eyrnv3ret8da3qh8j5aytp6q4f73crd505lj"
-        },
-        {
-          "decimals": 6,
-          "symbol": "USDTet",
-          "source": "ethereum-wormhole",
-          "address": "inj18zykysxw9pcvtyr9ylhe0p5s7yzf6pzdagune8"
-        },
-        {
-          "decimals": 6,
-          "symbol": "USDTap",
-          "source": "aptos",
-          "address": "inj13yrhllhe40sd3nj0lde9azlwfkyrf2t9r78dx5"
-        },
-        {
-          "decimals": 6,
-          "symbol": "USDTso",
-          "source": "solana",
-          "address": "inj1qjn06jt7zjhdqxgud07nylkpgnaurq6xc5c4fd"
-        }
-      ],
-      "tokenVerification": "verified",
-      "cw20": {
-        "decimals": 6,
-        "symbol": "USDTbsc",
-        "source": "binance-smart-chain",
-        "address": "inj1l9eyrnv3ret8da3qh8j5aytp6q4f73crd505lj"
-      },
-      "ibc": {
-        "decimals": 6,
-        "symbol": "USDTkv",
-        "isNative": true,
-        "baseDenom": "erc20/tether/usdt",
-        "path": "transfer/channel-143",
-        "channelId": "channel-143",
-        "hash": "4ABBEF4C8926DDDB320AE5188CFD63267ABBCEFC0583E4AE05D6E5AA2401DDAB",
-        "source": "cosmos"
-      }
+      "tokenType": "cw20"
     },
     "astroportLink": "https://app.astroport.fi/swap?from=inj&to=peggy0xdAC17F958D2ee523a2206206994597C13D831ec7",
     "coinhallLink": "https://coinhall.org/injective/inj1h0mpv48ctcsmydymh2hnkal7hla5gl4gftemqv?trader=inj1sy2aad37tku3dz0353epczxd95hvuhzl0lhfqh",
@@ -1626,37 +1536,9 @@
     "token1Meta": {
       "denom": "inj",
       "name": "Injective",
-      "symbol": "INJ",
+      "symbol": "inj",
       "decimals": 18,
-      "tokenType": "native",
-      "logo": "injective-v3.png",
-      "coinGeckoId": "injective-protocol",
-      "erc20": {
-        "symbol": "INJ",
-        "decimals": 18,
-        "address": "0xe28b3B32B6c345A34Ff64674606124Dd5Aceca30"
-      },
-      "cw20s": [
-        {
-          "decimals": 8,
-          "symbol": "INJbsc",
-          "source": "binance-smart-chain",
-          "address": "inj1xcgprh58szttp0vqtztvcfy34tkpupr563ua40"
-        },
-        {
-          "decimals": 8,
-          "symbol": "INJet",
-          "source": "ethereum-wormhole",
-          "address": "inj1v8gg4wzfauwf9l7895t0eyrrkwe65vh5n7dqmw"
-        }
-      ],
-      "tokenVerification": "verified",
-      "cw20": {
-        "decimals": 8,
-        "symbol": "INJbsc",
-        "source": "binance-smart-chain",
-        "address": "inj1xcgprh58szttp0vqtztvcfy34tkpupr563ua40"
-      }
+      "tokenType": "native"
     },
     "astroportLink": "https://app.astroport.fi/swap?from=inj1lwt5h7xe76vdk73yawjfp0ghe48jzxymkdd40a&to=inj",
     "coinhallLink": "https://coinhall.org/injective/inj1wlvt0pce53mvz6x7eczzq6ufvje9p4u6vkqzjq?trader=inj1sy2aad37tku3dz0353epczxd95hvuhzl0lhfqh",

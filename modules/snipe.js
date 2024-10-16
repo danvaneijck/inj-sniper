@@ -10,7 +10,6 @@ const {
     MsgSend
 } = require('@injectivelabs/sdk-ts');
 const { getNetworkEndpoints, Network } = require('@injectivelabs/networks');
-const { DenomClientAsync } = require('@injectivelabs/sdk-ui-ts');
 const { Client, GatewayIntentBits, ActivityType } = require('discord.js');
 const { SlashCommandBuilder } = require('@discordjs/builders');
 const moment = require('moment');
@@ -42,15 +41,6 @@ class InjectiveSniper {
         this.dojoSwapFactory = process.env.DOJO_FACTORY_CONTRACT;
         this.dojoSwapRouter = process.env.DOJO_ROUTER_CONTRACT;
         this.dojoSwapPricePair = process.env.DOJO_PRICE_PAIR_CONTRACT;
-
-        this.denomClient = new DenomClientAsync(Network.Mainnet, {
-            endpoints: {
-                grpc: this.RPC,
-                indexer: "https://sentry.exchange.grpc-web.injective.network",
-                rest: "https://sentry.lcd.injective.network",
-                rpc: "https://sentry.tm.injective.network"
-            }
-        })
 
         this.chainGrpcBankApi = new ChainGrpcBankApi(this.RPC)
         this.indexerRestExplorerApi = new IndexerRestExplorerApi(config.endpoints.explorer)
@@ -534,8 +524,19 @@ class InjectiveSniper {
     }
 
     async getDenomMetadata(denom) {
+        if (denom == "inj") {
+            return {
+                decimals: 18,
+                name: "Injective",
+                symbol: "inj",
+                tokenType: "native"
+            }
+        }
+        if (denom.includes("peggy") || denom.includes("ibc")) {
+            return {}
+        }
         try {
-            const token = await this.denomClient.getDenomToken(denom)
+            const token = await this.chainGrpcBankApi.fetchDenomMetadata(denom)
             return token;
         } catch (error) {
             console.error('Error fetching token info:', error);
@@ -1798,7 +1799,7 @@ class InjectiveSniper {
 
             // console.log("finished check new pairs".gray)
 
-            await new Promise(resolve => setTimeout(resolve, 10));
+            // await new Promise(resolve => setTimeout(resolve, 10));
         }
     }
 
