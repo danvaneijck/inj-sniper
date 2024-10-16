@@ -1563,5 +1563,65 @@
       18,
       18
     ]
+  },
+  {
+    "token0Meta": {
+      "denom": "inj",
+      "name": "Injective",
+      "symbol": "inj",
+      "decimals": 18,
+      "tokenType": "native"
+    },
+    "token1Meta": {
+      "denom": "factory/inj1sy2aad37tku3dz0353epczxd95hvuhzl0lhfqh/FUN",
+      "name": "FUN",
+      "symbol": "FUN",
+      "decimals": 6,
+      "tokenType": "tokenFactory",
+      "description": "just for fun",
+      "denomUnits": [
+        {
+          "denom": "factory/inj1sy2aad37tku3dz0353epczxd95hvuhzl0lhfqh/FUN",
+          "exponent": 0,
+          "aliases": [
+            "ufun"
+          ]
+        },
+        {
+          "denom": "FUN",
+          "exponent": 6,
+          "aliases": []
+        }
+      ],
+      "base": "factory/inj1sy2aad37tku3dz0353epczxd95hvuhzl0lhfqh/FUN",
+      "display": "FUN",
+      "uri": "https://bafkreianoh6m3tpolob7isem6upnxtxf4mckk75yzotay73deaj37hfpza.ipfs.w3s.link",
+      "uriHash": ""
+    },
+    "astroportLink": "https://app.astroport.fi/swap?from=inj&to=factory/inj1sy2aad37tku3dz0353epczxd95hvuhzl0lhfqh/FUN",
+    "coinhallLink": "https://coinhall.org/injective/inj19ky6vfk6l2v59p3eycp7jlw4q8l2d3addqutjt?trader=inj1sy2aad37tku3dz0353epczxd95hvuhzl0lhfqh",
+    "dexscreenerLink": "https://dexscreener.com/injective/inj19ky6vfk6l2v59p3eycp7jlw4q8l2d3addqutjt?maker=inj1sy2aad37tku3dz0353epczxd95hvuhzl0lhfqh",
+    "dojoSwapLink": "https://dojo.trading/swap?type=swap&from=inj&to=factory/inj1sy2aad37tku3dz0353epczxd95hvuhzl0lhfqh/FUN",
+    "factory": "inj1pc2vxcmnyzawnwkf03n2ggvt997avtuwagqngk",
+    "asset_infos": [
+      {
+        "native_token": {
+          "denom": "inj"
+        }
+      },
+      {
+        "native_token": {
+          "denom": "factory/inj1sy2aad37tku3dz0353epczxd95hvuhzl0lhfqh/FUN"
+        }
+      }
+    ],
+    "contract_addr": "inj19ky6vfk6l2v59p3eycp7jlw4q8l2d3addqutjt",
+    "liquidity_token": "inj1kgkezy7emle0j5uz9wgfyvxt8ltxl37nzuj4q7",
+    "asset_decimals": [
+      18,
+      6
+    ],
+    "liquidity": 0.41765596000000005,
+    "liquidityUpdate": "2024-10-16T09:56:16.171Z"
   }
 ]

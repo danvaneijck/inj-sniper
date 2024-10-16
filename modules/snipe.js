@@ -1535,10 +1535,6 @@ class InjectiveSniper {
             // console.log(transactions);
         }
 
-        let baseAssetDecimals = this.baseAsset.decimals
-
-        console.log(`got tx ${allTransactions.length}`)
-
         await Promise.all(
             allTransactions.map(async (tx) => {
                 const txHash = tx.txHash;
@@ -1555,28 +1551,31 @@ class InjectiveSniper {
                         if (typeof message === 'object' && message.provide_liquidity) {
                             let baseAssetAmount = 0;
 
-                            let memeAddress = ""
-
                             if (message.provide_liquidity) {
                                 const info = message.provide_liquidity.pair_msg?.provide_liquidity || message.provide_liquidity;
-                                if (info.assets) {
-                                    const assetInfo = (info.assets[0].info?.token?.contract_addr) || info.assets[0].info?.native_token.denom;
-                                    memeAddress = assetInfo
-                                    baseAssetAmount = assetInfo === this.baseDenom ? info.assets[0].amount : info.assets[1].amount;
-                                    console.log(JSON.stringify(info.assets, null, 2))
-                                    console.log(pair.asset_decimals)
-                                    if (pair.asset_decimals) {
-                                        baseAssetDecimals = assetInfo === this.baseDenom ? pair.asset_decimals[0] : pair.asset_decimals[1]
-                                    }
 
+                                if (info.assets) {
+                                    function getAssetInfo(asset) {
+                                        return asset.info?.token?.contract_addr || asset.info?.native_token?.denom;
+                                    }
+                                    const baseAssetIndex = info.assets.findIndex(asset => getAssetInfo(asset) === this.baseDenom);
+                                    if (baseAssetIndex !== -1) {
+                                        baseAssetAmount = info.assets[baseAssetIndex].amount;
+                                        console.log('Base Asset Amount:', baseAssetAmount);
+                                    }
+                                    else {
+                                        console.error('Base asset not found.');
+                                    }
                                 }
                             }
+
                             console.log(`https://explorer.injective.network/transaction/${txHash}`)
-                            const numericBaseAssetAmount = Number(baseAssetAmount) / 10 ** (baseAssetDecimals || 0);
-                            const liquidity = (numericBaseAssetAmount * this.baseAssetPrice * 2) / 10 ** this.stableAsset.decimals;
+                            const numericBaseAssetAmount = Number(baseAssetAmount) / (10 ** (18));
+                            console.log(numericBaseAssetAmount)
+                            const liquidity = (numericBaseAssetAmount * this.baseAssetPrice * 2) / (10 ** this.stableAsset.decimals);
+
                             const txTime = moment(txInfo['blockTimestamp'], 'YYYY-MM-DD HH:mm:ss.SSS Z');
                             console.log(`${pairName} liquidity added: $${liquidity} ${txTime.fromNow()}`);
-
 
                             if (txTime < moment().subtract(15, 'minute')) {
                                 console.log(`liq added over time limit: ${txTime.fromNow()}`)
@@ -1590,14 +1589,15 @@ class InjectiveSniper {
                             ) {
                                 this.stopMonitorPairForLiq(pairContract);
                                 console.log("small amount of liquidity added")
-                                this.sendMessageToDiscord(`:eyes: ${pairName} - Small liquidity Added: $${liquidity}\n` +
+
+                                this.sendMessageToDiscord(
+                                    `:eyes: ${pairName} - Small liquidity Added: $${liquidity}\n` +
                                     `<t:${txTime.unix()}:R>\n` +
                                     `add liq tx: https://explorer.injective.network/transaction/${txHash}\n` +
                                     `view holders: ${trippyHoldersLink}\n` +
                                     `view liquidity holders: ${trippyLiquidityLink}\n` +
-                                    `<@352761566401265664>`)
-
-                                // await this.monitorPairForPriceChange(pair, 5, 5, 5)
+                                    `<@352761566401265664>`
+                                )
 
                                 this.sendMessageToTelegram(
                                     `👀 ${pairName} - Liquidity Added from tx: $${liquidity}\n` +
@@ -1615,12 +1615,15 @@ class InjectiveSniper {
                                 txTime > moment().subtract(1, 'minute')
                             ) {
                                 this.stopMonitorPairForLiq(pairContract);
-                                this.sendMessageToDiscord(`:eyes: ${pairName} - Liquidity Added from tx: $${liquidity}\n` +
+
+                                this.sendMessageToDiscord(
+                                    `:eyes: ${pairName} - Liquidity Added from tx: $${liquidity}\n` +
                                     `<t:${txTime.unix()}:R>\n` +
                                     `add liq tx: https://explorer.injective.network/transaction/${txHash}\n` +
                                     `view holders: ${trippyHoldersLink}\n` +
                                     `view liquidity holders: ${trippyLiquidityLink}\n` +
-                                    `<@352761566401265664>`)
+                                    `<@352761566401265664>`
+                                )
 
                                 this.sendMessageToTelegram(
                                     `👀 ${pairName} - Liquidity Added from tx: $${liquidity}\n` +

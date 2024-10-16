@@ -7,5 +7,13 @@
     "time_bought": "2024-10-16T07:02:44.405Z",
     "profit": -59909684614442,
     "is_moon_bag": false
+  },
+  {
+    "pair_contract": "inj19ky6vfk6l2v59p3eycp7jlw4q8l2d3addqutjt",
+    "balance": "499999999999",
+    "amount_in": 0,
+    "token_denom": "factory/inj1sy2aad37tku3dz0353epczxd95hvuhzl0lhfqh/FUN",
+    "profit": 0,
+    "is_moon_bag": true
   }
 ]

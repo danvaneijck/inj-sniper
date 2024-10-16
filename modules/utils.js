@@ -3,15 +3,12 @@ const {
     PrivateKey,
     ChainGrpcBankApi,
     IndexerRestExplorerApi,
-    IndexerGrpcExplorerApi,
     MsgSend,
     MsgInstantiateContract,
     MsgExecuteContractCompat,
-    IndexerGrpcAccountPortfolioApi,
     MsgExecuteContract,
 } = require("@injectivelabs/sdk-ts");
 const { DEFAULT_STD_FEE } = require("@injectivelabs/utils");
-const { DenomClientAsync } = require("@injectivelabs/sdk-ui-ts");
 const fs = require("fs/promises");
 const TransactionManager = require("./transactions");
 const path = require("path");
@@ -37,7 +34,7 @@ class InjectiveTokenTools {
             endpoints.explorer
         );
 
-        this.privateKey = PrivateKey.fromMnemonic(process.env.MNEMONIC);
+        this.privateKey = PrivateKey.fromMnemonic(process.env.SNIPER_MNEMONIC);
         this.publicKey = this.privateKey.toAddress();
 
         this.walletAddress = this.privateKey.toAddress().toBech32();
@@ -851,6 +848,7 @@ class InjectiveTokenTools {
 
     async createDojoPool(denom) {
         console.log("create pair on dojoswap");
+
         const msg = MsgExecuteContract.fromJSON({
             contractAddress: this.endpoints.dojoFactory,
             sender: this.publicKey.toBech32(),
@@ -867,8 +865,8 @@ class InjectiveTokenTools {
                         },
                         {
                             info: {
-                                token: {
-                                    contract_addr: denom,
+                                native_token: {
+                                    denom: denom
                                 },
                             },
                             amount: "0",
@@ -883,11 +881,13 @@ class InjectiveTokenTools {
             gas: "700000",
         };
 
-        let result = await this.txManager.enqueue(msg, GAS);
+        let result = await this.txManager.enqueue(msg);
         console.log(
             `tx success ${result.timestamp} ${this.endpoints.explorerUrl}/transaction/${result.txHash}`
                 .green
         );
+
+        console.log(result.events)
 
         let attributes = result.events[result.events.length - 1].attributes;
         let address = attributes.find(

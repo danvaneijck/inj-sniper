@@ -16,7 +16,7 @@ const CONFIG = {
     tradeTimeLimit: 1000,               // mins
     lowLiquidityThreshold: 0.00001,     // USD
     highLiquidityThreshold: 100000,     // USD
-    targetDenom: "inj1300xcg9naqy00fujsr9r8alwk7dh65uqu87xm8" // token to snipe
+    targetDenom: "factory/inj1sy2aad37tku3dz0353epczxd95hvuhzl0lhfqh/FUN" // token to snipe
 
     // targetDenom: "factory/inj18xsczx27lanjt40y9v79q0v57d76j2s8ctj85x/POOR" // token to snipe
 }
