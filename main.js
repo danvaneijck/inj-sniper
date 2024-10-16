@@ -1,6 +1,7 @@
 const InjectiveSniper = require("./modules/snipe")
 const { MAIN_NET, TEST_NET } = require("./constants")
-const LIVE_TRADING = false
+const LIVE_TRADING = true
+
 
 const CONFIG = {
     live: LIVE_TRADING,
@@ -8,16 +9,17 @@ const CONFIG = {
     tokenTypes: ['native', 'tokenFactory', 'cw20'],
     pairType: '{"xyk":{}}',
     maxSpread: 0.49,
-    snipeAmount: 3,                     // INJ
+    snipeAmount: 0.01,                  // INJ
     profitGoalPercent: 500,             // %
     stopLoss: 95,                       // %
     moonBagPercent: 0.20,               // %
     tradeTimeLimit: 1000,               // mins
-    lowLiquidityThreshold: 0.001,       // USD
+    lowLiquidityThreshold: 0.00001,     // USD
     highLiquidityThreshold: 100000,     // USD
-    targetDenom: "factory/inj18xsczx27lanjt40y9v79q0v57d76j2s8ctj85x/POOR" // token to snipe
-}
+    targetDenom: "inj1300xcg9naqy00fujsr9r8alwk7dh65uqu87xm8" // token to snipe
 
+    // targetDenom: "factory/inj18xsczx27lanjt40y9v79q0v57d76j2s8ctj85x/POOR" // token to snipe
+}
 
 const main = async () => {
     try {

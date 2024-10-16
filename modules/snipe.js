@@ -118,76 +118,80 @@ class InjectiveSniper {
                 console.error('Error during initialization:', error);
             }
 
-            this.discordClient.on('ready', async () => {
-                console.log(`Logged in as ${this.discordClient.user.tag}!`.gray);
-                // await this.sendMessageToDiscord(
-                //     `:arrows_clockwise: Start up INJ Sniper on RPC: ${this.RPC}\n` +
-                //     `:chart_with_upwards_trend: Trading mode: ${this.live ? ':exclamation: LIVE :exclamation:' : 'TEST'}\n` +
-                //     `:gun: Snipe amount: ${this.snipeAmount} ${this.baseAssetName} ($${((this.baseAssetPrice / Math.pow(10, this.stableAsset.decimals)) * this.snipeAmount).toFixed(2)}), ` +
-                //     `profit goal: ${(this.profitGoalPercent).toFixed(2)}%, stop loss: ${(this.stopLoss).toFixed(2)}%,` +
-                //     ` targeting pairs between $${this.lowLiquidityThreshold} and $${this.highLiquidityThreshold} in liquidity`
-                // )
-                // await this.sendMessageToTelegram("bot online 💡")
-                this.discordClient.guilds.cache.forEach(guild => {
-                    guild.commands.create(new SlashCommandBuilder()
-                        .setName('get_positions')
-                        .setDescription('Get portfolio positions for a wallet address')
-                    );
-                    guild.commands.create(new SlashCommandBuilder()
-                        .setName('buy_token')
-                        .addStringOption(option => option.setName('pair').setDescription('The pair to buy').setRequired(true))
-                        .addNumberOption(option => option.setName('amount').setDescription('The amount to buy').setRequired(true))
-                        .setDescription('Buy a token using the pair address')
-                    );
-                    guild.commands.create(new SlashCommandBuilder()
-                        .setName('sell_token')
-                        .addStringOption(option => option.setName('pair').setDescription('The pair to sell').setRequired(true))
-                        .setDescription('Sell a token using the pair address')
-                    );
-                    guild.commands.create(new SlashCommandBuilder()
-                        .setName('monitor_to_sell')
-                        .addStringOption(option => option.setName('pair').setDescription('The pair to monitor').setRequired(true))
-                        .setDescription('Monitor a pair for opportunity to sell')
-                    );
-                    guild.commands.create(new SlashCommandBuilder()
-                        .setName('set_live_trading')
-                        .addBooleanOption(option => option.setName('live').setDescription('Is trading live?').setRequired(true))
-                        .setDescription('Set live trading mode on or off')
-                    );
-                    guild.commands.create(new SlashCommandBuilder()
-                        .setName('set_monitor_new_pairs')
-                        .addBooleanOption(option => option.setName('monitor_pairs').setDescription('Monitor for new pairs?').setRequired(true))
-                        .setDescription('Set monitoring for new pairs on or off')
-                    );
-                    guild.commands.create(new SlashCommandBuilder()
-                        .setName('start_monitor_pair_for_liquidity')
-                        .addStringOption(option => option.setName('pair').setDescription('The pair to monitor').setRequired(true))
-                        .setDescription('Monitor a pair for added liquidity')
-                    );
-                    guild.commands.create(new SlashCommandBuilder()
-                        .setName('stop_monitor_pair_for_liquidity')
-                        .addStringOption(option => option.setName('pair').setDescription('The pair to stop monitoring').setRequired(true))
-                        .setDescription('Stop monitoring a pair for added liquidity')
-                    );
-                    guild.commands.create(new SlashCommandBuilder()
-                        .setName('set_config')
-                        .addNumberOption(option => option.setName('snipe_amount').setDescription('The snipe amount').setRequired(true))
-                        .addNumberOption(option => option.setName('stop_loss').setDescription('The stop loss % 1 - 100').setRequired(true))
-                        .addNumberOption(option => option.setName('profit_goal').setDescription('The profit goal % 1 - 100').setRequired(true))
-                        .addNumberOption(option => option.setName('moon_bag').setDescription('The moon bag % 0.0 - 1.0').setRequired(true))
-                        .addNumberOption(option => option.setName('low_liq_threshold').setDescription('The low liquidity threshold $').setRequired(true))
-                        .addNumberOption(option => option.setName('high_liq_threshold').setDescription('The high liquidity threshold $').setRequired(true))
-                        .addNumberOption(option => option.setName('trade_time_limit').setDescription('The trade time limit in minutes').setRequired(true))
-                        .setDescription('Set the trading parameters')
-                    );
-                    guild.commands.create(new SlashCommandBuilder()
-                        .setName('get_status')
-                        .setDescription('Get the current bot status')
-                    );
+            if (this.discordToken) {
+                this.discordClient.on('ready', async () => {
+                    console.log(`Logged in as ${this.discordClient.user.tag}!`.gray);
+                    // await this.sendMessageToDiscord(
+                    //     `:arrows_clockwise: Start up INJ Sniper on RPC: ${this.RPC}\n` +
+                    //     `:chart_with_upwards_trend: Trading mode: ${this.live ? ':exclamation: LIVE :exclamation:' : 'TEST'}\n` +
+                    //     `:gun: Snipe amount: ${this.snipeAmount} ${this.baseAssetName} ($${((this.baseAssetPrice / Math.pow(10, this.stableAsset.decimals)) * this.snipeAmount).toFixed(2)}), ` +
+                    //     `profit goal: ${(this.profitGoalPercent).toFixed(2)}%, stop loss: ${(this.stopLoss).toFixed(2)}%,` +
+                    //     ` targeting pairs between $${this.lowLiquidityThreshold} and $${this.highLiquidityThreshold} in liquidity`
+                    // )
+                    // await this.sendMessageToTelegram("bot online 💡")
+                    this.discordClient.guilds.cache.forEach(guild => {
+                        guild.commands.create(new SlashCommandBuilder()
+                            .setName('get_positions')
+                            .setDescription('Get portfolio positions for a wallet address')
+                        );
+                        guild.commands.create(new SlashCommandBuilder()
+                            .setName('buy_token')
+                            .addStringOption(option => option.setName('pair').setDescription('The pair to buy').setRequired(true))
+                            .addNumberOption(option => option.setName('amount').setDescription('The amount to buy').setRequired(true))
+                            .setDescription('Buy a token using the pair address')
+                        );
+                        guild.commands.create(new SlashCommandBuilder()
+                            .setName('sell_token')
+                            .addStringOption(option => option.setName('pair').setDescription('The pair to sell').setRequired(true))
+                            .setDescription('Sell a token using the pair address')
+                        );
+                        guild.commands.create(new SlashCommandBuilder()
+                            .setName('monitor_to_sell')
+                            .addStringOption(option => option.setName('pair').setDescription('The pair to monitor').setRequired(true))
+                            .setDescription('Monitor a pair for opportunity to sell')
+                        );
+                        guild.commands.create(new SlashCommandBuilder()
+                            .setName('set_live_trading')
+                            .addBooleanOption(option => option.setName('live').setDescription('Is trading live?').setRequired(true))
+                            .setDescription('Set live trading mode on or off')
+                        );
+                        guild.commands.create(new SlashCommandBuilder()
+                            .setName('set_monitor_new_pairs')
+                            .addBooleanOption(option => option.setName('monitor_pairs').setDescription('Monitor for new pairs?').setRequired(true))
+                            .setDescription('Set monitoring for new pairs on or off')
+                        );
+                        guild.commands.create(new SlashCommandBuilder()
+                            .setName('start_monitor_pair_for_liquidity')
+                            .addStringOption(option => option.setName('pair').setDescription('The pair to monitor').setRequired(true))
+                            .setDescription('Monitor a pair for added liquidity')
+                        );
+                        guild.commands.create(new SlashCommandBuilder()
+                            .setName('stop_monitor_pair_for_liquidity')
+                            .addStringOption(option => option.setName('pair').setDescription('The pair to stop monitoring').setRequired(true))
+                            .setDescription('Stop monitoring a pair for added liquidity')
+                        );
+                        guild.commands.create(new SlashCommandBuilder()
+                            .setName('set_config')
+                            .addNumberOption(option => option.setName('snipe_amount').setDescription('The snipe amount').setRequired(true))
+                            .addNumberOption(option => option.setName('stop_loss').setDescription('The stop loss % 1 - 100').setRequired(true))
+                            .addNumberOption(option => option.setName('profit_goal').setDescription('The profit goal % 1 - 100').setRequired(true))
+                            .addNumberOption(option => option.setName('moon_bag').setDescription('The moon bag % 0.0 - 1.0').setRequired(true))
+                            .addNumberOption(option => option.setName('low_liq_threshold').setDescription('The low liquidity threshold $').setRequired(true))
+                            .addNumberOption(option => option.setName('high_liq_threshold').setDescription('The high liquidity threshold $').setRequired(true))
+                            .addNumberOption(option => option.setName('trade_time_limit').setDescription('The trade time limit in minutes').setRequired(true))
+                            .setDescription('Set the trading parameters')
+                        );
+                        guild.commands.create(new SlashCommandBuilder()
+                            .setName('get_status')
+                            .setDescription('Get the current bot status')
+                        );
+                    });
+                    console.log("set up discord slash commands".gray)
                 });
-                console.log("set up discord slash commands".gray)
-            });
-            this.discordClient.login(this.discordToken);
+                this.discordClient.login(this.discordToken);
+            }
+
+
         } catch (error) {
             console.error('Error during initialization:', error);
         }
@@ -332,11 +336,7 @@ class InjectiveSniper {
                 return
             }
             await this.calculateLiquidity(pair)
-            // if (pair.liquidity < this.lowLiquidityThreshold) {
-            //     this.monitorLowLiquidityPair(pair, 5, this.lowLiquidityThreshold)
-            //     await this.sendMessageToDiscord(`:eyes: Monitoring token for liquidity change`)
-            //     return
-            // }
+
             let result = await this.buyMemeToken(pair, amount)
             if (result && !this.allPairs.has(pairContract)) {
                 this.allPairs.set(pairContract, pair);
@@ -357,7 +357,6 @@ class InjectiveSniper {
                 : pair.token0Meta;
 
             let balance = await this.getBalanceOfToken(memeTokenMeta.denom);
-            console.log(balance)
 
             if (!balance || Number(balance.amount) <= 0) {
                 balance = await this.queryTokenForBalance(memeTokenMeta.denom)
@@ -472,6 +471,12 @@ class InjectiveSniper {
     async sendMessageToTelegram(message) {
         const token = process.env.TG_BOT_TOKEN
         const chatId = process.env.TG_CHAT_ID
+
+        if (!token || !chatId) {
+            console.error('Telegram token and channel not in env vars');
+            return;
+        }
+
         const url = `https://api.telegram.org/bot${token}/sendMessage`;
         console.log(url)
 
@@ -573,6 +578,7 @@ class InjectiveSniper {
             return factoryDecoded
         }
         catch (e) {
+            return null
             console.log(`Error checking factory for pair: ${JSON.stringify(assetInfos, null, 2)} ${e}`.red)
         }
         return null
@@ -1016,14 +1022,13 @@ class InjectiveSniper {
             try {
                 const result = await this.txManager.enqueue(msg, GAS);
                 if (result) {
-                    console.log("Swap executed successfully:", result.txHash);
-
-                    console.log(result)
+                    console.log(`Buy executed successfully: ${result.txHash}`.green);
 
                     const returnAmount = this.parseReturnAmountFromEvents(result.events);
 
                     if (returnAmount !== undefined) {
                         this.handleSuccessfulSwap(pair, returnAmount, adjustedAmount, memeTokenMeta, result.txHash);
+
                         // await this.monitorPairToSell(pair, 10);
                     } else {
                         console.error("Return amount not found in events.");
@@ -1045,23 +1050,18 @@ class InjectiveSniper {
         if (!events) return undefined;
         const wasmEvents = events.filter((event) => event.type === "wasm");
         if (wasmEvents.length < 1) return undefined;
-
         for (const wasmEvent of wasmEvents) {
-            console.log(wasmEvent);
             const returnAmountAttribute = wasmEvent.attributes.find((attr) => {
-                const key = new TextDecoder().decode(attr.key);
+                const key = attr.key
                 return key === "return_amount";
             });
-
             if (returnAmountAttribute) {
-                const value = new TextDecoder().decode(returnAmountAttribute.value);
+                const value = returnAmountAttribute.value
                 return value;
             }
         }
-
         return undefined;
     }
-
 
     handleSuccessfulSwap(pair, returnAmount, adjustedAmount, memeTokenMeta, txHash) {
         const balance = this.positions.get(pair.contract_addr)?.balance || 0;
@@ -1150,7 +1150,6 @@ class InjectiveSniper {
 
         let retryCount = 0;
         while (retryCount < maxRetries) {
-
             let swapOperations = {
                 swap: {
                     offer_asset: {
@@ -1206,14 +1205,14 @@ class InjectiveSniper {
                 else {
                     this.stopMonitoringPairToSell(pair)
 
-                    console.log("Swap executed successfully:", result.txHash);
+                    console.log(`Sell executed successfully: ${result.txHash}`.green);
 
                     let profit = 0
                     const returnAmount = this.parseReturnAmountFromEvents(result.events);
-                    if (returnAmount !== undefined) {
+                    if (returnAmount !== undefined && position) {
                         profit = returnAmount - position.amount_in
                     } else {
-                        console.error("Return amount not found in sell events.");
+                        console.error("No saved position or return amount not found in sell events.");
                     }
 
                     let updatedBalance = Number(position.balance) - Number(amount)
@@ -1663,6 +1662,7 @@ class InjectiveSniper {
 
         const txTime = moment(pair.tx['blockTimestamp'], 'YYYY-MM-DD HH:mm:ss.SSS Z');
 
+        console.log(`found new pair on ${dex}`.green)
         console.log(JSON.stringify(pairInfo, null, 2))
 
         const memeTokenMeta = pairInfo.token0Meta.denom === this.baseDenom

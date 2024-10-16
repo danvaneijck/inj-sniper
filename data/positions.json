@@ -1,1 +1,11 @@
-[]
+[
+  {
+    "pair_contract": "inj1m35kyjuegq7ruwgx787xm53e5wfwu6n5uadurl",
+    "balance": 0,
+    "amount_in": 59909684614442,
+    "token_denom": "inj1300xcg9naqy00fujsr9r8alwk7dh65uqu87xm8",
+    "time_bought": "2024-10-16T07:02:44.405Z",
+    "profit": -59909684614442,
+    "is_moon_bag": false
+  }
+]
