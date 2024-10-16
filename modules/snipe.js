@@ -78,6 +78,8 @@ class InjectiveSniper {
         this.lowLiquidityThreshold = config.lowLiquidityThreshold
         this.highLiquidityThreshold = config.highLiquidityThreshold
 
+        this.targetDenom = config.targetDenom
+
         this.snipeAmount = config.snipeAmount
         this.profitGoalPercent = config.profitGoalPercent
         this.stopLoss = config.stopLoss
@@ -970,6 +972,11 @@ class InjectiveSniper {
         const baseTokenMeta = token0Meta.denom === this.baseDenom ? token0Meta : token1Meta;
         const memeTokenMeta = token0Meta.denom === this.baseDenom ? token1Meta : token0Meta;
 
+        if (this.targetDenom !== null && memeTokenMeta.denom !== this.targetDenom) {
+            console.log("token is not the target, not buying")
+            return
+        }
+
         console.log(`Attempting to buy ${memeTokenMeta.symbol}`);
 
         const adjustedAmount = amount * 10 ** (this.baseAsset ? this.baseAsset.decimals : 18);
@@ -1640,7 +1647,7 @@ class InjectiveSniper {
 
         const endTime = new Date().getTime();
         const executionTime = endTime - startTime;
-        // console.log(`Finished check for liq for pair ${pairName} in ${executionTime} milliseconds`.gray);
+        console.log(`Finished check for liq for pair ${pairName} in ${executionTime} milliseconds`.gray);
     }
 
     async handleNewPair(pair) {
@@ -1706,7 +1713,6 @@ class InjectiveSniper {
             } else if (txTime > moment().subtract(5, 'minute')) {
                 this.startMonitorPairForLiq(pair.address);
             }
-
         }
         else {
             const message = `:new: New pair found on ${dex}: ${pairInfo.token0Meta.symbol}, ` +
@@ -1752,7 +1758,7 @@ class InjectiveSniper {
             for (const pair of this.lowLiqPairsToMonitor.values()) {
                 await this.checkPairForProvideLiquidity(pair);
             }
-            await new Promise(resolve => setTimeout(resolve, 2500));
+            await new Promise(resolve => setTimeout(resolve, 10));
         }
     }
 
@@ -1771,17 +1777,6 @@ class InjectiveSniper {
     async newPairsLoop() {
         while (this.monitorNewPairs) {
             try {
-                let newAstroPairs = await this.astroport.checkForNewPairs(this.allPairs, this.ignoredPairs);
-                for (const pair of newAstroPairs) {
-                    await this.handleNewPair(pair)
-                }
-            }
-            catch (e) {
-                console.log("error getting new astro pairs", e.originalMessage ? e.originalMessage : e)
-            }
-
-
-            try {
                 let newDojoPairs = await this.dojoSwap.checkForNewPairs(this.allPairs, this.ignoredPairs);
                 for (const pair of newDojoPairs) {
                     await this.handleNewPair(pair)
@@ -1791,8 +1786,19 @@ class InjectiveSniper {
                 console.log("error getting new dojo pairs", e.originalMessage ? e.originalMessage : e)
             }
 
+            // try {
+            //     let newAstroPairs = await this.astroport.checkForNewPairs(this.allPairs, this.ignoredPairs);
+            //     for (const pair of newAstroPairs) {
+            //         await this.handleNewPair(pair)
+            //     }
+            // }
+            // catch (e) {
+            //     console.log("error getting new astro pairs", e.originalMessage ? e.originalMessage : e)
+            // }
 
-            await new Promise(resolve => setTimeout(resolve, 1000));
+            // console.log("finished check new pairs".gray)
+
+            await new Promise(resolve => setTimeout(resolve, 10));
         }
     }
 

@@ -79,7 +79,7 @@ class DojoSwap {
 
         const endTime = new Date().getTime();
         const executionTime = endTime - startTime;
-        // console.log(`Finished check for new pairs on DojoSwap in ${executionTime} milliseconds`.gray);
+        console.log(`Finished check for new pairs on DojoSwap in ${executionTime} milliseconds`.gray);
 
         return newPairs
     }

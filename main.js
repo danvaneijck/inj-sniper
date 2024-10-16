@@ -8,19 +8,21 @@ const CONFIG = {
     tokenTypes: ['native', 'tokenFactory', 'cw20'],
     pairType: '{"xyk":{}}',
     maxSpread: 0.49,
-    snipeAmount: 0.1,                   // INJ
+    snipeAmount: 3,                     // INJ
     profitGoalPercent: 500,             // %
     stopLoss: 95,                       // %
     moonBagPercent: 0.20,               // %
     tradeTimeLimit: 1000,               // mins
     lowLiquidityThreshold: 0.001,       // USD
     highLiquidityThreshold: 100000,     // USD
+    targetDenom: "factory/inj18xsczx27lanjt40y9v79q0v57d76j2s8ctj85x/POOR" // token to snipe
 }
+
 
 const main = async () => {
     try {
         const injectiveSniper = new InjectiveSniper(CONFIG);
-        injectiveSniper.startMonitoringBasePair(10);
+        injectiveSniper.startMonitoringBasePair(20);
 
         await injectiveSniper.initialize();
         await injectiveSniper.getPortfolio()
